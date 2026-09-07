@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Согласие на обработку персональных данных — Гурман-Гуру</title>
+<meta name="description" content="Согласие на обработку персональных данных, предоставляемое ИП Виленскому Павлу Александровичу при отправке заявки через форму на сайте.">
+<meta name="theme-color" content="#0B0B0B">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+
+<!--
+=============================================================================
+  СОГЛАСИЕ НА ОБРАБОТКУ ПЕРСОНАЛЬНЫХ ДАННЫХ
+  Текст перенесён без изменений с https://gurman.guru/soglasie
+  Юридический текст не редактировался: правки в него вносит только юрист.
+
+  Токены продублированы из index.html. Меняете палитру — правьте в трёх
+  файлах: index.html, politika.html, soglasie.html.
+=============================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --c-abyss:#0B0B0B; --c-carbon:#141414; --c-bone:#E4E0D8; --c-ash:#A8A29A;
+  --c-stone:#6A655F; --c-steel:#B9B2A6; --c-white-warm:#FFFDFA;
+  --c-line-dark:rgba(228,224,216,.20);
+  --f-display:"Playfair Display","Prata",Georgia,"Times New Roman",serif;
+  --f-mono:"Roboto Mono",ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;
+  --t-display-m:clamp(28px,3.9vw,56px); --t-title-s:clamp(17px,1.55vw,22px);
+  --t-body:clamp(14px,1.05vw,15px); --t-micro:12px;
+  --lh-body:1.75; --ls-wide:.18em; --ls-title:.12em;
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px;
+  --s-7:48px; --s-8:64px; --s-9:96px; --s-10:128px;
+  --container:1332px; --gutter:54px;
+  --radius:0px; --border-w:1px;
+  --ease:cubic-bezier(.2,.6,.2,1); --dur-fast:220ms;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--c-abyss); color:var(--c-bone);
+  font-family:var(--f-mono); font-size:var(--t-body); font-weight:300;
+  line-height:var(--lh-body); -webkit-font-smoothing:antialiased;
+}
+img{display:block; max-width:100%; height:auto}
+a{color:inherit}
+h1,h2,h3,p{margin:0}
+ul{margin:0; padding:0; list-style:none}
+:focus-visible{outline:2px solid var(--c-steel); outline-offset:3px}
+.container{width:min(var(--container), 100% - var(--gutter)*2); margin-inline:auto}
+.micro{font-size:var(--t-micro); font-weight:400; letter-spacing:var(--ls-wide); text-transform:uppercase; line-height:1.6}
+
+/* Плёночное зерно — тот же приём, что на главной */
+body::after{
+  content:""; position:fixed; inset:0; z-index:9999; pointer-events:none;
+  opacity:.045; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Шапка документа. Не фиксированная — длинный текст читается спокойнее. */
+.doc-header{padding-block:var(--s-5); border-bottom:var(--border-w) solid var(--c-line-dark)}
+.doc-header__inner{display:flex; align-items:center; justify-content:space-between; gap:var(--s-5)}
+.logo{display:block; line-height:0; text-decoration:none}
+.logo img{height:clamp(30px,2.6vw,38px); width:auto; transition:opacity var(--dur-fast) var(--ease)}
+.logo:hover img{opacity:.78}
+.doc-header a.back{
+  font-size:var(--t-micro); font-weight:500; letter-spacing:var(--ls-wide);
+  text-transform:uppercase; color:var(--c-ash); text-decoration:none; white-space:nowrap;
+  transition:color var(--dur-fast) var(--ease);
+}
+.doc-header a.back:hover{color:var(--c-bone)}
+
+/* Титул документа */
+.doc-title{padding-block:var(--s-9) var(--s-8); border-bottom:var(--border-w) solid var(--c-line-dark)}
+.doc-title h1{
+  font-family:var(--f-display); font-weight:400; font-size:var(--t-display-m);
+  line-height:1.04; text-transform:uppercase; letter-spacing:.01em; color:var(--c-white-warm);
+  max-width:22ch;
+}
+.doc-title p{margin-top:var(--s-5); color:var(--c-ash)}
+
+/* Тело документа. Одна колонка ограниченной меры — так длинный текст читается. */
+.doc-body{padding-block:var(--s-8) var(--s-10)}
+.doc-body > *{max-width:82ch}
+.doc-body section + section{margin-top:var(--s-8)}
+.doc-body h2{
+  font-family:var(--f-display); font-weight:400; font-size:var(--t-title-s);
+  letter-spacing:var(--ls-title); text-transform:uppercase; color:var(--c-white-warm);
+  padding-bottom:var(--s-4); border-bottom:var(--border-w) solid var(--c-line-dark);
+  margin-bottom:var(--s-5);
+}
+.doc-body p{color:var(--c-ash)}
+.doc-body p + p{margin-top:var(--s-4)}
+.doc-body ul{margin-top:var(--s-4); display:flex; flex-direction:column; gap:var(--s-3)}
+.doc-body li{color:var(--c-ash); padding-left:var(--s-5); position:relative}
+.doc-body li::before{content:"—"; position:absolute; left:0; color:var(--c-stone)}
+.doc-body a{color:var(--c-bone); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+.doc-body a:hover{color:var(--c-steel)}
+.doc-body strong{font-weight:500; color:var(--c-bone)}
+/* Вводная врезка перед пунктами согласия */
+.doc-body .lead{
+  color:var(--c-bone); border-left:var(--border-w) solid var(--c-line-dark);
+  padding-left:var(--s-5); margin-bottom:var(--s-8);
+}
+
+/* Подвал документа */
+.doc-footer{border-top:var(--border-w) solid var(--c-line-dark); padding-block:var(--s-7); color:var(--c-stone)}
+.doc-footer__inner{display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--s-3) var(--s-7)}
+.doc-footer__legal{display:flex; flex-wrap:wrap; gap:var(--s-3) var(--s-6)}
+.doc-footer a{color:var(--c-ash); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+.doc-footer a:hover{color:var(--c-bone)}
+
+@media (max-width:1100px){ :root{--gutter:32px} }
+@media (max-width:760px){
+  :root{--gutter:20px}
+  .doc-title{padding-block:var(--s-7) var(--s-6)}
+  .doc-body{padding-block:var(--s-7) var(--s-8)}
+  .doc-footer__inner{flex-direction:column; gap:var(--s-4)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; transition-duration:.01ms !important}
+}
+</style>
+</head>
+
+<body>
+
+<header class="doc-header">
+  <div class="container doc-header__inner">
+    <a class="logo" href="index.html" aria-label="Гурман-Гуру — на главную">
+      <img src="assets/logo-gurman-guru.png" width="880" height="320" alt="Гурман-Гуру">
+    </a>
+    <a class="back" href="index.html">&#8592; На главную</a>
+  </div>
+</header>
+
+<main>
+  <div class="container doc-title">
+    <h1>Согласие на обработку персональных данных</h1>
+    <p class="micro">Предоставляется при отправке заявки через форму на сайте</p>
+  </div>
+
+  <div class="container doc-body">
+
+    <p class="lead">Я, действуя свободно, своей волей и в своём интересе, подтверждая свою дееспособность, даю согласие Индивидуальному предпринимателю Виленскому Павлу Александровичу (ИП Виленский П. А., ИНН 773001052346, ОГРНИП 319774600717835, адрес: 119330, г. Москва, ул. Мосфильмовская, д. 11, корп. 2, кв. 24; адрес для корреспонденции: 121471, г. Москва, ул. Рябиновая, д. 43А, стр. 1; далее — «Оператор») на обработку моих персональных данных на следующих условиях.</p>
+
+    <section>
+      <h2>1. Перечень персональных данных, на обработку которых даётся согласие</h2>
+      <ul>
+        <li>фамилия, имя, отчество (при наличии);</li>
+        <li>номер контактного телефона;</li>
+        <li>адрес электронной почты;</li>
+        <li>иные сведения, самостоятельно указанные мною в форме на сайте https://gurman.guru (далее — «Сайт»).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. Цели обработки персональных данных</h2>
+      <p>Рассмотрение моего обращения (заявки), направленного через форму на Сайте; связь со мной по указанным контактным данным для консультации по товарам и услугам Оператора, согласования условий и оформления заказа; направление мне информации, непосредственно связанной с моим обращением.</p>
+    </section>
+
+    <section>
+      <h2>3. Перечень действий с персональными данными и способы обработки</h2>
+      <p>Сбор, запись, систематизация, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передача (предоставление, доступ) лицам, осуществляющим обработку персональных данных по поручению Оператора на основании заключённых с ними договоров, блокирование, удаление, уничтожение. Обработка осуществляется как с использованием средств автоматизации, так и без их использования.</p>
+    </section>
+
+    <section>
+      <h2>4. Срок действия согласия</h2>
+      <p>Согласие действует с момента его предоставления до достижения целей обработки, но не более 3 (трёх) лет с момента предоставления, либо до момента его отзыва — в зависимости от того, какое событие наступит раньше.</p>
+    </section>
+
+    <section>
+      <h2>5. Порядок отзыва согласия</h2>
+      <p>Согласие может быть отозвано мною в любое время путём направления Оператору заявления по адресу электронной почты <a href="mailto:2114111@mail.ru">2114111@mail.ru</a> либо по почтовому адресу: 121471, г. Москва, ул. Рябиновая, д. 43А, стр. 1. В случае отзыва согласия Оператор прекращает обработку персональных данных и уничтожает их в срок, не превышающий 30 (тридцати) дней с даты поступления отзыва, если отсутствуют иные правовые основания обработки, предусмотренные законодательством Российской Федерации.</p>
+    </section>
+
+    <section>
+      <h2>6. Заключительные положения</h2>
+      <p>Я подтверждаю, что указанные мною персональные данные принадлежат лично мне и являются достоверными. Мне разъяснены права субъекта персональных данных, предусмотренные Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных». С <a href="politika.html">Политикой обработки персональных данных</a> Оператора, размещённой на Сайте, я ознакомлен(а).</p>
+      <p>Согласие предоставляется мною путём проставления отметки в соответствующем поле (чекбоксе) формы на Сайте, что в соответствии с ч. 1 ст. 9 Федерального закона от 27.07.2006 № 152-ФЗ является формой, позволяющей подтвердить факт получения согласия.</p>
+    </section>
+
+  </div>
+</main>
+
+<footer class="doc-footer">
+  <div class="container doc-footer__inner micro">
+    <span>&copy; ИП Виленский П.А., 2026 г.</span>
+    <span class="doc-footer__legal">
+      <a href="index.html">На главную</a>
+      <a href="politika.html">Политика конфиденциальности</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
