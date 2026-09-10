@@ -1,0 +1,1145 @@
+<!-- Стили лендинга, часть 1 из 2. Блок T123.
+     Все правила заперты под .gg-root — разметку Тильды не трогают. -->
+<!-- Шрифты. Взяты из index.html как есть, вместе с весами:
+     Playfair Display 600 и Roboto Mono 700 нужны заголовкам. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* Корень лендинга. Всё, что ниже, действует только внутри него —
+   разметку Тильды эти правила не трогают. */
+.gg-root{position:relative;
+  -webkit-text-size-adjust:100%; text-align:left;}
+.gg-root img{max-width:100%;}
+
+
+/* ===========================================================================
+   ТОКЕНЫ. Единственный источник значений для всей страницы.
+   Меняете здесь — меняется везде.
+   Те же значения продублированы в politika.html и soglasie.html.
+   =========================================================================== */
+.gg-root{
+  /* --- Цвет. HEX замерен пипеткой по референсу, OKLCH пересчитан --- */
+  /* Тёмная краница осветлена и утеплена 2026-09-09: заказчик сказал, что
+     «не нравится, что всё чёрное». Было #0B0B0B / #141414 — нейтральный
+     чёрный, хроматичность нулевая, из-за чего тёмные секции читались
+     холодным провалом рядом с тёплой «бумагой» (h 73). Стало: та же пара
+     подтянута по светлоте на 5 пунктов и посажена на тот же тон 73, что и
+     светлая половина сайта, — получился тёплый графит.
+     Контраст перепроверен: --c-bone на новом фоне 13,8 : 1 (было 15,3),
+     --c-ash — 7,1 : 1 (было 7,8). Оба с запасом выше порога 4,5. */
+  --c-abyss:      #191510; /* oklch(19.9% .012 73) фон тёмных секций */
+  --c-carbon:     #221D17; /* oklch(23.4% .014 72) поверхность на тёмном */
+  --c-paper:      #E9E4DE; /* oklch(92.1% .010 73) фон светлых секций */
+  --c-paper-warm: #F1EDE7; /* oklch(94.8% .009 78) поверхность на светлом */
+  --c-graphite:   #13100B; /* oklch(17.5% .011 81) текст на светлом */
+  /* --c-stone только на светлом; пара для тёмного — --c-ash.
+     Было #6A655F. На «бумаге» это давало 4,57 : 1 при пороге 4,5 — формально
+     проходило, но с запасом в полтора процента, самым тонким на сайте. А это
+     не редкая краска: ею набран весь вторичный текст светлых секций — ответы
+     в вопросах, подписи этапов, описания документов. Плёночное зерно поверх
+     страницы съедало и этот запас: замер наложения в режиме overlay показал
+     4,57 → 4,50, ровно в порог. Взято #605A54 — 5,38 : 1 на «бумаге» и
+     5,83 : 1 на «тёплой бумаге». До --c-graphite (15,02 : 1) далеко, разница
+     «основной/вторичный» на глаз сохраняется. */
+  --c-stone:      #605A54; /* oklch(47.0% .010 73) вторичный текст на светлом */
+  --c-bone:       #E4E0D8; /* oklch(90.8% .012 85) текст на тёмном */
+  --c-ash:        #A8A29A; /* oklch(71.5% .013 75) вторичный текст на тёмном */
+  /* Вторичный текст, лежащий на фотографии. Плоский тёмный фон — величина
+     постоянная, и на нём --c-ash даёт 7,78 : 1. Фон из фотографии — величина
+     переменная: под строкой попадаются светлые пятна, и та же краска падала
+     до 4,0–5,5 : 1. Замер по композиции «кадр + вуаль» на 390/768/1440
+     показал, что #CFC9C0 снимает провал везде, а дальше к --c-bone выигрыша
+     уже нет: худшим становится другой элемент. Оттенок взят на той же оси
+     между --c-ash и --c-bone, чтобы иерархия «основной/вторичный» осталась. */
+  --c-ash-photo:  #CFC9C0; /* oklch(82.5% .012 79) вторичный текст на фото */
+  --c-steel:      #B9B2A6; /* oklch(76.6% .019 81) акцент: сталь, крышки */
+  --c-white-warm: #FFFDFA; /* oklch(99.2% .004 90) только для крупной антиквы на фото */
+  --c-line-dark:  rgba(228,224,216,.20); /* обводка на тёмном */
+  --c-line-light: rgba(19,16,11,.16);    /* обводка на светлом */
+  /* Тот же --c-abyss, разложенный на составляющие. Нужен вуали поверх
+     фотографий: она задаётся десятком полупрозрачных остановок, и без
+     этого токена в стилях расползлись бы литералы rgba(25,21,16,…). */
+  --c-abyss-rgb: 25,21,16;
+
+  /* --- Вуаль поверх фонового кадра ---
+     Один приём на все блоки, где текст лежит на фотографии: первый экран,
+     полоса-разделитель, сцена «Этапы работы», «Производство», «Контакты».
+     Числа подобраны замером контраста по пикселям снимков, а не на глаз.
+     Меняете фотографию — перемеряйте: светлый кадр требует плотнее.
+     near — край, у которого стоит текст; open — самая открытая точка кадра.
+
+     Эти четыре числа остались только у сцены: «Производство» и «Контакты»
+     собирают свою вуаль сами, у первого экрана градиент выписан на месте.
+
+     Ряд пересчитан заново. Прежние числа (.90/.80/.34/.50 и .72/.78) держали
+     медиану стопки кадров на 17–20 из 255 — на сцене, самом длинном по времени
+     куске страницы, читатель смотрел в темноту. Замер показал, что запас лежал
+     без дела: узкое место сцены — подпись «Этапы работы» у левого края, а она
+     стоит на закрытой части кадра и на открытие не реагирует. Открытие с .34
+     до .24 стоило 0,04 запаса (7,57 → 7,40 : 1 при пороге 4,5) и вернуло
+     медиану 20 → 24. */
+  --scrim-near: .82;
+  --scrim-mid:  .70;
+  --scrim-open: .24;
+  --scrim-far:  .40;
+  --scrim-top:  .62; /* под шапкой */
+  --scrim-foot: .70; /* у нижнего края блока */
+
+  /* Готовые слои вуали. Горизонтальный уводит кадр от текста вбок,
+     вертикальный гасит верх под шапкой и низ под служебной строкой.
+     Блок берёт либо один, либо оба — через свою переменную --scrim. */
+  --scrim-x: linear-gradient(90deg,
+    rgba(var(--c-abyss-rgb), var(--scrim-near)) 0%,
+    rgba(var(--c-abyss-rgb), var(--scrim-mid))  38%,
+    rgba(var(--c-abyss-rgb), var(--scrim-open)) 74%,
+    rgba(var(--c-abyss-rgb), var(--scrim-far))  100%);
+  --scrim-y: linear-gradient(180deg,
+    rgba(var(--c-abyss-rgb), var(--scrim-top))  0%,
+    rgba(var(--c-abyss-rgb), 0) 24%,
+    rgba(var(--c-abyss-rgb), 0) 58%,
+    rgba(var(--c-abyss-rgb), var(--scrim-foot)) 100%);
+
+  /* Размытие фонового кадра. Ставится только там, где поверх идёт мелкий
+     текст в несколько колонок: крупная антиква читается и на резком кадре,
+     а строка в 15px на фактуре — уже нет. */
+  --bg-blur: 3px;
+
+  /* Подъём теней в полосах .section__photo. Ссылается на SVG-фильтр
+     #photo-lift — он объявлен сразу после <body>, там же разобрано, почему
+     взята гамма, а не brightness/contrast. Ставится только на полосы:
+     фоновых кадров под текстом не касается, там подъём яркости ухудшил бы
+     контраст надписей. */
+  --photo-lift: url(#photo-lift);
+
+  /* Точка кадрирования в полосе. Оба снимка держат содержимое в нижней трети
+     (замер по горизонтальным полосам: у «О компании» верх кадра 7–11 из 255,
+     низ 29–61; у «Сырья» верх 2, низ 12–25), а object-fit:cover по умолчанию
+     режет середину — самое тёмное место. На узком экране запас обрезки мал и
+     разница невелика, но на 1440 кадр масштабируется до 960px высоты при
+     полосе в 420px, и центральная обрезка показывала бы одну темноту. */
+  --photo-pos: 50% 80%;
+
+  /* --- Шрифт ---
+     Заголовочный шрифт сменён 2026-09-09 с антиквы Playfair Display на
+     гротеск Golos Text по просьбе заказчика: «буквы с засечками не нравятся,
+     хотелось бы прямые». Golos Text — кириллический гротеск Paratype, лежит
+     в Google Fonts, знаковый состав полный, поэтому запасной ряд собран из
+     системных гротесков, а не из антиквы.
+     --fw-display: гротеску нужен вес тяжелее антиквенного. Playfair держал
+     крупный заголовок в 400, у Golos Text та же строка на кегле 112px
+     выглядит бледной, поэтому по умолчанию 500. Вынесено в токен, чтобы
+     вес правился в одном месте, а не в четырнадцати правилах. */
+  --f-display: "Golos Text", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --fw-display: 500;
+  --f-mono: "Roboto Mono", ui-monospace, "SF Mono", "JetBrains Mono", Consolas, monospace;
+
+  /* --- Кегли. Слева минимум для 360px, справа — замер с референса при 1440px --- */
+  /* Замер с референса: строка «ДО ГОТОВОЙ» занимает 800px по ширине при
+     высоте прописной 100px. У Playfair Display кириллица шире, чем у шрифта
+     на референсе, поэтому кегль опущен со 143 до 112 — иначе строка не
+     разбивается на три, как в макете. Подробности в README, п. «Расхождения». */
+  --t-display-xl: clamp(40px, 7.8vw, 112px); /* заголовок секции, интерлиньяж .88 */
+  --t-display-l:  clamp(38px, 7.5vw, 108px); /* h1 героя, замер: кегль ~108, интерлиньяж .98 */
+  --t-display-m:  clamp(28px, 3.9vw, 56px);  /* заголовки внутренних секций */
+  --t-num:        clamp(30px, 2.9vw, 42px);  /* цифры 01–04, замер ~42 */
+  --t-title-s:    clamp(17px, 1.55vw, 22px); /* ПРИЁМКА, КОНТРОЛЬ, замер ~22 */
+  /* Кегли мелкого текста подняты на ступень 8 сентября 2026 после замера
+     читабельности. Причина не в контрасте — он проходил, — а в том, что треть
+     всего текста страницы (2376 знаков из 7107) стояла в 12px и мельче с
+     разрядкой .18em. На телефоне такую строку приходится разбирать. Основной
+     текст на узком экране поднят с 14 до 15px, микроподписи 12 → 13,
+     нижняя строка подвала 11 → 12. */
+  --t-body:       clamp(15px, 1.05vw, 16px); /* основной текст */
+  --t-nav:        13px;                      /* пункты меню */
+  --t-micro:      13px;                      /* технические подписи */
+  --t-micro-s:    12px;                      /* нижняя строка подвала: на ступень
+                                                мельче, чтобы четыре юридических
+                                                пункта стояли в один ряд */
+
+  --lh-tight: .88;  /* интерлиньяж крупной антиквы */
+  --lh-hero: .98;
+  --lh-body: 1.75;
+  /* Трекинг мелкого моно. Замер с референса давал .18em, но там этим кеглем
+     набраны единичные подписи, а у нас — треть текста. Разрядка разрывает
+     слово на отдельные знаки: глаз читает по буквам, а не целым словом.
+     Ужат до .12em — след референса сохраняется, слово снова читается разом. */
+  --ls-wide: .12em;
+  --ls-nav: .14em;
+  --ls-title: .12em;
+  --ls-legal: .12em; /* нижняя строка подвала; на ≤760 ужимается до .04em,
+                        иначе «Согласие на обработку персональных данных»
+                        (41 знак моно) не входит в 320px одной строкой.
+                        Оба числа опущены на ступень 8 сентября 2026 вместе
+                        с --t-micro-s: 11 → 12px, и при прежней разрядке
+                        строка вылезала за поле на 15px при ширине окна 360. */
+
+  /* --- Отступы. База 4px --- */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px; --s-10: 128px; --s-11: 160px;
+
+  /* --- Сетка. Замер: левое поле 54px при макете 1440 --- */
+  --container: 1332px;
+  --gutter: 54px;
+  --grid-gap: 44px;
+
+  /* --- Карта. Высота врезки с Яндекс-картой после «Контактов» --- */
+  --map-h: 460px; /* на ≤760 ужимается до 360px в медиазапросе */
+
+  /* --- Форма. На референсе радиусов и теней нет вообще --- */
+  --radius: 0px;
+  --border-w: 1px;
+  --shadow: none;
+
+  /* --- Движение ---
+     Одна кривая на всю страницу: быстрый старт, длинный выкат. Движение
+     читается как «тяжёлый предмет доехал», а не «элемент подпрыгнул».
+     --dur-med — вход блоков, --dur-slow — крупные планы и фотографии. */
+  --ease: cubic-bezier(.2,.6,.2,1);
+  --dur-fast: 220ms;
+  --dur-med:  420ms;
+  --dur-slow: 620ms;
+  --stagger: 70ms;      /* шаг каскада между соседями */
+  --stagger-line: 60ms; /* шаг между строками крупного заголовка */
+
+  /* Глубина параллакса: на сколько пикселей уезжает фотография за весь
+     проход через экран. 64 — сдержанно; выше 100 кадр начинает «плавать». */
+  --parallax: 64px;
+
+  /* Высота фиксированной шапки. Нужна отступу якорей: без неё переход
+     по меню прятал верхние 85px секции под шапкой. */
+  --header-h: 85px;
+
+  /* --- Лента «Нам доверяют» ---
+     --trust-h: высота логотипа. Было 52px — этого хватало, чтобы подписи
+     внутри знаков («Restaurant», «Piano Bar», «TSUM Moscow») не слипались,
+     но лента читалась как сноска. По указанию заказчика высота удвоена:
+     104px на десктопе, 76px на узком экране.
+     --trust-gap: просвет между логотипами. Намеренно НЕ удвоен. Отношение
+     просвета к высоте падает с 1,85 до 0,92 — строка становится плотнее,
+     и это правильно: рядом с крупным знаком прежний просвет читался бы
+     как дыра, а на 360px удвоенный просвет оставил бы в кадре один логотип.
+     --trust-dur: полный оборот ленты. Пересчитан так, чтобы скорость
+     в пикселях осталась прежней — изменился только размер, не характер
+     движения. Сумма ширин 12 знаков при высоте h равна 1628/132×h;
+     ряд = сумма + 12 просветов, сдвиг за оборот = ширина ряда.
+     Десктоп: было 1793px/64s = 28,0 px/s; стало 2435px, значит 2435/28,0 = 87s
+     (поставлено 88s). Оборот удлинился, но на знак теперь приходится 7,3s
+     вместо 5,3s — крупный знак и держать в кадре нужно дольше.
+     --trust-fade: ширина растушёвки у краёв ленты. */
+  --trust-h: 104px;
+  --trust-gap: 96px;
+  --trust-dur: 88s;
+  --trust-fade: 120px;
+
+  /* --- Кинематографическая сцена «Этапы работы» ---
+     --scene-track: длина трека прокрутки. 360vh на четыре этапа — по 90vh
+     на этап. Меньше 280vh кадры меняются рывком, больше 480vh секция
+     превращается в бесконечную прокрутку.
+     --scene-zoom: конечный масштаб кадра. 1.06 — медленный наезд за весь
+     проход, движение заметно только боковым зрением.
+     --scene-fade: доля трека на смену текста, --scene-xfade — на смену кадра.
+     Кадр меняется медленнее и раньше текста: сначала уходит картинка,
+     затем подпись. Наоборот получается рывок. */
+  --scene-track: 360vh;
+  --scene-zoom: 1.06;
+  --scene-fade: .06;
+  --scene-xfade: .10;
+
+  /* Постоянные сглаживания, 1/с. Скорость схождения к цели не зависит от
+     частоты кадров: доля за кадр считается как 1 − exp(−dt · tau).
+     8.35 воспроизводит согласованный ранее характер инерции (0.13 за кадр
+     при 60 Гц), но теперь одинаково на 60, 120 и 144 Гц.
+     --scene-tau ниже: картинка догоняет прокрутку чуть мягче страницы. */
+  --inertia-tau: 8.35;
+  --scene-tau: 8;
+}
+
+/* ===========================================================================
+   БАЗА
+   =========================================================================== */
+.gg-root, .gg-root *, .gg-root *::before, .gg-root *::after{box-sizing:border-box}
+.gg-root{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+/* Шапка фиксирована: без этого отступа переход по меню прятал верхние 85px
+   секции под шапкой. Считается от токена --header-h, менять её в :root. */
+.gg-root section[id], .gg-root main[id]{scroll-margin-top:calc(var(--header-h) + 24px)}
+/* Когда работает своя инерция, браузерная плавность выключается —
+   иначе две плавности накладываются друг на друга. */
+html.has-inertia .gg-root{scroll-behavior:auto}
+/* Основной вес — 400, а не 300, как было до 8 сентября 2026.
+   Причина физическая, а не вкусовая: светлый штрих на тёмном фоне из-за
+   иррадиации кажется тоньше, чем тёмный на светлом при том же весе. Замер
+   показал, что весом 300 набрано 63% текста страницы (4487 знаков из 7107),
+   и почти весь он лежит на чёрном — контраст по WCAG проходил с запасом
+   7–15 : 1, но строка всё равно «съедалась». Начертание 400 уже было в
+   загрузке, лишнего запроса правка не добавила.
+   Сглаживание -webkit-font-smoothing:antialiased снято по той же причине:
+   на macOS оно дополнительно утончает светлый текст на тёмном. */
+.gg-root{
+  margin:0; background:var(--c-abyss); color:var(--c-bone);
+  font-family:var(--f-mono); font-size:var(--t-body); font-weight:400;
+  line-height:var(--lh-body);
+}
+.gg-root img{display:block; max-width:100%; height:auto}
+.gg-root a{color:inherit; text-decoration:none}
+.gg-root button{font:inherit; color:inherit}
+.gg-root h1, .gg-root h2, .gg-root h3, .gg-root h4, .gg-root p, .gg-root figure, .gg-root blockquote{margin:0}
+.gg-root ul, .gg-root ol{margin:0; padding:0; list-style:none}
+
+/* Плёночное зерно поверх всей страницы — приём с референса, он же прячет
+   мягкость апскейленных фотографий. Безопасно менять opacity 0….08
+
+   Слой лежит поверх текста, и это проверено, а не оставлено на веру. Наложение
+   в режиме overlay при непрозрачности .045 воспроизведено в canvas на реальных
+   парах «краска текста / фон под ней»: bone на абиссе 14,95 → 14,95, ash на
+   абиссе 7,78 → 7,87, графит на бумаге 15,02 → 15,02. Единственная пара, где
+   зерно было заметно, — вторичный текст на бумаге: 4,57 → 4,50. Причина не в
+   зерне, а в том, что сама краска стояла у порога; она и переделана
+   (--c-stone). Опускать слой под текст незачем — на этих числах он ничего не
+   отнимает. */
+.gg-root::after{
+  content:""; position:fixed; inset:0; z-index:9999; pointer-events:none;
+  opacity:.045; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Фокус виден всегда — требование доступности */
+.gg-root :focus-visible{outline:2px solid var(--c-steel); outline-offset:3px}
+
+.gg-root .container{width:min(var(--container), 100% - var(--gutter)*2); margin-inline:auto}
+
+/* Типографические утилиты */
+/* Трекинг был .005em под антикву: у Playfair Display прописные стоят тесно,
+   и им добавляли просвет. Golos Text рисует прописные шире, на кегле 112px
+   зазоры между ними расходятся, поэтому строка, наоборот, поджата. */
+.gg-root .display{font-family:var(--f-display); font-weight:var(--fw-display); letter-spacing:-.015em}
+.gg-root .micro{
+  font-size:var(--t-micro); font-weight:400; letter-spacing:var(--ls-wide);
+  text-transform:uppercase; line-height:1.6;
+}
+.gg-root .rule{width:40px; height:1px; background:currentColor; opacity:.5; border:0; margin:0}
+
+/* ===========================================================================
+   ДВИЖЕНИЕ. Все правила собраны в одном месте — так их можно отключить
+   целиком, не выискивая по файлу. Правило одно: движение показывает, откуда
+   элемент пришёл, и не украшает само себя. Отсюда единая кривая --ease,
+   малые дистанции (18px, не 80px) и отсутствие «отскоков».
+   Всё, что ниже, выключается блоком prefers-reduced-motion в конце стилей.
+   =========================================================================== */
+
+/* 1. Блок проявляется при входе в экран. Базовый приём страницы.
+      Стартовая прозрачность включается только классом .js-motion на <html>,
+      который ставит короткий скрипт в <head>. Без скрипта или при
+      prefers-reduced-motion класса нет — и весь текст виден сразу.
+      Раньше .reveal был безусловным: с выключенным JS страница оставалась
+      пустой. */
+.js-motion .gg-root .reveal{opacity:0; transform:translateY(18px); transition:opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease)}
+.js-motion .gg-root .reveal.is-in{opacity:1; transform:none}
+
+/* 2. Крупный заголовок выезжает построчно из-под маски.
+      Разбивку делает скрипт: каждая строка — .line (маска, overflow:hidden),
+      внутри .line__i (то, что едет). Задержка строки приходит в --d.
+      Если скрипт не выполнился, заголовок остаётся обычным текстом. */
+/* Маска шире строки: при интерлиньяже .88 выносные знаки (р, у, д) выходят
+   за строчный бокс, и overflow:hidden срезал бы им хвосты. Поля добавлены
+   и тут же скомпенсированы отрицательными margin — высота блока не меняется.
+   Сдвиг 130 %, а не 100 %: строка должна уходить ниже увеличенной маски. */
+.gg-root .line{display:block; overflow:hidden; padding:.08em 0 .18em; margin:-.08em 0 -.18em}
+/* will-change здесь намеренно нет: строк на странице семнадцать, и подсказка
+   держала бы семнадцать слоёв в памяти всё время жизни страницы. Браузер сам
+   выделяет слой на время перехода transform — этого достаточно. */
+.gg-root .line__i{
+  display:block;
+  transform:translateY(130%);
+  transition:transform var(--dur-slow) var(--ease);
+  transition-delay:var(--d, 0ms);
+}
+.gg-root .is-in .line__i{transform:none}
+/* Заголовок, разобранный на строки, сам уже не сдвигается: две подвижки
+   на одном элементе читаются как рывок. Остаётся только быстрое проявление. */
+.js-motion .gg-root .reveal.has-lines{transform:none; transition-duration:var(--dur-fast)}
+
+/* 3. Параллакс фотографий. Кадр в рамке выше рамки на 2×--parallax и поднят
+      на --parallax вверх — поэтому при сдвиге ±--parallax/2 края никогда
+      не открываются. Двигает скрипт, через translate3d. */
+.gg-root .px-frame{position:relative; overflow:hidden}
+.gg-root .px-frame > .px{
+  position:absolute; left:0; top:calc(var(--parallax) * -1);
+  width:100%; max-width:none; height:calc(100% + var(--parallax) * 2);
+  object-fit:cover; will-change:transform;
+}
+
+/* 3-бис. Фоновый кадр. Один примитив на все блоки, где текст лежит на
+   фотографии. Раньше вуаль была написана трижды по-своему, с прозрачностями
+   прямо в правилах; теперь блок задаёт только свою переменную --scrim, а
+   геометрия и слои общие.
+
+   alt у кадра описательный, а не пустой. Снимок несёт то, чего нет в тексте:
+   каким выглядит цех, какая вода на побережье. Тот же приём уже принят в
+   полосе-разделителе и на первом экране — фон здесь не орнамент, а часть
+   рассказа, и выкидывать его из озвучки было бы потерей.
+
+   pointer-events:none обязателен: подложка перекрывает всю секцию, и без
+   этого по ссылкам и полям формы поверх неё было бы не попасть. */
+.gg-root .bg-media{
+  position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+  background:var(--c-abyss);
+}
+/* Гамма-подъём кадра (--photo-lift, тот же фильтр, что и у светлых секций).
+   Съёмка тёмная сама по себе, а сверху лежит вуаль в 0,7–0,9 — вместе они
+   уводили медиану кадра к 12–17 из 255. На таких числах фотографии на
+   странице фактически не было: читатель видел не цех и не море, а чёрное
+   пятно с еле заметной рябью. Гамма поднимает тени сильно, а светлые точки
+   почти не трогает — а контраст текста считается как раз по светлым, — и
+   поэтому кадр становится виден, не отнимая читаемости. */
+.gg-root .bg-media > img{
+  width:100%; height:100%; object-fit:cover; object-position:center;
+  filter:var(--photo-lift);
+}
+.gg-root .bg-media::after{content:""; position:absolute; inset:0; background:var(--scrim)}
+/* Размытие идёт на самом изображении, а не на всей подложке: фильтр на
+   родителе размыл бы и вуаль, и её края у границ секции.
+   Подъём перечислен здесь заново: filter не складывается из двух правил,
+   и без него это объявление отменило бы гамму. Порядок важен — сначала
+   размытие, потом подъём. */
+.gg-root .bg-media--soft > img{filter:blur(var(--bg-blur)) var(--photo-lift); transform:scale(1.03)}
+/* Содержимое поверх подложки. Без этого текст лёг бы под неё. */
+.gg-root .has-bg{position:relative; overflow:hidden}
+.gg-root .has-bg > .container{position:relative; z-index:1}
+/* Вторичный текст на кадре светлее, чем вторичный текст на плоском фоне.
+   Правило собрано в одном месте и привязано к признаку «под блоком лежит
+   фотография», а не к отдельным секциям: заведёте новую секцию с .has-bg —
+   краска подхватится сама. Заголовки и основной текст не трогаем, они и так
+   набраны --c-bone и --c-white-warm. */
+.gg-root .has-bg .section__head p, .gg-root .has-bg .equip__text, .gg-root .has-bg .fact__key, .gg-root .has-bg .cta__lead{color:var(--c-ash-photo)}
+
+/* 4. Полоса прогресса чтения. Декоративная: дублирует то, что и так видно
+      по полосе прокрутки, поэтому aria-hidden и 2px высоты. */
+.gg-root .progress{
+  position:fixed; top:0; left:0; right:0; height:2px; z-index:120;
+  background:var(--c-steel); opacity:.85;
+  transform:scaleX(0); transform-origin:0 50%;
+  pointer-events:none;
+}
+
+/* 5. Первый экран: фотография проявляется и доезжает из лёгкого приближения.
+      Стартовое состояние задаётся только при работающем скрипте (класс
+      is-armed на <html>) — иначе при выключенном JS экран остался бы пустым. */
+.js-motion .gg-root .hero__media{opacity:0; transform:scale(1.05)}
+.gg-root .hero__media{transition:opacity 1000ms var(--ease), transform 1600ms var(--ease)}
+.gg-root .hero.is-ready .hero__media{opacity:1; transform:none}
+
+/* ===========================================================================
+   ХЕДЕР. Токены: --c-abyss, --c-bone, --t-nav, --ls-nav, --gutter
+   Логотип — PNG с прозрачным фоном, белые знаки. Высота задаётся в CSS,
+   ширина считается сама. Заменить логотип: положите свой файл под именем
+   assets/logo-gurman-guru.png, пропорции примерно 2.75 : 1.
+   =========================================================================== */
+.gg-root .site-header{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  padding-block:var(--s-5);
+  transition:background var(--dur-fast) var(--ease), padding var(--dur-fast) var(--ease);
+}
+.gg-root .site-header.is-stuck{background:rgba(var(--c-abyss-rgb), .92); backdrop-filter:blur(10px); padding-block:var(--s-4)}
+.gg-root .site-header__inner{display:flex; align-items:center; justify-content:space-between; gap:var(--s-5)}
+.gg-root .logo{display:block; line-height:0}
+.gg-root .logo img{height:clamp(30px, 2.6vw, 38px); width:auto; transition:opacity var(--dur-fast) var(--ease)}
+.gg-root .logo:hover img{opacity:.78}
+.gg-root .nav{display:flex; gap:var(--s-7)}
+.gg-root .nav a{
+  font-size:var(--t-nav); font-weight:500; letter-spacing:var(--ls-nav);
+  text-transform:uppercase; color:var(--c-ash); position:relative; padding-block:var(--s-1);
+  transition:color var(--dur-fast) var(--ease);
+}
+.gg-root .nav a::after{
+  content:""; position:absolute; left:0; bottom:0; width:100%; height:1px;
+  background:var(--c-bone); transform:scaleX(0); transform-origin:left;
+  transition:transform var(--dur-fast) var(--ease);
+}
+.gg-root .nav a:hover{color:var(--c-bone)}
+.gg-root .nav a:hover::after{transform:scaleX(1)}
+.gg-root .nav-toggle{display:none; background:none; border:0; padding:var(--s-2); cursor:pointer}
+.gg-root .nav-toggle span{display:block; width:22px; height:1px; background:var(--c-bone); margin:5px 0; transition:transform var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease)}
+.gg-root .nav-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.gg-root .nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+.gg-root .nav-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+
+/* ===========================================================================
+   1. ПЕРВЫЙ ЭКРАН. Фото справа, текст слева поверх чёрного — как на референсе.
+   По ТЗ п. 1: услуга, красная и чёрная икра, тара и этикетки, одно действие.
+   Токены: --c-abyss, --c-bone, --t-display-l, --lh-hero
+   =========================================================================== */
+.gg-root .hero{position:relative; min-height:100svh; display:flex; flex-direction:column; justify-content:center; overflow:hidden; padding-block:var(--s-11) var(--s-7)}
+.gg-root .hero__media{position:absolute; inset:0 0 0 auto; width:62%; z-index:0}
+.gg-root .hero__media img{width:100%; height:100%; object-fit:cover; object-position:52% 46%; filter:var(--photo-lift)}
+/* Растушёвка левого края фото в чистый чёрный — так текст читается без плашки */
+.gg-root .hero__media::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg,
+    var(--c-abyss) 0%,
+    rgba(var(--c-abyss-rgb), .86) 26%,
+    rgba(var(--c-abyss-rgb), .10) 68%,
+    rgba(var(--c-abyss-rgb), .34) 100%);
+}
+.gg-root .hero__inner{position:relative; z-index:1}
+.gg-root .hero h1{
+  font-family:var(--f-display); font-weight:var(--fw-display);
+  font-size:var(--t-display-l); line-height:var(--lh-hero);
+  text-transform:uppercase; color:var(--c-white-warm); max-width:13ch;
+  /* 13ch держит заголовок в две строки: «ФАСОВКА» / «ИКРЫ». Ограничение
+     осталось от прежнего варианта «Контрактная фасовка икры», где слово
+     «КОНТРАКТНАЯ» при 11ch выходило за границу блока и срезалось маской
+     построчной анимации. Новому заголовку запас не мешает, а страховка от
+     той же ошибки при следующей правке текста сохраняется. */
+}
+.gg-root .hero__rule{margin:var(--s-7) 0 var(--s-5); color:var(--c-steel)}
+.gg-root .hero__lead{max-width:34ch; color:var(--c-bone); font-size:var(--t-body)}
+.gg-root .hero__cta{margin-top:var(--s-7)}
+/* Техническая строка прижата к низу первого экрана — margin-top:auto,
+   а не absolute, иначе теряется центрирование контейнера */
+.gg-root .hero__meta{
+  position:relative; z-index:1; margin-top:auto; padding-top:var(--s-9);
+  display:flex; flex-wrap:wrap; gap:var(--s-4) var(--s-7);
+  /* Первый экран не помечен .has-bg — кадр у него свой, .hero__media, —
+     поэтому краска для текста на фото проставлена здесь напрямую. Строка
+     тянется во всю ширину и на 768 целиком заезжает на открытую часть кадра:
+     это самое узкое место первого экрана по контрасту. */
+  color:var(--c-ash-photo);
+}
+
+/* Кнопка. Все состояния описаны — на референсе видно только обычное. */
+.gg-root .btn{
+  display:inline-flex; align-items:center; gap:var(--s-5);
+  padding:var(--s-4) var(--s-6); border:var(--border-w) solid var(--c-line-dark);
+  border-radius:var(--radius); background:transparent; color:var(--c-bone);
+  font-size:var(--t-micro); font-weight:500; letter-spacing:var(--ls-wide);
+  text-transform:uppercase; cursor:pointer;
+  transition:background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.gg-root .btn__arrow{transition:transform var(--dur-fast) var(--ease)}
+/* :not(:disabled) у всех состояний наведения — иначе заблокированная кнопка
+   отправки формы перекрашивалась бы под курсором и выглядела рабочей.
+   Само :hover на disabled-элементах браузеры отрабатывают, гасить его
+   приходится вручную. */
+.gg-root .btn:not(:disabled):hover{background:var(--c-bone); color:var(--c-abyss); border-color:var(--c-bone)}
+.gg-root .btn:not(:disabled):hover .btn__arrow{transform:translateX(6px)}
+.gg-root .btn:not(:disabled):active{background:var(--c-steel); border-color:var(--c-steel)}
+.gg-root .btn:disabled{opacity:.4; cursor:not-allowed}
+.gg-root .btn--light{border-color:var(--c-line-light); color:var(--c-graphite)}
+.gg-root .btn--light:not(:disabled):hover{background:var(--c-graphite); color:var(--c-paper); border-color:var(--c-graphite)}
+.gg-root .btn--solid{background:var(--c-bone); color:var(--c-abyss); border-color:var(--c-bone)}
+.gg-root .btn--solid:not(:disabled):hover{background:var(--c-steel); border-color:var(--c-steel); color:var(--c-abyss)}
+
+/* ===========================================================================
+   1-бис. «НАМ ДОВЕРЯЮТ». Тонкая тёмная лента сразу под первым экраном —
+   продолжение чёрного фона hero, поэтому шва между ними нет и полоса
+   читается как подвал первого экрана, а не как отдельная секция.
+   Логотипы вырезаны из исходного скриншота в прозрачные PNG и перекрашены
+   в белый: разноцветные плашки на нашей палитре смотрелись бы чужеродно.
+   Токены: --trust-h, --trust-gap, --trust-dur, --trust-fade
+   =========================================================================== */
+.gg-root .trust{background:var(--c-abyss); color:var(--c-bone); padding-block:var(--s-7) var(--s-8)}
+.gg-root .trust__head{display:flex; align-items:baseline; gap:var(--s-7); margin-bottom:var(--s-6)}
+.gg-root .trust__label{color:var(--c-ash); margin:0}
+/* Кнопка «Остановить» убрана по прямому указанию заказчика. Остались пауза
+   по наведению, статичная раскладка при «уменьшить движение» и без скрипта.
+   Оговорка по WCAG 2.2.2 записана в README — с клавиатуры остановить ленту
+   теперь нечем. */
+
+/* Лента идёт от края до края, без контейнера: обрезанный логотип у границы
+   экрана — это признак движения, а поля вокруг него сделали бы из ленты
+   обычный статичный ряд. */
+.gg-root .trust__viewport{overflow:hidden}
+.gg-root .trust__track{display:flex; width:max-content}
+.gg-root .trust__row{
+  display:flex; align-items:center; gap:var(--trust-gap);
+  margin:0; padding:0 0 0 var(--trust-gap); list-style:none;
+}
+.gg-root .trust__row img{
+  display:block; height:var(--trust-h); width:auto;
+  opacity:.82; transition:opacity var(--dur-fast) var(--ease);
+}
+.gg-root .trust__row li:hover img{opacity:1}
+
+/* Движение только когда есть кому его показать. Без скрипта и при
+   «уменьшить движение» лента раскладывается в обычный ряд с переносом:
+   ни один логотип не должен остаться за кадром. */
+.js-motion .gg-root .trust__track{animation:trust-run var(--trust-dur) linear infinite}
+.js-motion .gg-root .trust__viewport:hover .trust__track{animation-play-state:paused}
+.js-motion .gg-root .trust__viewport{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--trust-fade),#000 calc(100% - var(--trust-fade)),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 var(--trust-fade),#000 calc(100% - var(--trust-fade)),transparent 100%);
+}
+/* Трек состоит ровно из двух одинаковых рядов, поэтому -50% — это ширина
+   одного ряда: в момент скачка кадр совпадает сам с собой. */
+@keyframes trust-run{from{transform:translate3d(0,0,0)} to{transform:translate3d(-50%,0,0)}}
+
+html:not(.js-motion) .gg-root .trust__track{flex-wrap:wrap; width:auto; row-gap:var(--s-7)}
+html:not(.js-motion) .gg-root .trust__row[aria-hidden="true"]{display:none}
+html:not(.js-motion) .gg-root .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:var(--gutter); row-gap:var(--s-7)}
+
+/* ===========================================================================
+   2. ПОЛНЫЙ ЦИКЛ. Светлая секция, второй блок референса перенесён дословно:
+   крупная антиква слева, техническая колонка справа, вертикальная подпись
+   в левом поле. По ТЗ п. 7 здесь же — краткое перечисление всех этапов.
+   Токены: --c-paper, --c-graphite, --t-display-xl, --lh-tight
+   =========================================================================== */
+.gg-root .section{padding-block:var(--s-10)}
+.gg-root .section--light{background:var(--c-paper); color:var(--c-graphite)}
+.gg-root .section--dark{background:var(--c-abyss); color:var(--c-bone)}
+.gg-root .section--paper-warm{background:var(--c-paper-warm); color:var(--c-graphite)}
+
+.gg-root .statement{position:relative}
+/* Замер с референса: заголовок отбит от левого поля на 144px,
+   техническая колонка справа шириной ~296px */
+.gg-root .statement__grid{display:grid; grid-template-columns:minmax(0,1fr) 288px; gap:var(--s-8); align-items:start}
+/* Вертикальная подпись в левом поле — приём с референса.
+   Якорь именно на .container: раньше отсчёт шёл от секции во всю ширину,
+   и подпись при left:-54px уезжала за левый край экрана — её не было видно.
+   Теперь она стоит в пустом поле слева от заголовка (у h2 отступ 144px). */
+.gg-root .statement .container{position:relative}
+.gg-root .statement__side{
+  position:absolute; left:0; top:0;
+  writing-mode:vertical-rl; transform:rotate(180deg);
+  color:var(--c-stone); white-space:nowrap;
+}
+/* Отступ 144px перенесён с самого h2 на обёртку 2026-09-09: над заголовком
+   появилась строка-надзаголовок, и она должна стоять по той же левой
+   границе. */
+.gg-root .statement__head{padding-left:144px}
+.gg-root .statement__kicker{color:var(--c-stone); margin:0 0 var(--s-5)}
+.gg-root .statement h2{
+  font-family:var(--f-display); font-weight:var(--fw-display);
+  line-height:var(--lh-tight);
+  text-transform:uppercase; letter-spacing:-.015em;
+  /* Кегль опущен со 112px (--t-display-xl). Заголовок сменился с
+     «От сырья до готовой партии» (11 знаков в самой длинной строке) на
+     «Берём на себя фасовку, упаковку, маркировку и подготовку продукции
+     к отгрузке» — 74 знака.
+     Коэффициент 3.6vw, а не 4.3, потому что колонка под заголовком сужается
+     быстрее окна: от неё отрезаны техническая колонка 288px, просвет 32 и
+     отступ 144 — все три величины постоянные. На 1440 это 868px, на 1101 —
+     уже 529px, вдвое меньше при падении ширины окна всего на четверть.
+     Замер переноса на 1101/1150/1280/1440: при 3.6vw заголовок везде встаёт
+     в четыре строки, при 4.3vw на 1101 разваливается на семь. */
+  font-size:clamp(24px, 3.6vw, 56px);
+}
+.gg-root .statement__meta{padding-top:var(--s-2)}
+.gg-root .statement__meta dl{margin:0; display:flex; flex-direction:column}
+.gg-root .statement__meta dt{color:var(--c-stone)}
+.gg-root .statement__meta dt + dd{margin:var(--s-2) 0 var(--s-6); color:var(--c-graphite)}
+.gg-root .statement__meta dd:last-of-type{margin-bottom:0}
+.gg-root .statement__note{margin-top:var(--s-7); max-width:30ch; color:var(--c-graphite)}
+.gg-root .statement__note .rule{margin-bottom:var(--s-5); color:var(--c-stone)}
+.gg-root .statement__addr{margin-top:var(--s-7); color:var(--c-stone)}
+
+/* Цепочка этапов под заголовком. Компактный информационный модуль,
+   а не карточки — ТЗ п. 7 просит чередовать типы блоков. */
+.gg-root .chain{
+  margin-top:var(--s-9); padding-left:144px;
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--s-3) var(--s-4);
+  color:var(--c-stone);
+}
+.gg-root .chain li{display:flex; align-items:center; gap:var(--s-4)}
+.gg-root .chain li:not(:last-child)::after{content:""; width:26px; height:1px; background:var(--c-line-light)}
+.gg-root .chain b{font-weight:400; color:var(--c-graphite)}
+
+/* ===========================================================================
+   3. ЭТАПЫ РАБОТЫ 01–04. Светлая секция, 4 колонки — замер: старт колонок
+   54 / 411 / 763 / 1102 px при макете 1440, зазор ~44px.
+   Фото 5:4. ТЗ п. 2 требует четыре РАЗНЫХ производственных кадра.
+   =========================================================================== */
+.gg-root .process__grid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:var(--grid-gap)}
+.gg-root .step__num{font-family:var(--f-display); font-size:var(--t-num); line-height:1; color:var(--c-graphite)}
+.gg-root .step__title{
+  font-family:var(--f-display); font-size:var(--t-title-s); font-weight:var(--fw-display);
+  letter-spacing:var(--ls-title); text-transform:uppercase;
+  margin-top:var(--s-2); color:var(--c-graphite);
+}
+.gg-root .step__media{margin-top:var(--s-5); aspect-ratio:5/4; overflow:hidden; background:var(--c-carbon)}
+.gg-root .step__media img{width:100%; height:100%; object-fit:cover; transition:transform var(--dur-slow) var(--ease)}
+.gg-root .step:hover .step__media img{transform:scale(1.04)}
+.gg-root .step__text{margin-top:var(--s-5); color:var(--c-stone)}
+.gg-root .process__head{margin-bottom:var(--s-8)}
+.gg-root .process__head .micro{color:var(--c-stone)}
+
+/* ===========================================================================
+   3-бис. КИНЕМАТОГРАФИЧЕСКАЯ СЦЕНА «ЭТАПЫ РАБОТЫ».
+
+   Приём взят из присланного промта и переложен на наш материал. Там позицией
+   прокрутки перематывалось видео; видео в проекте нет, а внешний CDN и сборка
+   ломают условие «файл открывается двойным кликом». Здесь прокруткой ведётся
+   последовательность из четырёх кадров производственного цикла — тех же, что
+   стояли в сетке. Роль «банка кадров» играет кэш браузера: четыре JPEG
+   декодируются заранее, до включения сцены.
+
+   Всё ниже висит на классе .is-scene, который ставит скрипт. Без скрипта и
+   при «уменьшить движение» класса нет — секция остаётся ровно той сеткой
+   01–04, что была: те же тексты, те же фотографии, тот же порядок.
+   Правится длина сцены токеном --scene-track в :root.
+   =========================================================================== */
+.gg-root .scene.is-scene{padding-block:0; background:var(--c-abyss)}
+.gg-root .scene.is-scene .scene__track{position:relative; height:var(--scene-track)}
+.gg-root .scene.is-scene .scene__stage{
+  position:sticky; top:0; height:100vh; height:100svh; overflow:hidden;
+  display:flex; flex-direction:column;
+  /* Верхнее поле — под фиксированную шапку, иначе подпись «Этапы работы»
+     уезжает под логотип. */
+  padding:calc(var(--header-h) + var(--s-5)) 0 var(--s-8);
+}
+
+/* Стопка кадров. Наезд задан на обёртке, а не на самих снимках: затемнение
+   лежит отдельным слоем и масштабироваться вместе с фотографией не должно. */
+.gg-root .scene.is-scene .scene__media{
+  position:absolute; inset:0; z-index:0; overflow:hidden;
+  background:var(--c-abyss); will-change:transform;
+}
+.gg-root .scene.is-scene .scene__frame{
+  position:absolute; inset:0; width:100%; height:100%; max-width:none;
+  object-fit:cover; opacity:0;
+  /* Тот же гамма-подъём, что и у остальных кадров под вуалью. Здесь вуаль
+     двойная (--scrim-x поверх --scrim-y), и без подъёма медиана стопки
+     держалась на 13–17 из 255. Подъём отдаёт 0,02–0,04 запаса по контрасту
+     и возвращает 8 пунктов медианы. В обычной сетке 01–04, куда секция
+     сходит без скрипта, вуали нет — и подъёма там тоже нет. */
+  filter:var(--photo-lift);
+}
+/* Кадр, однажды проявившись, остаётся непрозрачным, а следующий проступает
+   поверх него. Так стопка всегда закрыта целиком: в середине перехода фон
+   сквозь два полупрозрачных снимка не просвечивает. */
+.gg-root .scene.is-scene .scene__frame:first-child{opacity:1}
+
+/* Затемнение. Текст стоит слева, поэтому основной градиент горизонтальный;
+   вертикальный добавлен под шапку сверху и под шкалу этапов снизу.
+   Значения подобраны замером контраста по пикселям всех четырёх кадров. */
+.gg-root .scene.is-scene .scene__scrim{
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:var(--scrim-x), var(--scrim-y);
+}
+
+.gg-root .scene.is-scene .scene__stage > .container{
+  position:relative; z-index:2; flex:1; display:flex; flex-direction:column; min-height:0;
+}
+.gg-root .scene.is-scene .process__head{margin-bottom:0}
+.gg-root .scene.is-scene .process__head .micro{color:var(--c-ash)}
+
+/* Акты лежат друг на друге и переключаются прозрачностью. Переход короткий,
+   120 мс: подпись должна отвечать на прокрутку сразу, длинную плавность
+   здесь берёт на себя картинка. */
+.gg-root .scene.is-scene .process__grid{position:relative; display:block; flex:1; min-height:0}
+.gg-root .scene.is-scene .step{
+  position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+  max-width:min(46ch, 100%); opacity:0; transition:opacity 120ms linear;
+}
+.gg-root .scene.is-scene .step__media{display:none}   /* снимок ушёл в стопку кадров */
+.gg-root .scene.is-scene .step__num{color:var(--c-steel)}
+.gg-root .scene.is-scene .step__title{
+  font-size:var(--t-display-m); letter-spacing:.04em; line-height:1.02;
+  margin-top:var(--s-3); color:var(--c-white-warm);
+}
+.gg-root .scene.is-scene .step__text{margin-top:var(--s-5); max-width:42ch; color:var(--c-bone)}
+
+/* Ступенчатый вход внутри акта — приём из промта: содержимое не появляется
+   разом, а собирается сверху вниз. Включается классом .is-live, который
+   скрипт ставит, когда акт виден больше чем на треть. */
+.gg-root .scene.is-scene .step__num, .gg-root .scene.is-scene .step__title, .gg-root .scene.is-scene .step__text{
+  opacity:0; transform:translateY(20px);
+  transition:opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+}
+.gg-root .scene.is-scene .step.is-live .step__num, .gg-root .scene.is-scene .step.is-live .step__title, .gg-root .scene.is-scene .step.is-live .step__text{opacity:1; transform:none}
+.gg-root .scene.is-scene .step__title{transition-delay:var(--stagger)}
+.gg-root .scene.is-scene .step__text{transition-delay:calc(var(--stagger) * 2)}
+
+/* Шкала этапов внизу сцены. Вместо точек из промта — четыре отрезка:
+   круглых форм в этой системе нет вообще, --radius: 0. Шкала заодно
+   работает подписью: видно, какой этап идёт и сколько их всего. */
+.gg-root .scene__hud{display:none}
+.gg-root .scene.is-scene .scene__hud{
+  display:grid; grid-template-columns:repeat(4, minmax(0,1fr));
+  gap:var(--grid-gap); margin-top:var(--s-7);
+}
+.gg-root .scene__seg{display:block}
+.gg-root .scene__bar{display:block; height:2px; background:var(--c-line-dark); overflow:hidden}
+.gg-root .scene__bar i{
+  display:block; height:100%; background:var(--c-steel);
+  transform:scaleX(0); transform-origin:0 50%;
+}
+.gg-root .scene__seg span{
+  display:block; margin-top:var(--s-3);
+  font-size:var(--t-micro); letter-spacing:var(--ls-wide); text-transform:uppercase;
+  color:var(--c-ash); opacity:.45; transition:opacity var(--dur-fast) var(--ease);
+}
+.gg-root .scene__seg.is-on span{opacity:1; color:var(--c-bone)}
+
+/* ===========================================================================
+   Полоса-разделитель с крупным кадром и заголовком поверх.
+   Здесь открывается раздел о сырье — заголовок из ТЗ п. 4.
+   =========================================================================== */
+.gg-root .band{position:relative; height:clamp(220px,30vw,400px); overflow:hidden}
+.gg-root .band img{width:100%; height:100%; object-fit:cover}
+.gg-root .band::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg,
+    rgba(var(--c-abyss-rgb), .62),
+    rgba(var(--c-abyss-rgb), .50) 50%,
+    rgba(var(--c-abyss-rgb), .70));
+}
+/* Средняя точка затемнения: .24 → .42 после замены фото (природный кадр
+   светлее прежнего, подзаголовок падал до 3,3:1), затем .42 → .50 после
+   включения параллакса. Причина второй правки: кадр в рамке параллакса выше
+   полосы и ездит по ней на ±32px, открывая более светлые участки неба.
+   Замер сделан по пикселям кадра с наложенным затемнением, по всем
+   положениям параллакса: худшая точка подзаголовка 4,66:1, порог AA — 4,5. */
+.gg-root .band__text{
+  position:absolute; inset:0; z-index:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:var(--s-4);
+  text-align:center; padding-inline:var(--s-5); color:var(--c-white-warm);
+}
+.gg-root .band__text h2{
+  font-family:var(--f-display); font-weight:var(--fw-display); font-size:var(--t-display-m);
+  text-transform:uppercase; letter-spacing:.04em; line-height:1.02;
+}
+.gg-root .band__text p{color:var(--c-bone); max-width:46ch}
+
+/* ===========================================================================
+   4. ПРОИСХОЖДЕНИЕ И КАЧЕСТВО СЫРЬЯ. Светлая секция.
+   Два текстовых столбца: слева рассуждение, справа сухая табличка параметров.
+   Токены: --c-paper-warm, --c-graphite, --c-stone, --c-line-light
+
+   Секция была тёмной, с кадром колотого льда на фоне и текстом поверх него.
+   Переведена на светлый фон 8 сентября 2026 по указанию заказчика — вместе
+   с «О компании». Причина в замере: под вуалью .84–.90 медианная яркость
+   кадра падала до 10 из 255 при исходных 5, то есть фотографии на экране
+   фактически не было, оставалась тёмная фактура. При этом секция добавляла
+   1040px к сплошной тёмной полосе в 9845px — половине всей страницы.
+   Теперь кадр вынесен в отдельную полосу над текстом и показан без вуали
+   вообще (правила .origin__photo), а текст лежит на чистом светлом фоне.
+   =========================================================================== */
+.gg-root .origin__grid{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:var(--s-9)}
+.gg-root .origin__lead{color:var(--c-graphite); max-width:52ch}
+.gg-root .origin__lead p + p{margin-top:var(--s-5)}
+.gg-root .origin__lead .rule{margin-bottom:var(--s-6); color:var(--c-stone)}
+/* Подзаголовки внутри колонки. Набраны тем же моно, что и остальные
+   технические подписи страницы, а не дисплейным шрифтом: рядом с ними стоит
+   заголовок полосы «КАЧЕСТВО НАЧИНАЕТСЯ С СЫРЬЯ», и второй крупный шрифт
+   в том же экране начал бы спорить с ним за первенство. */
+.gg-root .origin__sub{
+  font-family:var(--f-mono); font-size:var(--t-micro); font-weight:500;
+  letter-spacing:var(--ls-wide); text-transform:uppercase; line-height:1.6;
+  margin:0 0 var(--s-4); color:var(--c-graphite);
+}
+.gg-root .origin__lead p + .origin__sub{margin-top:var(--s-7)}
+.gg-root .origin__specs{margin:0}
+.gg-root .origin__specs div{
+  display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:var(--s-5);
+  padding-block:var(--s-5); border-bottom:var(--border-w) solid var(--c-line-light);
+}
+.gg-root .origin__specs div:first-child{border-top:var(--border-w) solid var(--c-line-light)}
+.gg-root .origin__specs dt{color:var(--c-stone)}
+.gg-root .origin__specs dd{margin:0; color:var(--c-graphite)}
+
+/* Полоса с фотографией во всю ширину секции. Приём общий для «Сырья» и
+   «О компании»: кадр не лежит под текстом, а стоит отдельным ярусом и потому
+   не требует вуали — виден целиком, в исходной яркости. Полоса прижата к
+   верхнему краю секции (у секции снят верхний отступ), высота растёт с
+   шириной окна: на 360px это 220px, на 1440 — 420px. */
+.gg-root .section__photo{
+  position:relative; overflow:hidden; background:var(--c-abyss);
+  height:clamp(220px, 30vw, 420px); margin-bottom:var(--s-9);
+}
+.gg-root .section__photo img{
+  width:100%; height:100%; object-fit:cover;
+  object-position:var(--photo-pos); filter:var(--photo-lift);
+}
+.gg-root /* Селектор из двух классов намеренно: правило .section{padding-block} .gg-root внутри
+   медиазапроса ≤760 стоит ниже по файлу и при одинаковой специфичности
+   перебивало обнуление — полоса отъезжала от края на 64px. */
+.section.has-photo{padding-top:0}
+/* Прежде здесь стояла вуаль над кадром с икрой: пять опорных точек от .90 до
+   .70, подобранных так, чтобы блики колотого льда не съедали текст. После
+   перевода секции на светлый фон вуаль не нужна — кадр ушёл в отдельную
+   полосу .section__photo и текста над собой не несёт. */
+
+/* ===========================================================================
+   5. ПРОИЗВОДСТВО. Тёмная секция поверх кадра цеха: оборудование, линия,
+   мощности в цифрах.
+   =========================================================================== */
+.gg-root .section__head{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,380px); gap:var(--s-9); align-items:end; margin-bottom:var(--s-8)}
+.gg-root .section__head h2{
+  font-family:var(--f-display); font-weight:var(--fw-display); font-size:var(--t-display-m);
+  line-height:1.02; text-transform:uppercase; letter-spacing:.01em;
+}
+.gg-root .section__head p{color:var(--c-ash)}
+.gg-root .section--light .section__head p, .gg-root .section--paper-warm .section__head p{color:var(--c-stone)}
+
+/* Кадр цеха раньше лежал картинкой 21:9 в коробке посреди светлой секции:
+   заголовок, стена фотографии, под ней текст. Теперь он ушёл на фон всей
+   секции, а текст лёг поверх — тем же приёмом, что на первом экране и в
+   сцене «Этапы работы». Правила .equip__media вместе с коробкой удалены.
+
+   Вуаль здесь вертикальная, без горизонтальной: у кадра перспектива вглубь
+   зала, и гасить его вбок — значит закрыть именно ту часть, ради которой он
+   снят. Плотно сверху, где стоит заголовок с подводкой, открыто в середине,
+   где зал уходит вдаль, и снова плотно внизу под четырьмя числами.
+
+   Открытая точка .72, а не .62, как хотелось бы глазу. Ограничение задал не
+   десктоп, а 768: там секция вытягивается с 819 до 1087 px, кадр обрезается
+   по ширине сильнее, и в открытую полосу попадает светлый участок зала — как
+   раз под описаниями оборудования в 15px цветом --c-ash. На .62 худшая пара
+   давала 4.7:1 при пороге 4.5:1, на .68 — 4.57:1 на 768. .72 держит не ниже
+   4.98:1 на всех трёх ширинах. Меняете фотографию — перемеряйте. */
+.gg-root #proizvodstvo{
+  --scrim-top: .93;
+  --scrim-foot: .91;
+  --scrim: linear-gradient(180deg,
+    rgba(var(--c-abyss-rgb), var(--scrim-top)) 0%,
+    rgba(var(--c-abyss-rgb), .86) 18%,
+    rgba(var(--c-abyss-rgb), .72) 40%,
+    rgba(var(--c-abyss-rgb), .79) 62%,
+    rgba(var(--c-abyss-rgb), var(--scrim-foot)) 84%,
+    rgba(var(--c-abyss-rgb), var(--scrim-foot)) 100%);
+  /* Сверху секция граничит с «Происхождением» — тоже тёмным и плоским. Без
+     этой линии шов между ними исчезает и кадр читается как продолжение
+     предыдущего блока, а не как начало нового. */
+  border-top:var(--border-w) solid var(--c-line-dark);
+}
+
+.gg-root .equip{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:var(--grid-gap); margin-bottom:var(--s-9)}
+.gg-root .equip__item{border-top:var(--border-w) solid var(--c-line-dark); padding-top:var(--s-5)}
+.gg-root .equip__name{font-family:var(--f-display); font-weight:var(--fw-display); font-size:var(--t-title-s); letter-spacing:var(--ls-title); text-transform:uppercase; color:var(--c-bone)}
+.gg-root .equip__text{margin-top:var(--s-3); color:var(--c-ash)}
+
+.gg-root .facts{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:var(--grid-gap); border-top:var(--border-w) solid var(--c-line-dark); padding-top:var(--s-7)}
+/* Крупная антиква на фотографии — единственное место, где взят --c-white-warm:
+   числа набраны в 66px и лежат на самом открытом участке кадра. */
+.gg-root .fact__val{font-family:var(--f-display); font-size:clamp(38px,4.6vw,66px); line-height:1; color:var(--c-white-warm)}
+.gg-root .fact__key{margin-top:var(--s-4); color:var(--c-ash)}
+
+/* ===========================================================================
+   6. ТАРА И МАРКИРОВКА. Тёмная секция, вторая липкая сцена (механика — в
+   блоке 3-бис, она общая для всех .scene). Здесь только два дополнения.
+
+   Первое: хвост секции. Таблица форматов не участвует в сцене и стоит в
+   обычном потоке под треком. В режиме сцены padding-block секции обнулён
+   (.scene.is-scene), поэтому хвост несёт свои поля сам; без сцены секция
+   сохраняет свои поля, и хвосту хватает верхнего отступа — того же s-9,
+   что раньше стоял у таблицы инлайном.
+
+   Второе: цвета сетки-фолбэка на тёмном фоне. Базовые .step__num и
+   .step__title рассчитаны на светлую секцию «Этапов» (графит), на «абиссе»
+   они бы пропали. Берутся те же цвета, что у этих элементов в сцене. */
+.gg-root .scene__after{margin-top:var(--s-9)}
+.gg-root .scene.is-scene .scene__after{margin-top:0; padding-block:var(--s-9)}
+.gg-root .section--dark .step__num{color:var(--c-steel)}
+.gg-root .section--dark .step__title{color:var(--c-white-warm)}
+.gg-root .section--dark .step__text{color:var(--c-bone)}
+/* Подпись над заголовком («Тара и маркировка») в этот список не попала.
+   В сцене она перекрашивается в --c-ash, а в сетке-фолбэке оставалась
+   --c-stone — краской для светлого фона — и давала 2,89 : 1 на «абиссе».
+   Видно это только там, где скрипт не отработал: без JS или при «уменьшить
+   движение». Поэтому и не попадалось на глаза. */
+.gg-root .section--dark .process__head .micro{color:var(--c-ash)}
+
+.gg-root .tbl{width:100%; border-collapse:collapse; font-size:var(--t-body)}
+.gg-root .tbl th, .gg-root .tbl td{text-align:left; padding:var(--s-5) var(--s-4); border-bottom:var(--border-w) solid var(--c-line-dark); vertical-align:top}
+/* Крайние колонки без внешнего отступа: иначе первый столбец стоял на 16px
+   правее заголовка секции и подписи к таблице, а последний — на 16px левее
+   правого края контейнера. Линии строк при этом идут во всю ширину. */
+.gg-root .tbl th:first-child, .gg-root .tbl td:first-child{padding-left:0}
+.gg-root .tbl th:last-child, .gg-root .tbl td:last-child{padding-right:0}
+.gg-root .tbl th{
+  font-size:var(--t-micro); font-weight:500; letter-spacing:var(--ls-wide);
+  text-transform:uppercase; color:var(--c-ash); border-bottom-color:var(--c-line-dark);
+}
+.gg-root .tbl td:first-child{font-family:var(--f-display); font-size:var(--t-title-s); letter-spacing:.02em; text-transform:uppercase; color:var(--c-bone)}
+.gg-root .tbl td{color:var(--c-ash)}
+.gg-root .tbl tr{transition:background var(--dur-fast) var(--ease)}
+.gg-root .tbl tbody tr:hover{background:var(--c-carbon)}
+.gg-root .tbl caption{text-align:left; padding-bottom:var(--s-4); color:var(--c-ash)}
+/* Строки входят по очереди. Пять строк, проступивших разом, читаются как
+   «мигнула вся таблица»; шаг 60ms даёт глазу пройти сверху вниз.
+   Сама таблица при этом почти не сдвигается — двойная подвижка на одном
+   блоке выглядит рывком, поэтому её выезд укорочен, как у заголовков. */
+.js-motion .gg-root .tbl.reveal{transform:none; transition-duration:var(--dur-fast)}
+.js-motion .gg-root .tbl tbody tr{opacity:0; transition:opacity var(--dur-med) var(--ease)}
+.js-motion .gg-root .tbl.is-in tbody tr{opacity:1}
+.js-motion .gg-root .tbl.is-in tbody tr:nth-child(1){transition-delay:60ms}
+.js-motion .gg-root .tbl.is-in tbody tr:nth-child(2){transition-delay:120ms}
+.js-motion .gg-root .tbl.is-in tbody tr:nth-child(3){transition-delay:180ms}
+.js-motion .gg-root .tbl.is-in tbody tr:nth-child(4){transition-delay:240ms}
+.js-motion .gg-root .tbl.is-in tbody tr:nth-child(5){transition-delay:300ms}
+
+/* ===========================================================================
+   7. ГОТОВАЯ ПАРТИЯ. Светлая секция: упаковка, контроль, отгрузка, документы.
+   ТУ и HACCP/ISO — с референса. Фото — правая колонка.
+   =========================================================================== */
+/* start, а не center: в списке стало 7 пунктов, и центрированное фото начало
+   висеть посреди колонки. Верх фото должен совпадать с первой линейкой списка. */
+.gg-root .docs__grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--s-9); align-items:start}
+.gg-root .docs__list li{position:relative; display:grid; grid-template-columns:28px minmax(0,1fr); gap:var(--s-5); padding-block:var(--s-5); border-bottom:var(--border-w) solid var(--c-line-light)}
+.gg-root .docs__list li:first-child{border-top:var(--border-w) solid var(--c-line-light)}
+.gg-root .docs__idx{font-family:var(--f-display); color:var(--c-stone); transition:color var(--dur-med) var(--ease)}
+/* Пункт на линии чтения отмечается тем, что его нижняя линия темнеет и
+   доезжает слева направо, а номер набирает цвет. Текст при этом не гаснет:
+   контраст остальных пунктов не должен зависеть от положения прокрутки. */
+.js-motion .gg-root .docs__list li::after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
+  background:var(--c-graphite); transform:scaleX(0); transform-origin:0 50%;
+  transition:transform var(--dur-med) var(--ease);
+}
+.js-motion .gg-root .docs__list li.is-active::after{transform:scaleX(1)}
+.js-motion .gg-root .docs__list li.is-active .docs__idx{color:var(--c-graphite)}
+.gg-root .docs__name{color:var(--c-graphite)}
+.gg-root .docs__desc{margin-top:var(--s-1); color:var(--c-stone)}
+/* Список из семи пунктов вдвое выше фотографии — под кадром оставалось 264px
+   пустоты. Кадр липнет к верху экрана и едет вместе со списком до конца
+   строки сетки. Липнет именно <img>, а не figure: у растянутой figure нет
+   свободного хода внутри собственной области сетки. */
+.gg-root .docs__media{align-self:stretch}
+.gg-root .docs__media img{
+  width:100%; object-fit:cover;
+  position:sticky; top:calc(var(--header-h) + var(--s-7));
+}
+
+/* ===========================================================================
+   8. О КОМПАНИИ. Светлая секция. Ритм отличается от соседей: слева крупная
+   выдержка дисплейной антиквой, справа — список точек продаж строкой.
+   Текст целиком из файла «о нас.docx», не переписан.
+
+   Секция была тёмной, кадр со столом стоял под текстом полосой в 560px.
+   Переведена на светлый фон 8 сентября 2026 вместе с «Сырьём»: замер давал
+   медианную яркость кадра под вуалью 11 из 255 при исходных 10 — снимок не
+   читался. Кадр вынесен в полосу .section__photo над текстом и показан без
+   вуали; вместе с ним ушли и подпорки, которых он требовал (обрыв полосы на
+   560px, вуаль до .98 под списком точек продаж).
+   =========================================================================== */
+.gg-root .about__grid{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:var(--s-9)}
+/* Выдержка набрана прописными, как и вся остальная антиква страницы. Раньше
+   она была единственным крупным serif-набором в строчных на весь лендинг —
+   строчные Playfair с выносными элементами читаются рядом с прописными
+   заголовками как другая гарнитура. На референсе строчной антиквы нет
+   вообще. Кегль опущен с --t-num до --t-title-s×2 по той же причине, по
+   которой опущен кегль заголовка секций: прописные шире строчных, и на
+   прежних 42px выдержка занимала пять строк вместо трёх. */
+.gg-root .about__quote{
+  font-family:var(--f-display); font-weight:var(--fw-display);
+  font-size:clamp(22px, 2.2vw, 32px); text-transform:uppercase;
+  letter-spacing:var(--ls-title); line-height:1.34;
+  color:var(--c-graphite); max-width:30ch;
+}
+.gg-root .about__text{color:var(--c-stone)}
+.gg-root .about__text p + p{margin-top:var(--s-5)}
+/* Список идёт во всю ширину секции в четыре колонки — по числу точек.
+   Раньше он стоял столбиком в правой колонке и кончался на 252px выше левой. */
+.gg-root .about__where{margin-top:var(--s-9)}
+.gg-root .about__where dt{color:var(--c-stone)}
+.gg-root .about__where dd{margin:var(--s-5) 0 0}
+.gg-root .about__where ul{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:var(--grid-gap)}
+.gg-root .about__where li{
+  color:var(--c-graphite); border-top:var(--border-w) solid var(--c-line-light);
+  padding-top:var(--s-4); min-height:76px;
+}
+/* Прежде кадр со столом занимал верхние 560px секции, а вуаль под списком
+   точек продаж доводилась до .98 — иначе освещённая столешница подставляла
+   блик прямо под подпись цветом --c-stone (2,56 : 1 при пороге 4,5). Обе
+   подпорки сняты вместе с переводом секции на светлый фон: кадр стоит
+   отдельной полосой, текста над собой не несёт, мерить под ним нечего. */
+
+/* ---------------------------------------------------------------------------
+   Знаки «Честный ЗНАК» и ВЕТИС в «Готовой партии».
+   Отделены сверху линией — тем же приёмом, что и пункты списка рядом:
+   ряд читается как продолжение перечня, а не как отдельная плашка.
+   --------------------------------------------------------------------------- */
+.gg-root .marks{margin-top:var(--s-8); padding-top:var(--s-5); border-top:var(--border-w) solid var(--c-line-light)}
+.gg-root .marks__label{color:var(--c-stone)}
+.gg-root .marks__list{display:flex; flex-wrap:wrap; align-items:center; gap:var(--s-5) var(--s-8); margin-top:var(--s-5)}
+/* Высота 44px — тот же рост, что у логотипа в подвале: знаки не должны
+   выглядеть крупнее марки самой компании. Ширина auto, потому что
+   пропорции у двух знаков разные.
+   У ВЕТИС под словом идёт четырёхстрочная расшифровка, она съедает нижнюю
+   треть картинки, и при одинаковой высоте файла сам знак выходит заметно
+   мельче соседнего. 60px выравнивают их по видимому размеру, а не по
+   габариту файла. */
+.gg-root .marks__list img{height:44px; width:auto; display:block}
+.gg-root .marks__list .marks__vetis img{height:60px}
+@media (max-width:560px){
+  .gg-root .marks__list{gap:var(--s-5)}
+  .gg-root .marks__list img{height:36px}
+  .gg-root .marks__list .marks__vetis img{height:48px}}
+
+/* ===========================================================================
+   9. КАК НАЧАТЬ. Светлая секция, три шага.
+   =========================================================================== */
+.gg-root .start__grid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:var(--grid-gap)}
+.gg-root .start__item{border-top:var(--border-w) solid var(--c-line-light); padding-top:var(--s-5)}
+.gg-root .start__term{color:var(--c-stone)}
+.gg-root .start__title{font-family:var(--f-display); font-weight:var(--fw-display); font-size:var(--t-title-s); letter-spacing:var(--ls-title); text-transform:uppercase; margin-top:var(--s-3); color:var(--c-graphite)}
+.gg-root .start__text{margin-top:var(--s-3); color:var(--c-stone)}
+
+/* ===========================================================================
+   9-бис. ЭКОНОМИКА И УСЛОВИЯ. Тёмная секция с ценами.
+
+   Почему тёмная и почему именно здесь: цена — единственное место, где
+   посетитель останавливается и считает. Секция стоит между «Как начать» и
+   «Вопросами», обе светлые; тёмная полоса между ними работает как пауза и
+   не даёт цифрам утонуть в общем потоке. Внутри «Вопросов» те же условия
+   пересказаны словами — здесь они собраны в цифрах, и это не дублирование:
+   один блок отвечает на «сколько», другой на «а если…».
+
+   Строение: слева две цены крупно, справа три условия списком. Никаких
+   карточек и рамок — на сайте их нигде нет, всё держится на линиях.
+   =========================================================================== */
+.gg-root .econ__grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--s-9); align-items:start}
+.gg-root .econ__prices{display:flex; flex-direction:column; gap:var(--s-7)}
+.gg-root .econ__price{border-top:var(--border-w) solid var(--c-line-dark); padding-top:var(--s-5)}
+.gg-root .econ__label{color:var(--c-ash)}
+/* Кегль --t-num — тот же, что у номеров 01–07 в «Готовой партии»: цифры на
+   странице должны быть одного роста, иначе цена спорит с нумерацией. */
+.gg-root .econ__value{
+  font-family:var(--f-display); font-weight:var(--fw-display);
+  font-size:var(--t-num); line-height:1.05; letter-spacing:var(--ls-title);
+  margin-top:var(--s-3); color:var(--c-white-warm);
+}
+/* Единица измерения — не часть цифры, поэтому мельче и другим цветом:
+   «4 000» должно читаться первым, «₽/кг» — уточнением. */
+.gg-root .econ__unit{font-size:var(--t-body); font-weight:400; letter-spacing:var(--ls-wide); color:var(--c-steel)}
+.gg-root .econ__note{margin-top:var(--s-3); color:var(--c-ash)}
+.gg-root .econ__terms li{
+  border-top:var(--border-w) solid var(--c-line-dark);
+  padding-block:var(--s-5);
+}
+.gg-root .econ__terms li:last-child{border-bottom:var(--border-w) solid var(--c-line-dark)}
+.gg-root .econ__term{
+  font-family:var(--f-display); font-weight:var(--fw-display);
+  font-size:var(--t-title-s); letter-spacing:var(--ls-title);
+  text-transform:uppercase; color:var(--c-white-warm);
+}
+.gg-root .econ__text{margin-top:var(--s-3); color:var(--c-bone)}
+@media (max-width:900px){
+  .gg-root .econ__grid{grid-template-columns:1fr; gap:var(--s-8)}
+  /* Цены в две колонки: по одной на строку они уводят условия слишком
+     далеко вниз, а рядом читаются как одна цена за услугу и тару. */
+  .gg-root .econ__prices{flex-direction:row; gap:var(--grid-gap)}
+  .gg-root .econ__price{flex:1 1 0}}
+@media (max-width:560px){
+  .gg-root .econ__prices{flex-direction:column; gap:var(--s-6)}}
+
+/* ===========================================================================
+   9. ВОПРОСЫ. Аккордеон на нативном <details>, без JS.
+   =========================================================================== */
+.gg-root .faq__item{border-bottom:var(--border-w) solid var(--c-line-light)}
+.gg-root .faq__item:first-child{border-top:var(--border-w) solid var(--c-line-light)}
+.gg-root .faq__q{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--s-5);
+  padding-block:var(--s-5); cursor:pointer; list-style:none;
+  font-family:var(--f-display); font-size:var(--t-title-s); letter-spacing:.02em; color:var(--c-graphite);
+}
+.gg-root .faq__q::-webkit-details-marker{display:none}
+.gg-root .faq__sign{flex:none; width:14px; height:14px; position:relative}
+.gg-root .faq__sign::before, .gg-root .faq__sign::after{content:""; position:absolute; background:var(--c-graphite); transition:transform var(--dur-fast) var(--ease)}
+.gg-root .faq__sign::before{left:0; top:6px; width:14px; height:1px}
+.gg-root .faq__sign::after{left:6px; top:0; width:1px; height:14px}
+.gg-root .faq__item[open] .faq__sign::after{transform:scaleY(0)}
+.gg-root .faq__a{padding-bottom:var(--s-5); max-width:70ch; color:var(--c-stone)}
+</style>

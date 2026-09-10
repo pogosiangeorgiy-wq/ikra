@@ -1,0 +1,411 @@
+<!-- Стили лендинга, часть 2 из 2. Блок T123.
+     Все правила заперты под .gg-root — разметку Тильды не трогают. -->
+<style>
+
+
+/* ===========================================================================
+   10. ЗАЯВКА. Тёмная секция поверх кадра первого экрана. Поля без рамок,
+   только нижняя линия.
+   =========================================================================== */
+/* Финал возвращает кадр открытия — тот же стол, но снятый иначе. На первом
+   экране рамка узкая и высокая (62% ширины, вся высота), поэтому снимок 3:4
+   виден целиком: банка, жестянка, рулон этикеток. Здесь рамка во всю ширину и
+   низкая, cover режет её в горизонтальную полосу, а object-position уводит
+   кадр вниз — на стол, ложку и пинцет. Одна и та же съёмка, но начало
+   показывает предмет, а конец — рабочее место после работы.
+
+   Вуаль здесь самая плотная на странице: под ней лежит форма, а это самый
+   мелкий текст лендинга — подписи полей, плейсхолдеры, строка согласия.
+
+   Плотность была ещё выше (.58/.66/.90/.94/.96). При таких числах медиана
+   того, что видит глаз, держалась на 12 из 255: фотография была на странице,
+   весила свои килобайты, озвучивалась в alt — и не показывала ничего. Ряд
+   пересчитан до .44/.54/.80/.84 вместе с гамма-подъёмом кадра и краской
+   --c-ash-photo. Замер на трёх ширинах: медиана 12 → 21, девяностая
+   процентиль 27 → 48, а худшая пара текст/фон при этом осталась на 7,3 : 1
+   при пороге 4,5. То есть кадр стало видно, не оплатив это читаемостью.
+
+   Опорные точки заданы в пикселях, а не в процентах. Высота секции гуляет от
+   926 до 1769px, и процентная вуаль на узком экране уезжала: подводка попадала
+   в открытую часть и давала 4.42:1 при пороге 4.5:1. Верхнее поле секции —
+   величина постоянная (128px, на узкой ветке 82px), поэтому пиксельные точки
+   держат границу «поле кончилось — текст начался» на любой высоте.
+
+   Низ уходит в сплошной --c-abyss: сразу под секцией стоит подвал с таким же
+   фоном, и любая недожатая прозрачность дала бы там видимый шов. */
+.gg-root #kontakty{
+  --scrim: linear-gradient(180deg,
+    rgba(var(--c-abyss-rgb), .44) 0,
+    rgba(var(--c-abyss-rgb), .54) 100px,
+    rgba(var(--c-abyss-rgb), .80) 200px,
+    rgba(var(--c-abyss-rgb), .84) 320px,
+    rgba(var(--c-abyss-rgb), .84) 70%,
+    rgba(var(--c-abyss-rgb), 1)   100%);
+}
+.gg-root #kontakty .bg-media > img{object-position:50% 82%}
+
+/* Левая колонка короче формы примерно на 297px — контакты обрывались высоко,
+   а под ними висела пустота. Колонка растянута на высоту формы, а блок
+   контактов прижат к её низу: нижние края обеих колонок совпадают. */
+.gg-root .cta__grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:var(--s-9); align-items:stretch}
+.gg-root .cta__aside{display:flex; flex-direction:column}
+.gg-root .cta__aside .cta__contacts{margin-top:auto; padding-top:var(--s-8)}
+.gg-root .cta h2{font-family:var(--f-display); font-weight:var(--fw-display); font-size:var(--t-display-m); line-height:1.02; text-transform:uppercase}
+.gg-root .cta__lead{margin-top:var(--s-5); max-width:34ch; color:var(--c-ash)}
+.gg-root .cta__contacts{margin-top:var(--s-8); display:flex; flex-direction:column; gap:var(--s-5); color:var(--c-ash)}
+.gg-root .cta__contacts a:hover{color:var(--c-bone)}
+/* Подписи «Руководитель подразделения», «Адрес» и т.д. стояли цветом
+   --c-stone. Токен описан как «вторичный текст на светлом», а здесь фон
+   тёмный: замер по композиции фото + вуаль дал 3,30–3,41 : 1 при пороге 4,5
+   (кегль 13px). Это был единственный живой провал контраста, оставшийся на
+   странице после Фазы 1. Взят --c-ash — 7,78 : 1. */
+.gg-root .cta__contacts dt{color:var(--c-ash)}
+.gg-root .cta__contacts dd{margin:var(--s-1) 0 0; color:var(--c-ash)}
+.gg-root .form__row{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:var(--s-5) var(--grid-gap)}
+.gg-root .field{display:flex; flex-direction:column; gap:var(--s-2); margin-bottom:var(--s-5)}
+.gg-root .field label{font-size:var(--t-micro); letter-spacing:var(--ls-wide); text-transform:uppercase; color:var(--c-ash)}
+.gg-root .field input, .gg-root .field select, .gg-root .field textarea{
+  background:transparent; border:0; border-bottom:var(--border-w) solid var(--c-line-dark);
+  border-radius:var(--radius); color:var(--c-bone); font-family:var(--f-mono);
+  font-size:var(--t-body); padding:var(--s-3) 0; width:100%;
+  /* Межстрочный интервал задан числом намеренно. При line-height:normal
+     браузер считает высоту строки по метрикам конкретного элемента, и <select>
+     получался на 2px выше <input>: в ряду «Продукт | Объём партии» две
+     подчёркивающие линейки стояли на разной высоте — 909 и 907. Два пикселя
+     не читаются как ошибка, но линейка тонкая и разнобой виден. */
+  line-height:1.45;
+  transition:border-color var(--dur-fast) var(--ease);
+}
+.gg-root .field textarea{resize:vertical; min-height:84px; line-height:1.6}
+.gg-root .field select{cursor:pointer}
+.gg-root .field select option{background:var(--c-carbon); color:var(--c-bone)}
+.gg-root .field input:focus, .gg-root .field select:focus, .gg-root .field textarea:focus{outline:none; border-bottom-color:var(--c-steel)}
+/* Плейсхолдеры. Было rgba(168,162,154,.55) — на «абиссе» это давало цвет
+   rgb(97,94,90) и контраст 3,06 : 1 при пороге 4,5. Единственное место на
+   сайте, где замер показал прямой провал. Взят непрозрачный --c-ash: 7,78 : 1.
+   Подсказка всё равно легко отличается от введённого значения — то набрано
+   --c-bone, вдвое светлее. */
+.gg-root .field input::placeholder, .gg-root .field textarea::placeholder{color:var(--c-ash); opacity:1}
+/* Согласие. Формулировка и ссылки — как на gurman.guru. */
+.gg-root .form__consent{display:flex; gap:var(--s-3); align-items:flex-start; margin:var(--s-5) 0 var(--s-6); color:var(--c-ash); font-size:var(--t-micro); line-height:1.7}
+.gg-root .form__consent input{accent-color:var(--c-steel); margin-top:4px; flex:none}
+.gg-root .form__consent a{color:var(--c-bone); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+.gg-root .form__consent a:hover{color:var(--c-steel)}
+.gg-root .form__status{margin-top:var(--s-5); color:var(--c-steel); min-height:1.5em}
+
+/* ===========================================================================
+   11. КАРТА. Врезка между «Контактами» и подвалом — по прямому указанию
+   заказчика. Единственное место, где страница обращается в сеть за чем-то,
+   кроме шрифтов: живая Яндекс-карта работает только из iframe с их сервера.
+   Оговорка записана в README. Кадр обесцвечен фильтром — цветная карта
+   спорила бы с палитрой референса; лёгкое затемнение прижимает её к чёрному
+   соседству. Без сети остаются адрес строкой и внешняя ссылка над картой.
+   =========================================================================== */
+.gg-root .map{background:var(--c-abyss); border-top:var(--border-w) solid var(--c-line-dark)}
+.gg-root .map__head{
+  display:flex; flex-wrap:wrap; align-items:baseline;
+  gap:var(--s-3) var(--s-7); padding-block:var(--s-6);
+}
+.gg-root .map__label{color:var(--c-ash); margin:0}
+.gg-root .map__addr{color:var(--c-bone); margin:0}
+.gg-root .map__link{
+  margin-left:auto; color:var(--c-ash);
+  text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px;
+}
+.gg-root .map__link:hover{color:var(--c-bone)}
+.gg-root .map__frame{position:relative; height:var(--map-h); border-top:var(--border-w) solid var(--c-line-dark)}
+.gg-root .map__frame iframe{
+  position:absolute; inset:0; width:100%; height:100%; border:0; display:block;
+  filter:grayscale(1) brightness(.92) contrast(1.02);
+}
+
+/* ===========================================================================
+   ПОДВАЛ. Логотип, разделы, реквизиты, юридические ссылки.
+   =========================================================================== */
+.gg-root .site-footer{background:var(--c-abyss); border-top:var(--border-w) solid var(--c-line-dark); padding-block:var(--s-8)}
+.gg-root .site-footer__grid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:var(--grid-gap); align-items:start}
+.gg-root .site-footer .logo img{height:44px}
+.gg-root .site-footer .micro{color:var(--c-ash)}
+.gg-root .site-footer a:hover{color:var(--c-bone)}
+/* Заголовки колонок и строка «Контрактная фасовка…» — жирным по указанию
+   заказчика (2026-09-07). На референсе подвал ровный по весу, это осознанное
+   отступление. 700 — специально догруженное начертание Roboto Mono.
+   Цвет не задаётся: у всех трёх заголовков в разметке есть класс micro, и
+   правило .site-footer .micro (два класса против одного) всё равно перебивало
+   стоявший здесь --c-stone. Объявление было мёртвым и при этом сбивало с
+   толку — на тёмном фоне --c-stone дал бы 3,3 : 1. */
+.gg-root .site-footer__col-title{font-weight:700}
+.gg-root .site-footer__tagline{font-weight:700; margin-top:var(--s-5)}
+.gg-root .site-footer__list{margin-top:var(--s-4); display:flex; flex-direction:column; gap:var(--s-3)}
+/* Нижняя строка стояла на четырёхколоночной сетке колонок выше, но «Согласие
+   на обработку персональных данных» — 41 знак моноширинного с трекингом — в
+   свою колонку (~300px) не входило и ломалось на две строки, пока соседи
+   стояли в одну. По указанию заказчика ряд собран заново: кегль на ступень
+   ниже (--t-micro-s) у всех четырёх пунктов сразу — одинаково ровно, — каждый
+   пункт цельный (white-space наследуется), при нехватке ширины переносится
+   пункт целиком, а не слово. На 1440 все четыре стоят в один ряд. */
+.gg-root .site-footer__bottom{
+  margin-top:var(--s-8); padding-top:var(--s-5);
+  border-top:var(--border-w) solid var(--c-line-dark);
+  display:flex; flex-wrap:wrap; justify-content:space-between;
+  gap:var(--s-3) var(--grid-gap);
+  font-size:var(--t-micro-s); letter-spacing:var(--ls-legal); white-space:nowrap;
+  /* Цвет здесь тоже не задаётся — по той же причине, что и у заголовков
+     колонок: на самом ряду висит класс micro, ряд всегда был --c-ash. */
+}
+/* Обёртка двух ссылок распущена до самих ссылок: каждая — отдельный пункт
+   ряда и переносится независимо. */
+.gg-root .site-footer__legal{display:contents}
+.gg-root .site-footer__legal a{color:var(--c-ash); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+.gg-root .site-footer__legal a:hover{color:var(--c-bone)}
+
+/* ===========================================================================
+   COOKIE-БАННЕР. Требование из «Приложения» к согласию: показать при первом
+   визите, до срабатывания необязательных счётчиков.
+
+   Почему полосой внизу, а не карточкой в углу и не окном по центру:
+   модальное окно перекрыло бы первый экран — тот самый кадр, ради которого
+   сайт и сделан; карточка в углу на 360px закрывает четверть экрана. Полоса
+   во всю ширину отнимает только нижние ~120px и совпадает с логикой самого
+   сайта, где всё выстроено полными горизонтальными лентами.
+
+   Фон непрозрачный --c-carbon, а не полупрозрачный: под баннером
+   прокручиваются и светлые, и тёмные секции, и на светлой подложке текст
+   --c-bone поплыл бы. --c-bone на --c-carbon — 11,4 : 1.
+   =========================================================================== */
+.gg-root .cookie{
+  position:fixed; inset:auto 0 0 0; z-index:60;
+  background:var(--c-carbon);
+  border-top:var(--border-w) solid var(--c-line-dark);
+  padding-block:var(--s-5);
+  /* Появление снизу — движение того же порядка, что и .reveal по сайту.
+     transform, а не height: не вызывает пересчёт раскладки страницы. */
+  transform:translateY(100%); opacity:0; visibility:hidden;
+  transition:transform var(--dur-slow) var(--ease), opacity var(--dur-slow) var(--ease), visibility 0s linear var(--dur-slow);
+}
+.gg-root .cookie.is-open{transform:none; opacity:1; visibility:visible; transition-delay:0s}
+.gg-root .cookie__inner{
+  display:flex; flex-wrap:wrap; align-items:center;
+  justify-content:space-between; gap:var(--s-4) var(--s-7);
+}
+/* Класс micro тут намеренно не используется, хотя кегль взят его же:
+   micro переводит текст в прописные, а здесь 250 знаков сплошного юридического
+   текста — капслоком его никто не дочитает. Строчные и обычный трекинг.
+   flex:1 1 34ch — текст забирает свободную середину ленты, но не тянется
+   бесконечно: верхняя граница 92 знака, дальше строка теряется при переносе. */
+.gg-root .cookie__text{
+  flex:1 1 34ch; max-width:92ch; margin:0;
+  color:var(--c-bone);
+  font-size:var(--t-micro); line-height:1.7;
+}
+.gg-root .cookie__text a{color:var(--c-bone); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+.gg-root .cookie__text a:hover{color:var(--c-steel)}
+.gg-root .cookie__actions{display:flex; flex-wrap:wrap; gap:var(--s-3); flex:none}
+@media (max-width:760px){
+  /* На телефоне текст и кнопки встают друг под друга, кнопки — в один ряд
+     на всю ширину: тянуться большим пальцем к краю экрана не нужно. */
+  .gg-root .cookie__inner{flex-direction:column; align-items:stretch; justify-content:flex-start}
+  /* Сброс flex обязателен: в колонке flex-basis считается по высоте, и
+     34ch превращались в ~440px высоты абзаца — баннер занимал пол-экрана,
+     а между текстом и кнопками зияла пустая полоса. */
+  .gg-root .cookie__text{flex:0 0 auto; max-width:none}
+  .gg-root .cookie__actions .btn{flex:1 1 0; justify-content:center}}
+
+/* ===========================================================================
+   АДАПТИВ. Контрольные ширины: 1440 / 768 / 360.
+   =========================================================================== */
+@media (max-width:1100px){
+  .gg-root{--gutter:32px; --grid-gap:32px}
+  .gg-root .statement__grid{grid-template-columns:1fr; gap:var(--s-7)}
+  .gg-root .statement__head, .gg-root .chain{padding-left:var(--s-7)}
+  /* Сетка стала одноколоночной: техническая колонка уехала под заголовок,
+     в ту же полосу, где стоит вертикальная подпись. Убираем её здесь,
+     а не на 640, иначе она перечёркивает «ПРОИЗВОДСТВО / ПО ТУ…». */
+  .gg-root .statement__side{display:none}
+  .gg-root .chain{margin-top:var(--s-7)}
+  .gg-root .docs__grid, .gg-root .cta__grid, .gg-root .origin__grid, .gg-root .about__grid{grid-template-columns:1fr; gap:var(--s-7)}
+  /* «Контакты» на одной колонке. Секция вытягивается с 926 до 1422–1769px, и
+     при object-fit:cover кадр 3:4 перестаёт обрезаться по высоте — начинает
+     обрезаться по ширине. Верх подложки в этом случае показывает не стол, а
+     самый верх исходника: тёмный фон и край гастроёмкости. Измеренная яркость
+     верхней полосы падала до медианы 10 из 255 — фотография переставала быть
+     видна вообще, оставаясь при этом в разметке.
+     Поэтому подложка прижимается к верху фиксированной полосой в 440px. У
+     полосы своя пропорция, кадр в ней снова режется по высоте, object-position
+     работает как задумано, и в первых 160px видно снимок: медиана 11–24, p90
+     39–50, максимум 87–100 против сплошных 10–11 у полноразмерного варианта.
+     Ниже 440px секция стоит на собственном --c-abyss — вуаль доводится до
+     единицы, чтобы стыка не было видно. */
+  .gg-root #kontakty .bg-media{bottom:auto; height:440px}
+  .gg-root #kontakty{
+    --scrim: linear-gradient(180deg,
+      rgba(var(--c-abyss-rgb), .52) 0,
+      rgba(var(--c-abyss-rgb), .58) 80px,
+      rgba(var(--c-abyss-rgb), .93) 170px,
+      rgba(var(--c-abyss-rgb), .96) 280px,
+      rgba(var(--c-abyss-rgb), 1)   440px);
+  }
+  .gg-root .about__where ul{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .gg-root .facts, .gg-root .site-footer__grid{grid-template-columns:repeat(2, minmax(0,1fr)); row-gap:var(--s-7)}
+  .gg-root .process__grid, .gg-root .equip{grid-template-columns:repeat(2, minmax(0,1fr)); row-gap:var(--s-7)}
+  .gg-root .hero__media{width:74%}
+  /* Шапка секции переходит на ту же сетку, что и содержимое под ней: две
+     равные колонки через --grid-gap. На десктопе шапка живёт по своим числам
+     (1fr + 380 через 96) — там она читается как отдельный ярус, и это взято
+     с референса. На планшете так не выходит: колонки content-сеток
+     (.equip, .facts, .site-footer__grid, .form__row) начинаются на 768 с 368px,
+     а правая колонка шапки при прежних 320+48 начиналась с 384. Шестнадцать
+     пикселей — это не смещение, это промах: подпись висела почти, но не совсем
+     над карточкой второй колонки, и глаз цеплялся именно за «почти».
+     Побочно решается и старая причина этого правила: слово «ПРОИЗВОДСТВО»
+     требует 244px, а левая колонка теперь 336px на 768 и 464px на 1024. */
+  .gg-root .section__head{grid-template-columns:repeat(2, minmax(0,1fr)); gap:var(--grid-gap)}}
+@media (max-width:760px){
+  /* На узком экране лента едет заметно быстрее относительно ширины окна,
+     поэтому оборот удлинён, а просвет и растушёвка ужаты.
+     Высота удвоена вместе с десктопной: 38px → 76px. Именно здесь разница
+     видна сильнее всего — на 360px знак высотой 38px занимал десятую часть
+     экрана по высоте и читался как значок, а не как логотип.
+     Оборот пересчитан по той же арифметике, что и в :root: ряд был
+     469+672 = 1141px за 78s = 14,6 px/s; стал 937+672 = 1609px,
+     значит 1609/14,6 = 110s. */
+  .gg-root{--gutter:20px; --grid-gap:24px; --trust-h:76px; --trust-gap:56px; --trust-dur:110s; --trust-fade:48px; --ls-legal:.04em; --map-h:360px}
+  /* Ссылка «Открыть в Яндекс Картах» на узком экране встаёт в поток,
+     а не прижимается вправо. */
+  .gg-root .map__link{margin-left:0}
+  .gg-root .section{padding-block:var(--s-8)}
+  .gg-root .trust{padding-block:var(--s-6) var(--s-7)}
+  .gg-root .trust__head{flex-wrap:wrap; gap:var(--s-3) var(--s-6)}
+  .gg-root .nav{
+    position:fixed; inset:0 0 auto; top:0; padding:96px var(--gutter) var(--s-8);
+    flex-direction:column; gap:var(--s-6); background:rgba(var(--c-abyss-rgb), .97);
+    backdrop-filter:blur(12px); transform:translateY(-101%);
+    transition:transform var(--dur-slow) var(--ease); z-index:1;
+  }
+  .gg-root .nav.is-open{transform:none}
+  .gg-root .nav a{font-size:16px}
+  .gg-root .nav-toggle{display:block; position:relative; z-index:2}
+  /* Шторка существует только вместе со скриптом: открыть её больше нечем.
+     Без скрипта она возвращается в поток обычной строкой ссылок — иначе на
+     телефоне навигация пропадала бы целиком. Класс js ставится в <head>
+     и, в отличие от js-motion, не зависит от «уменьшить движение». */
+  html:not(.js) .gg-root .nav{
+    position:static; transform:none; flex-direction:row; flex-wrap:wrap;
+    padding:0; gap:var(--s-4); background:none; backdrop-filter:none;
+  }
+  html:not(.js) .gg-root .nav-toggle{display:none}
+  /* Ссылки раскрытой шторки входят по очереди — приём из промта. */
+  .js-motion .gg-root .nav a{
+    opacity:0; transform:translateY(12px);
+    transition:opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
+  }
+  .js-motion .gg-root .nav.is-open a{opacity:1; transform:none}
+  .js-motion .gg-root .nav.is-open a:nth-child(1){transition-delay:60ms}
+  .js-motion .gg-root .nav.is-open a:nth-child(2){transition-delay:120ms}
+  .js-motion .gg-root .nav.is-open a:nth-child(3){transition-delay:180ms}
+  .js-motion .gg-root .nav.is-open a:nth-child(4){transition-delay:240ms}
+  /* Шапка секции разворачивается в одну колонку здесь, а не на 640: между
+     641 и 760 на заголовок оставалось меньше 244px — ширины слова
+     «ПРОИЗВОДСТВО» при этом кегле. */
+  .gg-root .section__head{grid-template-columns:1fr; gap:var(--s-5); align-items:start}
+  .gg-root .site-header .logo{position:relative; z-index:2} /* логотип поверх раскрытого меню */
+  .gg-root .hero{min-height:92svh; padding-block:120px var(--s-7)}
+  .gg-root .hero__media{width:100%; inset:0}
+  /* На узком экране кадр занимает весь первый экран, и вуаль на нём была
+     плотнее всего: .92/.72/.90 давали медиану 18 из 255 — читатель открывал
+     сайт и видел чёрный прямоугольник. Запас по контрасту при этом лежал
+     без дела: худшая пара держала 10,25 : 1 при пороге 4,5. Ряд пересчитан
+     до .86/.56/.84 — медиана 22, девяностая процентиль 34 → 47, худшая пара
+     всё ещё 8,95 : 1. */
+  .gg-root .hero__media::after{
+    background:linear-gradient(180deg,
+      rgba(var(--c-abyss-rgb), .86) 0%,
+      rgba(var(--c-abyss-rgb), .56) 42%,
+      rgba(var(--c-abyss-rgb), .84) 100%);
+  }
+  .gg-root .hero h1{max-width:none}
+  .gg-root .hero__lead{max-width:none}
+  .gg-root .hero__meta{margin-top:var(--s-7); padding-top:var(--s-7); gap:var(--s-3) var(--s-6)}
+  .gg-root .statement__head, .gg-root .chain{padding-left:0}
+  .gg-root .chain li:not(:last-child)::after{width:18px}
+  .gg-root .process__grid, .gg-root .start__grid, .gg-root .facts, .gg-root .equip, .gg-root .form__row, .gg-root .site-footer__grid{grid-template-columns:1fr}
+  /* «Производство» на узком экране. В одну колонку секция вытягивается с
+     819 до 1418px, и кадр 3:2 при object-fit:cover обрезается до вертикальной
+     полосы шириной в четверть исходника — от зала остаётся неразличимое
+     тёмное пятно. Платить за него 255 КБ загрузки незачем, поэтому подложка
+     здесь не растянута на всю секцию, а прижата к верху: 520px хватает на
+     заголовок, подводку и первый пункт, а кадр берётся серединой и остаётся
+     узнаваемым. Ниже вуаль уходит в сплошной --c-abyss и стыкуется с
+     собственным фоном секции без шва. */
+  .gg-root #proizvodstvo .bg-media{bottom:auto; height:520px}
+  .gg-root #proizvodstvo{
+    --scrim: linear-gradient(180deg,
+      rgba(var(--c-abyss-rgb), .84) 0%,
+      rgba(var(--c-abyss-rgb), .66) 34%,
+      rgba(var(--c-abyss-rgb), .84) 72%,
+      rgba(var(--c-abyss-rgb), 1)   100%);
+  }
+  /* В одну колонку пункты снова читаются строками, а не карточками. */
+  .gg-root .about__where ul{grid-template-columns:1fr; gap:0}
+  .gg-root .about__where li{min-height:0; padding-block:var(--s-4)}
+  /* Сцена на узком экране. Текст занимает всю ширину, поэтому боковое
+     затемнение заменяется равномерным — иначе правый край подписи падает
+     на светлый участок кадра. Названия этапов под шкалой убраны: на 360px
+     четыре подписи в строку не читаются, остаются четыре отрезка. */
+  .gg-root .scene.is-scene .scene__stage{padding:calc(var(--header-h) + var(--s-4)) 0 var(--s-7)}
+  /* Оба слоя ослаблены: два наложенных градиента перемножаются, и вместе они
+     уводили стопку кадров к медиане 14–17. Сцена — самый длинный по времени
+     кусок страницы, и всё это время читатель смотрел в темноту.
+     Было .86/.74 + .80/.30/.84, стало .76/.62 + .72/.20/.80: медиана 17 → 22
+     на «Этапах» и 14 → 16 на «Таре», худшая пара 6,73 : 1 при пороге 4,5. */
+  .gg-root .scene.is-scene .scene__scrim{
+    background:
+      linear-gradient(90deg,
+        rgba(var(--c-abyss-rgb), .76) 0%,
+        rgba(var(--c-abyss-rgb), .62) 100%),
+      linear-gradient(180deg,
+        rgba(var(--c-abyss-rgb), .72) 0%,
+        rgba(var(--c-abyss-rgb), .20) 30%,
+        rgba(var(--c-abyss-rgb), .20) 60%,
+        rgba(var(--c-abyss-rgb), .80) 100%);
+  }
+  .gg-root .scene.is-scene .step{max-width:none}
+  .gg-root .scene.is-scene .scene__hud{gap:var(--s-3); margin-top:var(--s-6)}
+  .gg-root .scene__seg span{display:none}
+  .gg-root .origin__specs div{grid-template-columns:1fr; gap:var(--s-1)}
+  /* Ряд подвала здесь складывается в столбик — пункты целыми строками. */
+  .gg-root .site-footer__bottom{gap:var(--s-4)}
+  /* Таблица форматов превращается в карточки — на 360px строки не помещаются */
+  .gg-root .tbl, .gg-root .tbl tbody, .gg-root .tbl tr, .gg-root .tbl td, .gg-root .tbl caption{display:block; width:100%}
+  .gg-root .tbl thead{display:none}
+  .gg-root .tbl tr{padding-block:var(--s-5); border-bottom:var(--border-w) solid var(--c-line-dark)}
+  .gg-root .tbl td{border:0; padding:var(--s-1) 0}
+  /* Подписи-ярлыки карточек. Было --c-stone — 3,3 : 1 на тёмном фоне
+     «Упаковки», и это единственное место, где они вообще показываются:
+     таблица превращается в карточки только на ≤760, то есть провал был
+     чисто мобильным. --c-ash даёт 7,78 : 1. */
+  .gg-root .tbl td::before{content:attr(data-label) " — "; color:var(--c-ash); font-size:var(--t-micro); letter-spacing:var(--ls-wide); text-transform:uppercase}
+  .gg-root .tbl td:first-child::before{content:none}}
+/* На узких экранах движение приглушается, но не выключается.
+   Причина: на телефоне блок проходит экран за долю секунды, длинный выкат
+   превращается в «страница тормозит». Дистанции и длительности меньше,
+   параллакс мельче. Инерцию скрипт на сенсорных экранах не включает вовсе —
+   она конфликтует с системным «резиновым» скроллом. */
+@media (max-width:640px){
+  .gg-root{--dur-slow:460ms; --stagger:50ms; --stagger-line:44ms; --parallax:28px}
+  .js-motion .gg-root .reveal{transform:translateY(12px)}}
+
+@media (prefers-reduced-motion:reduce){
+  .gg-root{scroll-behavior:auto}
+  .gg-root, .gg-root *, .gg-root *::before, .gg-root *::after{animation-duration:.01ms !important; transition-duration:.01ms !important}
+  .gg-root .reveal{opacity:1; transform:none}
+  .gg-root .line__i{transform:none !important}
+  .gg-root .progress{display:none}
+  /* Правило выше обнулило бы длительность бегущей строки и мгновенно
+     перемотало её в конец — до -50%, то есть на второй, скрытый от
+     озвучки ряд. Поэтому лента здесь не ускоряется, а раскладывается. */
+  .gg-root .trust__track{animation:none !important; flex-wrap:wrap; width:auto; row-gap:var(--s-7)}
+  .gg-root .trust__row[aria-hidden="true"]{display:none}
+  .gg-root .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:var(--gutter); row-gap:var(--s-7)}
+  .gg-root .trust__viewport{-webkit-mask-image:none; mask-image:none}}
+</style>

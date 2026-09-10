@@ -1,0 +1,901 @@
+<!-- Скрипты лендинга. Блок T123.
+     Ставить ПОСЛЕДНИМ: скрипт ищет разметку при загрузке. -->
+<script>
+(function(){
+  // js — просто «скрипт работает». От него зависит мобильная шторка меню:
+  // открыть её больше нечем, и без скрипта она должна вернуться в поток.
+  document.documentElement.classList.add('js');
+  try{
+    if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      document.documentElement.classList.add('js-motion');
+    }
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* ===========================================================================
+   СКРИПТ.
+
+   0. Общее               — флаг движения, чтение токенов из :root
+   1. Подложка хедера
+   2. Мобильное меню
+   3. Разбор заголовков на строки
+   4. Проявление блоков при скролле
+   5. Первый экран — каскад при загрузке
+   6. Параллакс фотографий и полоса прогресса (один цикл на кадр)
+   7. Счётчики цифр
+   8. Инерция скролла и переходы по якорям
+   9. Форма
+
+   Три правила, по которым это написано.
+   Первое: ни одно значение времени и расстояния не задаётся здесь числом —
+   всё читается из токенов :root, чтобы вся настройка движения жила в CSS.
+   Второе: если пользователь просил «уменьшить движение», разделы 3, 5, 6, 7 и 8
+   не запускаются вовсе, а не «выполняются быстро».
+   Третье: без скрипта страница остаётся читаемой — стартовая прозрачность
+   .reveal привязана к классу .js-motion, которого без скрипта нет.
+   =========================================================================== */
+(function () {
+  'use strict';
+
+  /* ---------- 0. Общее ---------------------------------------------------- */
+  var root = document.documentElement;
+  var motion = root.classList.contains('js-motion');
+  var cs = getComputedStyle(root);
+  var ms = function (name, fallback) {
+    var v = parseFloat(cs.getPropertyValue(name));
+    return isNaN(v) ? fallback : v;
+  };
+  var STAGGER = ms('--stagger', 70);           // шаг каскада между соседями
+  var STAGGER_LINE = ms('--stagger-line', 60); // шаг между строками заголовка
+  var HERO_DELAY = 260;                        // фотография успевает проявиться
+  var rafPending = false;
+  // Сюда подписываются модули, которым нужна прокрутка. Слушатель остаётся
+  // один: два независимых заставляли бы браузер дважды за кадр пересчитывать
+  // геометрию страницы.
+  var hooks = [];
+
+  /* ---------- 1. Подложка хедера ------------------------------------------ */
+  var header = document.getElementById('header');
+
+  /* ---------- 2. Мобильное меню ------------------------------------------- */
+  var toggle = document.getElementById('navToggle');
+  var nav = document.getElementById('nav');
+  var closeNav = function () {
+    nav.classList.remove('is-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Открыть меню');
+  };
+  toggle.addEventListener('click', function () {
+    var open = nav.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+  });
+  nav.addEventListener('click', function (e) {
+    if (e.target.tagName === 'A') closeNav();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeNav();
+  });
+
+  /* ---------- 3. Разбор заголовков на строки ------------------------------
+     Крупная антиква выезжает построчно из-под маски. Строки определяются по
+     фактической вёрстке, а не по <br>: кегль задан через clamp/vw, и на
+     разной ширине заголовок ломается по-разному.
+     Порядок: слова временно оборачиваются в <i>, по offsetTop они собираются
+     в строки, затем разметка переписывается набором .line > .line__i.
+     Текст при этом не меняется ни на символ — программы чтения с экрана
+     читают тот же заголовок. Пересчёт идёт после загрузки шрифтов и на
+     каждое изменение ширины окна.
+     ---------------------------------------------------------------------- */
+  // .about__quote добавлена сюда же: это такая же крупная антиква, что и
+  // заголовки, и разбирать её отдельным механизмом незачем.
+  var SPLIT_SEL = 'h1, .statement h2, .band h2, .section__head h2, .cta__grid h2, .about__quote';
+  var splitTargets = motion ? Array.prototype.slice.call(document.querySelectorAll(SPLIT_SEL)) : [];
+  var esc = function (s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  };
+
+  function splitLines(el) {
+    if (el.__src == null) el.__src = el.innerHTML;
+
+    // Черновая разметка: каждое слово — отдельный <i>, переносы сохранены.
+    var segments = el.__src.split(/<br\s*\/?>/i);
+    var draft = '';
+    segments.forEach(function (seg, si) {
+      if (si > 0) draft += '<br>';
+      var words = seg.replace(/\u00A0/g, ' ').replace(/<[^>]*>/g, '').trim().split(/\s+/);
+      words.forEach(function (w) {
+        if (w) draft += '<i>' + esc(w) + '</i> ';
+      });
+    });
+    el.innerHTML = draft;
+
+    // Сборка слов в строки по вертикальной позиции.
+    var words = el.getElementsByTagName('i');
+    var lines = [], current = null, prevTop = null;
+    for (var i = 0; i < words.length; i++) {
+      var top = words[i].offsetTop;
+      if (current === null || Math.abs(top - prevTop) > 2) { current = []; lines.push(current); }
+      current.push(words[i].textContent);
+      prevTop = top;
+    }
+
+    // Чистовая разметка. --d — задержка строки, --d0 — задержка всего блока.
+    var out = '';
+    lines.forEach(function (w, li) {
+      // Пробел в конце строки — чтобы при копировании заголовка слова не
+      // слиплись. На вёрстку не влияет: концевой пробел в блоке схлопывается.
+      out += '<span class="line"><span class="line__i" style="--d:calc(var(--d0, 0ms) + '
+           + (li * STAGGER_LINE) + 'ms)">' + esc(w.join(' ')) + ' </span></span>';
+    });
+    el.innerHTML = out;
+
+    // Класс снимает сдвиг с самого блока: строки уже едут, второй подвижки
+    // на том же элементе быть не должно.
+    var host = el.closest ? el.closest('.reveal') : null;
+    if (host) host.classList.add('has-lines');
+    // Заголовка без блока .reveal быть не должно: строки ждут класс .is-in
+    // на предке и без него остались бы под маской навсегда. Страховка.
+    else el.classList.add('is-in');
+  }
+
+  function splitAll() { splitTargets.forEach(splitLines); }
+
+  /* ---------- 3-бис. Кинематографическая сцена «Этапы работы» -------------
+     Переложение присланного промта на наш материал. Там прокрутка
+     перематывала видео: доля прокрутки → время в ролике, кадр рисовался на
+     canvas, между кадрами стояло сглаживание. Видео у нас нет, а внешний CDN
+     и сборщик ломают условие «файл открывается двойным кликом». Ведущая
+     величина та же — доля прокрутки, — но ведёт она последовательность из
+     четырёх снимков цикла и четыре текстовых акта.
+
+     Что взято из промта дословно: сглаживание вида 1 − exp(−dt·tau) вместо
+     доли за кадр, строгая последовательность актов (предыдущий уходит в ноль
+     раньше, чем появляется следующий), порог видимости 0.3 для ступенчатого
+     входа содержимого, предварительная подготовка кадров до включения сцены.
+
+     Что сделано иначе и почему: кадры не рисуются на canvas — четыре JPEG
+     декодирует сам браузер, и его кэш здесь и есть «банк кадров»; вместо
+     точек-индикаторов четыре отрезка, потому что во всей системе радиус
+     нулевой; сглаживание наложено только на картинку, текст идёт по
+     несглаженной доле — подпись должна отвечать на прокрутку сразу.
+
+     Модуль стоит до наблюдателя появления намеренно: он снимает с этапов
+     класс reveal, и наблюдатель их уже не берёт. Иначе тот позже поставил бы
+     им собственную задержку перехода поверх нашей.
+     ---------------------------------------------------------------------- */
+  (function () {
+    if (!motion) return;
+    /* 2026-09-08: модуль обобщён с единственного #etapy на все секции .scene —
+       по той же механике собрана вторая сцена «Тара и маркировка». Каждая
+       секция получает свой замкнутый экземпляр: свою стопку кадров, свою
+       шкалу и свой счётчик сглаживания. Общими остаются токены --scene-*:
+       обе сцены четырёхактные, и длина трека, наезд и пороги у них одни. */
+    function initScene(sec) {
+    var track = sec.querySelector('.scene__track');
+    var stage = sec.querySelector('.scene__stage');
+    var grid  = sec.querySelector('.process__grid');
+    var acts  = Array.prototype.slice.call(sec.querySelectorAll('.step'));
+    if (!track || !stage || !grid || acts.length < 2) return;
+
+    var N     = acts.length;
+    var SEG   = 1 / N;                     // доля трека на один этап
+    var FADE  = ms('--scene-fade', .06);   // смена текста
+    var XFADE = ms('--scene-xfade', .10);  // смена кадра, длиннее текста
+    var ZOOM  = ms('--scene-zoom', 1.06);
+    var TAU   = ms('--scene-tau', 8);
+    var SNAP  = .0015;                     // ближе этого считаем, что доехали
+
+    function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+    /* Стопка кадров. Снимки переносятся из сетки, а не дублируются: второй
+       комплект тех же файлов — лишние запросы и лишняя память. */
+    var media = document.createElement('div');
+    media.className = 'scene__media';
+    var shots = [];
+    acts.forEach(function (act) {
+      var img = act.querySelector('.step__media img');
+      if (!img) return;
+      img.classList.add('scene__frame');
+      img.loading = 'eager';               // в сцене они нужны все и сразу
+      media.appendChild(img);
+      shots.push(img);
+    });
+    if (shots.length !== N) return;        // разметка не та, что ожидалась
+
+    var scrim = document.createElement('div');
+    scrim.className = 'scene__scrim';
+
+    /* Шкала этапов. Для чтения с экрана скрыта: названия этапов уже есть в
+       самих актах, второй раз их озвучивать незачем. */
+    var hud = document.createElement('div');
+    hud.className = 'scene__hud';
+    hud.setAttribute('aria-hidden', 'true');
+    var bars = [], segs = [];
+    acts.forEach(function (act) {
+      var title = act.querySelector('.step__title');
+      var seg = document.createElement('div');
+      seg.className = 'scene__seg';
+      var barBox = document.createElement('div');
+      barBox.className = 'scene__bar';
+      var fill = document.createElement('i');
+      barBox.appendChild(fill);
+      var label = document.createElement('span');
+      label.textContent = title ? title.textContent : '';
+      seg.appendChild(barBox);
+      seg.appendChild(label);
+      hud.appendChild(seg);
+      bars.push(fill);
+      segs.push(seg);
+    });
+
+    // Порядок слоёв снизу вверх: кадры, затемнение, текст.
+    stage.insertBefore(scrim, stage.firstChild);
+    stage.insertBefore(media, stage.firstChild);
+    grid.parentNode.appendChild(hud);
+
+    // Этапы ведёт прокрутка, а не наблюдатель появления.
+    acts.forEach(function (a) { a.classList.remove('reveal'); });
+
+    var pT = 0, pC = 0, lastTs = 0, raf = 0;
+
+    function progress() {
+      // Ход липкого экрана — это высота трека минус высота самого экрана.
+      // Считать от window.innerHeight нельзя: на телефоне это разные величины,
+      // пока свёрнута адресная строка.
+      var span = track.offsetHeight - stage.offsetHeight;
+      if (span <= 0) return 0;
+      return clamp01(-track.getBoundingClientRect().top / span);
+    }
+    function near() {
+      var r = track.getBoundingClientRect();
+      return r.bottom > -240 && r.top < window.innerHeight + 240;
+    }
+
+    function paint(p, pRaw) {
+      var i, a;
+      /* Кадры идут по сглаженной доле. Кадр полностью проступает к началу
+         своего этапа и дальше остаётся непрозрачным, а следующий проявляется
+         поверх него. Так стопка всегда закрыта целиком: в середине перехода
+         фон сквозь два полупрозрачных снимка не просвечивает. */
+      for (i = 1; i < N; i++) {
+        shots[i].style.opacity = clamp01((p - (i * SEG - XFADE)) / XFADE).toFixed(3);
+      }
+      media.style.transform = 'scale(' + (1 + (ZOOM - 1) * p).toFixed(4) + ')';
+
+      /* Текст идёт по несглаженной доле. Акты строго последовательны:
+         предыдущий уходит в ноль раньше, чем начинает появляться следующий. */
+      for (i = 0; i < N; i++) {
+        var s = i * SEG, e = s + SEG;
+        a = 1;
+        if (i > 0)     a = Math.min(a, (pRaw - s) / FADE);
+        if (i < N - 1) a = Math.min(a, (e - pRaw) / FADE);
+        a = clamp01(a);
+        acts[i].style.opacity = a.toFixed(3);
+        // Порог 0.3 — из промта: содержимое собирается, когда акт уже читается,
+        // а не в самом начале проявления.
+        acts[i].classList.toggle('is-live', a > .3);
+        segs[i].classList.toggle('is-on', a > .3);
+        bars[i].style.transform = 'scaleX(' + clamp01((pRaw - s) / SEG).toFixed(3) + ')';
+      }
+    }
+
+    function frame(ts) {
+      raf = 0;
+      var dt = lastTs ? Math.min(.1, (ts - lastTs) / 1000) : 1 / 60;
+      lastTs = ts;
+      pT = progress();
+      pC += (pT - pC) * (1 - Math.exp(-dt * TAU));
+      if (Math.abs(pT - pC) < SNAP) pC = pT;
+      paint(pC, pT);
+      // Цикл живёт, только пока сцена рядом с экраном или картинка ещё
+      // догоняет прокрутку. В остальное время кадры не запрашиваются вовсе.
+      if (near() || Math.abs(pT - pC) > SNAP) request();
+      else lastTs = 0;
+    }
+    function request() { if (!raf) raf = requestAnimationFrame(frame); }
+
+    function enable() {
+      /* Включение меняет высоту секции с одного экрана до --scene-track.
+         Если читатель к этому моменту уже ушёл ниже, всё, что под секцией,
+         уедет вниз и он окажется не на том месте. Поэтому положение
+         компенсируется на величину прироста. */
+      var topAbs = track.getBoundingClientRect().top + window.pageYOffset;
+      var hBefore = track.offsetHeight;
+      sec.classList.add('is-scene');
+      var grow = track.offsetHeight - hBefore;
+      if (grow !== 0 && window.pageYOffset > topAbs + hBefore) {
+        window.scrollTo(0, window.pageYOffset + grow);
+      }
+      hooks.push(request);
+      window.addEventListener('resize', request, { passive: true });
+      pC = pT = progress();
+      paint(pC, pT);
+      onScroll();   // высота страницы изменилась — пересчитать полосу прогресса
+    }
+
+    /* Аналог «банка кадров» из промта. Там кадры доставали из mp4 через
+       WebCodecs; здесь декодировать нечего — четыре JPEG декодирует браузер.
+       Сцена включается только после того, как готовы все четыре, иначе первая
+       же смена кадра пришлась бы на пустое место. Полторы секунды — потолок
+       ожидания, тот же, что у разбора заголовков. */
+    var done = false;
+    function once() { if (!done) { done = true; enable(); } }
+    if (window.Promise) {
+      Promise.all(shots.map(function (img) {
+        return img.decode ? img.decode().catch(function () {}) : Promise.resolve();
+      })).then(once);
+      setTimeout(once, 1500);
+    } else {
+      once();
+    }
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.scene'), initScene);
+  })();
+
+  /* ---------- 4. Проявление блоков при скролле ---------------------------- */
+  var all = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+  var hero = document.querySelector('.hero');
+  var heroItems = all.filter(function (el) { return hero && hero.contains(el); });
+  var rest = all.filter(function (el) { return !hero || !hero.contains(el); });
+
+  function show(el, delay) {
+    el.style.transitionDelay = delay + 'ms';
+    el.style.setProperty('--d0', delay + 'ms');
+    el.classList.add('is-in');
+  }
+
+  if (!motion || !('IntersectionObserver' in window)) {
+    all.forEach(function (el) { el.classList.add('is-in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        var siblings = Array.prototype.slice.call(el.parentNode.children);
+        // Каскад считается по месту среди соседей, но не длиннее пяти шагов:
+        // иначе последний элемент длинного списка ждёт секунду впустую.
+        show(el, Math.min(siblings.indexOf(el), 4) * STAGGER);
+        io.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+    rest.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---------- 5. Первый экран --------------------------------------------- */
+  function playHero() {
+    if (!hero) return;
+    hero.classList.add('is-ready');
+    heroItems.forEach(function (el, i) { show(el, HERO_DELAY + i * STAGGER); });
+  }
+
+  /* ---------- 5-бис. Списки, связанные с прокруткой ------------------------
+     Приём взят из сцены «Этапы работы» и упрощён: ведущая величина — не факт
+     появления блока, а положение страницы. Подсвечивается пункт, ближайший к
+     линии чтения (45 % высоты экрана — примерно туда смотрят при прокрутке).
+
+     Выбор идёт по ближайшему центру, а не по попаданию линии внутрь пункта:
+     между пунктами есть промежутки, и на них подсветка гасла бы на кадр.
+
+     Приглушения текста здесь нет намеренно. Понижать прозрачность неактивных
+     пунктов — самый очевидный ход, но он ставит контраст текста в зависимость
+     от прокрутки, а с ней и читаемость. Меняются только линия и номер.
+     ---------------------------------------------------------------------- */
+  function linkList(listSel, itemSel) {
+    var list = document.querySelector(listSel);
+    if (!motion || !list) return;
+    var items = Array.prototype.slice.call(list.querySelectorAll(itemSel));
+    if (items.length < 2) return;
+    var last = -1;
+    hooks.push(function () {
+      var vh = window.innerHeight;
+      var r = list.getBoundingClientRect();
+      var idx = -1;
+      if (r.bottom > 0 && r.top < vh) {
+        var line = vh * 0.45, bestD = Infinity;
+        for (var i = 0; i < items.length; i++) {
+          var b = items[i].getBoundingClientRect();
+          var d = Math.abs((b.top + b.bottom) / 2 - line);
+          if (d < bestD) { bestD = d; idx = i; }
+        }
+      }
+      if (idx === last) return;
+      if (last > -1) items[last].classList.remove('is-active');
+      if (idx > -1) items[idx].classList.add('is-active');
+      last = idx;
+    });
+  }
+  linkList('.docs__list', 'li');
+
+  /* ---------- 5-тер. Раскрытие вопросов по высоте ---------------------------
+     <details> открывается мгновенно, и на фоне остальной страницы это был
+     единственный рывок. Высота меряется здесь, а не в CSS: перейти к auto
+     переходом нельзя, а фиксировать высоту ответов числом — значит сломать
+     блок при другой ширине или другом шрифте.
+
+     Порядок закрытия обратный открытию: сначала доигрывает высота, и только
+     потом снимается атрибут open. Иначе содержимое исчезло бы в первом же
+     кадре и складывать было бы нечего.
+
+     Без скрипта и при «уменьшить движение» модуль не подключается — остаётся
+     обычный нативный <details>, который работает и с клавиатуры, и в
+     программах чтения с экрана.
+     ---------------------------------------------------------------------- */
+  (function () {
+    if (!motion || !Element.prototype.animate) return;
+    var DUR = ms('--dur-med', 420);
+    Array.prototype.forEach.call(document.querySelectorAll('.faq__item'), function (d) {
+      var sum = d.querySelector('.faq__q');
+      var body = d.querySelector('.faq__a');
+      if (!sum || !body) return;
+      var anim = null;
+
+      function play(opening) {
+        // Обработчики снимаются до отмены: иначе прерванное закрытие успело бы
+        // доложить «закрыто» уже после того, как вопрос снова открыли.
+        if (anim) { anim.onfinish = anim.oncancel = null; anim.cancel(); }
+        var pb = getComputedStyle(body).paddingBottom;
+        var h = body.scrollHeight;
+        body.style.overflow = 'hidden';
+        anim = body.animate(
+          [{ height: '0px', paddingBottom: '0px', opacity: 0 },
+           { height: h + 'px', paddingBottom: pb, opacity: 1 }],
+          { duration: DUR, easing: 'cubic-bezier(.22,1,.36,1)', direction: opening ? 'normal' : 'reverse' }
+        );
+        anim.onfinish = function () {
+          anim = null;
+          body.style.overflow = '';
+          if (!opening) d.open = false;
+        };
+      }
+
+      sum.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (d.open) { play(false); }
+        else { d.open = true; play(true); }
+      });
+    });
+  })();
+
+  /* ---------- 6. Параллакс и полоса прогресса ------------------------------
+     Оба эффекта живут в одном обработчике: два независимых слушателя скролла
+     дважды за кадр заставляли бы браузер пересчитывать геометрию.
+     Параллакс: кадр внутри рамки выше её на 2×--parallax, поэтому сдвиг в
+     пределах ±--parallax/2 никогда не открывает края.
+     ---------------------------------------------------------------------- */
+  var bar = document.getElementById('progress');
+  var depth = ms('--parallax', 0);
+  var frames = [];
+  if (motion) {
+    Array.prototype.forEach.call(document.querySelectorAll('.px-frame'), function (f) {
+      var img = f.querySelector('.px');
+      if (img) frames.push({ box: f, img: img, last: null });
+    });
+  }
+
+  function tick() {
+    rafPending = false;
+    var y = window.pageYOffset;
+
+    header.classList.toggle('is-stuck', y > 40);
+
+    if (bar) {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      var p = max > 0 ? y / max : 0;
+      bar.style.transform = 'scaleX(' + (p < 0 ? 0 : p > 1 ? 1 : p).toFixed(4) + ')';
+    }
+
+    var vh = window.innerHeight;
+    for (var i = 0; i < frames.length; i++) {
+      var o = frames[i];
+      var r = o.box.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > vh) continue;      // за экраном — не считаем
+      var pr = (vh - r.top) / (vh + r.height);       // 0 — вошла снизу, 1 — вышла сверху
+      pr = pr < 0 ? 0 : pr > 1 ? 1 : pr;
+      var shift = Math.round((0.5 - pr) * depth * 100) / 100;
+      if (o.last !== shift) {
+        o.img.style.transform = 'translate3d(0,' + shift + 'px,0)';
+        o.last = shift;
+      }
+    }
+
+    for (i = 0; i < hooks.length; i++) hooks[i]();
+  }
+
+  function onScroll() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(tick);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  tick();
+
+  /* ---------- 7. Счётчики цифр ---------------------------------------------
+     Считает только целую часть, разделитель разрядов и знак берутся из самой
+     разметки. В конце подставляется исходная строка целиком — так значение
+     на странице гарантированно совпадает с тем, что написано в HTML.
+     ---------------------------------------------------------------------- */
+  function countUp(el) {
+    var raw = el.textContent;
+    // Пробел внутри числа считается разделителем разрядов только тогда,
+    // когда за ним идёт цифра. Иначе «−18 °C» разбиралось как число «18 »
+    // и градус на время счёта прилипал к цифре: «−9°C».
+    var m = raw.match(/^(\D*?)([\u2212-]?\d(?:[\u00A0 ]?\d)*)(.*)$/);
+    if (!m) return;
+    var pre = m[1], num = m[2], post = m[3];
+    var sign = /^[\u2212-]/.test(num) ? num.charAt(0) : '';
+    var sepMatch = num.match(/[\u00A0 ]/);
+    var sep = sepMatch ? sepMatch[0] : '';
+    var target = parseInt(num.replace(/\D/g, ''), 10);
+    if (!isFinite(target) || target === 0) return;
+
+    var DUR = 1000, start = null;
+    function frame(ts) {
+      if (start === null) start = ts;
+      var k = Math.min(1, (ts - start) / DUR);
+      var eased = 1 - Math.pow(1 - k, 3);   // тот же характер, что у --ease: длинный выкат
+      if (k < 1) {
+        var s = String(Math.round(target * eased));
+        if (sep) s = s.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+        el.textContent = pre + sign + s + post;
+        requestAnimationFrame(frame);
+      } else {
+        el.textContent = raw;
+      }
+    }
+    el.textContent = pre + sign + '0' + post;
+    requestAnimationFrame(frame);
+  }
+
+  if (motion && 'IntersectionObserver' in window) {
+    var nums = document.querySelectorAll('.fact__val');
+    var ioNum = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        ioNum.unobserve(entry.target);
+        countUp(entry.target);
+      });
+    }, { threshold: 0.6 });
+    Array.prototype.forEach.call(nums, function (el) { ioNum.observe(el); });
+  }
+
+  /* ---------- 8. Инерция скролла -------------------------------------------
+     Написано вручную, без внешней библиотеки: сайт должен открываться двойным
+     кликом, интернет нужен только для шрифтов.
+     Включается только там, где она уместна: мышь или трекпад, экран шире
+     1024, движение не отключено. На сенсорных экранах не включается никогда —
+     там есть собственная системная инерция, и две накладываются друг на друга.
+     Перехватывается только колесо. Клавиши, поиск по странице (Ctrl+F),
+     перетаскивание полосы прокрутки и переход по якорю работают как обычно:
+     цикл в это время не запущен и в чужой скролл не вмешивается.
+     Скорость выката задана постоянной времени, а не долей за кадр. Раньше
+     стояло «0.13 оставшегося расстояния за кадр» — и на мониторе 120 Гц
+     страница доезжала вдвое быстрее, чем на 60. Формула 1 − exp(−dt · tau)
+     взята из присланного промта: она считается от реального времени кадра,
+     поэтому характер одинаков на 60, 120 и 144 Гц. Значение 8.35 подобрано
+     так, чтобы при 60 Гц выкат остался ровно тем, что был согласован.
+     ---------------------------------------------------------------------- */
+  var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var inertia = motion && fine && window.innerWidth > 1024;
+  var target = 0, current = 0, running = false, prevTs = 0;
+  var INERTIA_TAU = ms('--inertia-tau', 8.35);
+
+  function maxScroll() {
+    return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  }
+  function loop(ts) {
+    var dt = prevTs ? Math.min(0.1, (ts - prevTs) / 1000) : 1 / 60;
+    prevTs = ts;
+    current += (target - current) * (1 - Math.exp(-dt * INERTIA_TAU));
+    if (Math.abs(target - current) < 0.4) {
+      current = target;
+      running = false;
+      prevTs = 0;
+      window.scrollTo(0, current);
+      return;
+    }
+    window.scrollTo(0, current);
+    requestAnimationFrame(loop);
+  }
+  function glideTo(y) {
+    target = Math.max(0, Math.min(maxScroll(), y));
+    if (!running) {
+      current = window.pageYOffset;
+      running = true;
+      prevTs = 0;
+      requestAnimationFrame(loop);
+    }
+  }
+
+  if (inertia) {
+    root.classList.add('has-inertia');
+    window.addEventListener('wheel', function (e) {
+      if (e.ctrlKey || e.metaKey) return;   // масштабирование страницы
+      if (e.deltaMode !== 0) return;        // прокрутка строками или экранами — отдаём браузеру
+      if (nav.classList.contains('is-open')) return;
+      if (!running) current = target = window.pageYOffset;
+      e.preventDefault();
+      glideTo(target + e.deltaY);
+    }, { passive: false });
+  }
+
+  // Переход по якорю. Нужен именно здесь: при включённой инерции у <html>
+  // снят scroll-behavior:smooth, иначе две плавности накладывались бы.
+  // Фокус переносится на секцию — без этого пользователь клавиатуры после
+  // перехода продолжал бы табуляцию из шапки.
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!a) return;
+    var id = a.getAttribute('href').slice(1);
+    if (!id) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    var offset = ms('--header-h', 85) + 24;
+    var y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    if (inertia) glideTo(y);
+    else window.scrollTo({ top: Math.max(0, y), behavior: motion ? 'smooth' : 'auto' });
+    if (history.replaceState) history.replaceState(null, '', '#' + id);
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+    el.focus({ preventScroll: true });
+  });
+
+  /* ---------- 9. Форма -----------------------------------------------------
+     Куда уходит заявка: sale@gurman.guru (адрес из документа с правками).
+
+     Страница статическая — своего сервера у неё нет, поэтому два режима:
+
+     1) FORM_ENDPOINT задан — заявка уходит POST-запросом на этот адрес.
+        Это может быть обработчик на хостинге, Formspree и т.п. Пересылку
+        на sale@gurman.guru настраивает уже он: адрес почты в открытом
+        HTML держать нельзя, его собирают спам-боты.
+     2) FORM_ENDPOINT пуст (как сейчас) — открывается почтовый клиент
+        посетителя с заранее заполненным письмом. Работает без сервера,
+        но требует действия от человека, поэтому это временный вариант.
+
+     После переноса на Tilda оба режима не нужны: там форму принимает
+     встроенный сервис приёма заявок, адрес прописывается в его настройках.
+
+     Что уходит вместе с заявкой: дата и время, идентификатор формы и
+     версия текста согласия (data-* на <form>). Это требование заказчика
+     о фиксации факта согласия. IP-адрес отсюда взять нельзя — его видит
+     только сервер, принимающий запрос; его пишет обработчик из пункта 1.
+     ---------------------------------------------------------------------- */
+  var FORM_ENDPOINT = '';                    // ← адрес обработчика, когда появится
+  var FORM_TO       = 'sale@gurman.guru';    // получатель заявок
+
+  var form    = document.getElementById('leadForm');
+  var status  = document.getElementById('formStatus');
+  var consent = document.getElementById('f-consent');
+  var submit  = document.getElementById('f-submit');
+
+  /* Кнопка неактивна, пока не отмечен чекбокс согласия — прямое требование
+     «Приложения» к согласию. Начальное состояние disabled стоит в разметке,
+     чтобы кнопка не была доступна и при выключенном JavaScript. */
+  function syncSubmit() { submit.disabled = !consent.checked; }
+  consent.addEventListener('change', syncSubmit);
+  syncSubmit();
+
+  /* Подписи полей для письма: name у поля короткое и латинское, а человеку,
+     который читает заявку, нужны нормальные названия. */
+  var FIELD_LABELS = {
+    name:    'Имя',
+    company: 'Компания',
+    phone:   'Телефон',
+    email:   'Почта',
+    product: 'Продукт',
+    volume:  'Объём партии',
+    message: 'Задача'
+  };
+
+  function collect() {
+    var data = {};
+    for (var key in FIELD_LABELS) {
+      var el = form.elements[key];
+      if (el && el.value.trim()) data[key] = el.value.trim();
+    }
+    data.consent        = 'да';
+    data.consentVersion = form.getAttribute('data-consent-version');
+    data.formId         = form.getAttribute('data-form-id');
+    data.submittedAt    = new Date().toISOString();
+    data.pageUrl        = location.href;
+    return data;
+  }
+
+  function toLetter(data) {
+    var lines = [];
+    for (var key in FIELD_LABELS) {
+      if (data[key]) lines.push(FIELD_LABELS[key] + ': ' + data[key]);
+    }
+    lines.push('');
+    lines.push('Согласие на обработку персональных данных: получено');
+    lines.push('Версия текста согласия: ' + data.consentVersion);
+    lines.push('Форма: ' + data.formId);
+    lines.push('Дата и время: ' + data.submittedAt);
+    lines.push('Страница: ' + data.pageUrl);
+    return lines.join('\n');
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (!form.checkValidity()) {
+      status.textContent = 'Заполните имя, телефон и отметьте согласие.';
+      var bad = form.querySelector(':invalid');
+      if (bad) bad.focus();
+      return;
+    }
+
+    var data = collect();
+
+    if (FORM_ENDPOINT) {
+      submit.disabled = true;
+      status.textContent = 'Отправляем…';
+      fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        status.textContent = 'Заявка принята. Свяжемся с вами по указанным контактам.';
+        form.reset();
+      }).catch(function () {
+        /* Не теряем заполненное: показываем запасной путь, поля остаются. */
+        status.textContent = 'Не удалось отправить. Напишите нам на ' + FORM_TO + ' или позвоните.';
+      }).then(function () {
+        syncSubmit();
+      });
+      return;
+    }
+
+    /* Запасной путь без сервера: письмо собирается в почтовом клиенте. */
+    var href = 'mailto:' + FORM_TO +
+               '?subject=' + encodeURIComponent('Заявка с сайта — ' + (data.name || 'без имени')) +
+               '&body='    + encodeURIComponent(toLetter(data));
+    location.href = href;
+    status.textContent = 'Открываем письмо в вашей почте. Если оно не открылось — напишите на ' + FORM_TO + '.';
+  });
+
+  /* ---------- 10. Cookie-баннер --------------------------------------------
+     Показывается один раз — пока выбор не сделан. Выбор лежит в localStorage,
+     а не в cookie: до ответа посетителя мы не имеем права ставить ему даже
+     свою куку, а localStorage — техническое хранилище самого браузера,
+     запись в него ничего никуда не передаёт.
+
+     В ключе хранится не «да/нет», а версия текста баннера. Когда текст
+     изменится, версия поднимется — и баннер спросит заново, потому что
+     согласие давалось на другую формулировку. Ставить сюда «true» значило бы
+     считать согласие бессрочным и безусловным, чего закон не позволяет.
+
+     ВНИМАНИЕ ДЛЯ ТЕХ, КТО БУДЕТ СТАВИТЬ СЧЁТЧИКИ. Сейчас на странице нет ни
+     одного счётчика — гасить нечего. Когда появится Яндекс.Метрика, её код
+     нельзя вставлять прямо в <head>: он должен вызываться из loadOptional()
+     ниже, иначе счётчик отработает до ответа посетителя и весь баннер
+     превратится в декорацию.
+     ---------------------------------------------------------------------- */
+  var COOKIE_KEY     = 'gg-cookie-consent';
+  var COOKIE_VERSION = '2026-09-09';   /* поднять при правке текста баннера */
+
+  var banner = document.getElementById('cookieBanner');
+
+  /* Хранилище может быть недоступно: приватный режим, запрет сторонних
+     данных, переполненная квота. Тогда решение просто не запоминается —
+     это лучше, чем уронить скрипт целиком. */
+  function readChoice() {
+    try { return localStorage.getItem(COOKIE_KEY); } catch (err) { return null; }
+  }
+  function writeChoice(value) {
+    try { localStorage.setItem(COOKIE_KEY, value); } catch (err) {}
+  }
+
+  function loadOptional() {
+    /* Сюда — и только сюда — вставляется код необязательной аналитики.
+       Функция вызывается либо сразу после нажатия «Принять все», либо при
+       следующем заходе, если согласие уже было дано. */
+  }
+
+  function closeBanner() {
+    banner.classList.remove('is-open');
+    /* hidden возвращается после того, как доедет уход вниз: иначе элемент
+       исчезнет мгновенно и перехода не будет видно. 600 мс — с запасом
+       больше --dur-slow (460–520 мс). */
+    setTimeout(function () { banner.hidden = true; }, 600);
+  }
+
+  var choice = readChoice();
+
+  if (choice === 'all:' + COOKIE_VERSION) {
+    loadOptional();
+  } else if (choice !== 'necessary:' + COOKIE_VERSION) {
+    banner.hidden = false;
+    /* Два кадра до is-open: браузер должен успеть отрисовать элемент в
+       исходном положении, иначе он появится сразу на месте, без выката. */
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { banner.classList.add('is-open'); });
+    });
+  }
+
+  document.getElementById('cookieAccept').addEventListener('click', function () {
+    writeChoice('all:' + COOKIE_VERSION);
+    loadOptional();
+    closeBanner();
+  });
+  document.getElementById('cookieReject').addEventListener('click', function () {
+    writeChoice('necessary:' + COOKIE_VERSION);
+    closeBanner();
+  });
+
+  /* ---------- Запуск -------------------------------------------------------
+     Разбор заголовков ждёт загрузки шрифтов: у Golos Text ширины знаков
+     свои, и по запасному системному гротеску строки посчитались бы неверно.
+     Полторы секунды — потолок ожидания на случай, если шрифты не пришли.
+     ---------------------------------------------------------------------- */
+  function start() {
+    if (start.done) return;
+    start.done = true;
+    splitAll();
+    playHero();
+    tick();
+  }
+  if (!motion) { playHero(); }
+  else if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+    setTimeout(start, 1500);
+  } else {
+    window.addEventListener('load', start);
+    setTimeout(start, 1500);
+  }
+
+  // Перенос строк зависит от ширины окна — при её изменении заголовки
+  // собираются заново. Пауза 200 мс, чтобы не пересчитывать на каждый пиксель.
+  var rt;
+  window.addEventListener('resize', function () {
+    if (!motion || !start.done) return;
+    clearTimeout(rt);
+    rt = setTimeout(splitAll, 200);
+  });
+})();
+</script>
+
+<script>
+/* Растягиваем корень на всю ширину окна: внутри контейнера Тильды
+   сплошные тёмные полосы иначе становятся врезанными панелями. */
+(function () {
+  var roots = document.querySelectorAll('.gg-root');
+  if (!roots.length) return;
+
+  function fit() {
+    var win = document.documentElement.clientWidth;
+    for (var i = 0; i < roots.length; i++) {
+      var r = roots[i];
+      /* Сбрасываем прошлую подгонку, иначе меряем уже исправленное. */
+      r.style.marginLeft = '';
+      r.style.marginRight = '';
+      r.style.width = '';
+      var left = r.getBoundingClientRect().left;
+      if (left <= 0.5) continue;          /* контейнер уже во всю ширину */
+      r.style.marginLeft = -left + 'px';
+      r.style.marginRight = -left + 'px';
+      r.style.width = win + 'px';
+    }
+  }
+
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('orientationchange', fit);
+  addEventListener('load', fit);
+
+  /* Наблюдаем за РОДИТЕЛЕМ, а не за корнем: ширину задаёт контейнер Тильды,
+     и правка корня на неё не влияет — петли не будет. Одного события resize
+     мало: контейнер меняет ширину и сам по себе, от правил самой Тильды. */
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(fit);
+    for (var j = 0; j < roots.length; j++) {
+      if (roots[j].parentElement) ro.observe(roots[j].parentElement);
+    }
+  }
+})();
+</script>

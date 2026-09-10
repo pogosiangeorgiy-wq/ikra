@@ -1,0 +1,226 @@
+<!-- Согласие на обработку персональных данных. Один блок T123 на всю страницу «/soglasie».
+     Внутри всё сразу: шрифты, стили, разметка и компенсатор ширины.
+     Шапку и подвал Тильды на этой странице не включать. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Корень страницы. Всё, что ниже, действует только внутри него. */
+.gg-root{position:relative;
+  -webkit-text-size-adjust:100%; text-align:left;}
+.gg-root img{max-width:100%;}
+
+
+.gg-root{
+  --c-abyss:#191510; --c-carbon:#221D17; --c-bone:#E4E0D8; --c-ash:#A8A29A;
+  /* --c-stone синхронизирован с index.html (#605A54). Он считан под светлый
+     фон и на этих тёмных страницах не используется: вторичный текст здесь
+     берёт --c-ash — на --c-abyss это 7,78 : 1 против 3,15 : 1 у камня. */
+  --c-stone:#605A54; --c-steel:#B9B2A6; --c-white-warm:#FFFDFA;
+  --c-line-dark:rgba(228,224,216,.20);
+  --f-display:"Golos Text","Inter","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"Roboto Mono",ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;
+  --t-display-m:clamp(28px,3.9vw,56px); --t-title-s:clamp(17px,1.55vw,22px);
+  --t-body:clamp(14px,1.05vw,15px); --t-micro:12px;
+  --lh-body:1.75; --ls-wide:.18em; --ls-title:.12em;
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px;
+  --s-7:48px; --s-8:64px; --s-9:96px; --s-10:128px;
+  --container:1332px; --gutter:54px;
+  --radius:0px; --border-w:1px;
+  --ease:cubic-bezier(.2,.6,.2,1); --dur-fast:220ms;
+}
+.gg-root, .gg-root *, .gg-root *::before, .gg-root *::after{box-sizing:border-box}
+.gg-root{-webkit-text-size-adjust:100%}
+.gg-root{
+  margin:0; background:var(--c-abyss); color:var(--c-bone);
+  font-family:var(--f-mono); font-size:var(--t-body); font-weight:300;
+  line-height:var(--lh-body); -webkit-font-smoothing:antialiased;
+}
+.gg-root img{display:block; max-width:100%; height:auto}
+.gg-root a{color:inherit}
+.gg-root h1, .gg-root h2, .gg-root h3, .gg-root p{margin:0}
+.gg-root ul{margin:0; padding:0; list-style:none}
+.gg-root :focus-visible{outline:2px solid var(--c-steel); outline-offset:3px}
+.gg-root .container{width:min(var(--container), 100% - var(--gutter)*2); margin-inline:auto}
+.gg-root .micro{font-size:var(--t-micro); font-weight:400; letter-spacing:var(--ls-wide); text-transform:uppercase; line-height:1.6}
+
+/* Плёночное зерно — тот же приём, что на главной */
+.gg-root::after{
+  content:""; position:fixed; inset:0; z-index:9999; pointer-events:none;
+  opacity:.045; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Шапка документа. Не фиксированная — длинный текст читается спокойнее. */
+.gg-root .doc-header{padding-block:var(--s-5); border-bottom:var(--border-w) solid var(--c-line-dark)}
+.gg-root .doc-header__inner{display:flex; align-items:center; justify-content:space-between; gap:var(--s-5)}
+.gg-root .logo{display:block; line-height:0; text-decoration:none}
+.gg-root .logo img{height:clamp(30px,2.6vw,38px); width:auto; transition:opacity var(--dur-fast) var(--ease)}
+.gg-root .logo:hover img{opacity:.78}
+.gg-root .doc-header a.back{
+  font-size:var(--t-micro); font-weight:500; letter-spacing:var(--ls-wide);
+  text-transform:uppercase; color:var(--c-ash); text-decoration:none; white-space:nowrap;
+  transition:color var(--dur-fast) var(--ease);
+}
+.gg-root .doc-header a.back:hover{color:var(--c-bone)}
+
+/* Титул документа */
+.gg-root .doc-title{padding-block:var(--s-9) var(--s-8); border-bottom:var(--border-w) solid var(--c-line-dark)}
+.gg-root .doc-title h1{
+  font-family:var(--f-display); font-weight:500; font-size:var(--t-display-m);
+  line-height:1.04; text-transform:uppercase; letter-spacing:.01em; color:var(--c-white-warm);
+  max-width:22ch;
+}
+.gg-root .doc-title p{margin-top:var(--s-5); color:var(--c-ash)}
+
+/* Тело документа. Одна колонка ограниченной меры — так длинный текст читается. */
+.gg-root .doc-body{padding-block:var(--s-8) var(--s-10)}
+.gg-root .doc-body > *{max-width:82ch}
+.gg-root .doc-body section + section{margin-top:var(--s-8)}
+.gg-root .doc-body h2{
+  font-family:var(--f-display); font-weight:500; font-size:var(--t-title-s);
+  letter-spacing:var(--ls-title); text-transform:uppercase; color:var(--c-white-warm);
+  padding-bottom:var(--s-4); border-bottom:var(--border-w) solid var(--c-line-dark);
+  margin-bottom:var(--s-5);
+}
+.gg-root .doc-body p{color:var(--c-ash)}
+.gg-root .doc-body p + p{margin-top:var(--s-4)}
+.gg-root .doc-body ul{margin-top:var(--s-4); display:flex; flex-direction:column; gap:var(--s-3)}
+.gg-root .doc-body li{color:var(--c-ash); padding-left:var(--s-5); position:relative}
+.gg-root .doc-body li::before{content:"—"; position:absolute; left:0; color:var(--c-ash)}
+.gg-root .doc-body a{color:var(--c-bone); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+.gg-root .doc-body a:hover{color:var(--c-steel)}
+.gg-root .doc-body strong{font-weight:500; color:var(--c-bone)}
+/* Вводная врезка перед пунктами согласия */
+.gg-root .doc-body .lead{
+  color:var(--c-bone); border-left:var(--border-w) solid var(--c-line-dark);
+  padding-left:var(--s-5); margin-bottom:var(--s-8);
+}
+
+/* Подвал документа */
+.gg-root .doc-footer{border-top:var(--border-w) solid var(--c-line-dark); padding-block:var(--s-7); color:var(--c-ash)}
+.gg-root .doc-footer__inner{display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--s-3) var(--s-7)}
+.gg-root .doc-footer__legal{display:flex; flex-wrap:wrap; gap:var(--s-3) var(--s-6)}
+.gg-root .doc-footer a{color:var(--c-ash); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+.gg-root .doc-footer a:hover{color:var(--c-bone)}
+
+@media (max-width:1100px){ .gg-root{--gutter:32px}}
+@media (max-width:760px){
+  .gg-root{--gutter:20px}
+  .gg-root .doc-title{padding-block:var(--s-7) var(--s-6)}
+  .gg-root .doc-body{padding-block:var(--s-7) var(--s-8)}
+  .gg-root .doc-footer__inner{flex-direction:column; gap:var(--s-4)}}
+@media (prefers-reduced-motion:reduce){
+  .gg-root, .gg-root *, .gg-root *::before, .gg-root *::after{animation-duration:.01ms !important; transition-duration:.01ms !important}}
+</style>
+
+<div class="gg-root">
+<header class="doc-header">
+  <div class="container doc-header__inner">
+    <a class="logo" href="/" aria-label="Гурман-Гуру — на главную">
+      <img src="https://pogosiangeorgiy-wq.github.io/ikra/assets/logo-gurman-guru.png" width="880" height="320" alt="Гурман-Гуру">
+    </a>
+    <a class="back" href="/">&#8592; На главную</a>
+  </div>
+</header>
+
+
+  <div class="container doc-title">
+    <h1>Согласие на обработку персональных данных</h1>
+    <p class="micro">Предоставляется при отправке заявки через форму на сайте</p>
+  </div>
+
+  <div class="container doc-body">
+
+    <p class="lead">Я, действуя свободно, своей волей и в своём интересе, подтверждая свою дееспособность, даю согласие Обществу с ограниченной ответственностью «ГУРМАН-ГУРУ» (ООО «ГУРМАН-ГУРУ», ИНН 9729312501, ОГРН 1217700391457, адрес: 121471, г. Москва, ул. Рябиновая, вл. 43А, эт. 2, пом. 23; далее — «Оператор») на обработку моих персональных данных на следующих условиях.</p>
+
+    <section>
+      <h2>1. Перечень персональных данных, на обработку которых даётся согласие</h2>
+      <ul>
+        <li>фамилия, имя, отчество (при наличии);</li>
+        <li>номер контактного телефона;</li>
+        <li>адрес электронной почты;</li>
+        <li>иные сведения, самостоятельно указанные мною в форме на сайте https://gurman.guru (далее — «Сайт»).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. Цели обработки персональных данных</h2>
+      <p>Рассмотрение моего обращения (заявки), направленного через форму на Сайте; связь со мной по указанным контактным данным для консультации по товарам и услугам Оператора, согласования условий и оформления заказа; направление мне информации, непосредственно связанной с моим обращением.</p>
+    </section>
+
+    <section>
+      <h2>3. Перечень действий с персональными данными и способы обработки</h2>
+      <p>Сбор, запись, систематизация, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передача (предоставление, доступ) лицам, осуществляющим обработку персональных данных по поручению Оператора на основании заключённых с ними договоров, блокирование, удаление, уничтожение. Обработка осуществляется как с использованием средств автоматизации, так и без их использования.</p>
+    </section>
+
+    <section>
+      <h2>4. Срок действия согласия</h2>
+      <p>Согласие действует с момента его предоставления до достижения целей обработки, но не более 3 (трёх) лет с момента предоставления, либо до момента его отзыва — в зависимости от того, какое событие наступит раньше.</p>
+    </section>
+
+    <section>
+      <h2>5. Порядок отзыва согласия</h2>
+      <p>Согласие может быть отозвано мною в любое время путём направления Оператору заявления по адресу электронной почты <a href="mailto:sale@gurman.guru">sale@gurman.guru</a> либо по почтовому адресу: 121471, г. Москва, ул. Рябиновая, вл. 43А, эт. 2, пом. 23. В случае отзыва согласия Оператор прекращает обработку персональных данных и уничтожает их в срок, не превышающий 30 (тридцати) дней с даты поступления отзыва, если отсутствуют иные правовые основания обработки, предусмотренные законодательством Российской Федерации.</p>
+    </section>
+
+    <section>
+      <h2>6. Заключительные положения</h2>
+      <p>Я подтверждаю, что указанные мною персональные данные принадлежат лично мне и являются достоверными. Мне разъяснены права субъекта персональных данных, предусмотренные Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных». С <a href="/politika">Политикой обработки персональных данных</a> Оператора, размещённой на Сайте, я ознакомлен(а).</p>
+      <p>Согласие предоставляется мною путём проставления отметки в соответствующем поле (чекбоксе) формы на Сайте, что в соответствии с ч. 1 ст. 9 Федерального закона от 27.07.2006 № 152-ФЗ является формой, позволяющей подтвердить факт получения согласия.</p>
+    </section>
+
+  </div>
+
+
+<footer class="doc-footer">
+  <div class="container doc-footer__inner micro">
+    <span>&copy; ООО «ГУРМАН-ГУРУ», 2026 г.</span>
+    <span class="doc-footer__legal">
+      <a href="/">На главную</a>
+      <a href="/politika">Политика конфиденциальности</a>
+    </span>
+  </div>
+</footer>
+</div>
+
+<script>
+/* Растягиваем корень на всю ширину окна: внутри контейнера Тильды
+   сплошные тёмные полосы иначе становятся врезанными панелями. */
+(function () {
+  var roots = document.querySelectorAll('.gg-root');
+  if (!roots.length) return;
+
+  function fit() {
+    var win = document.documentElement.clientWidth;
+    for (var i = 0; i < roots.length; i++) {
+      var r = roots[i];
+      /* Сбрасываем прошлую подгонку, иначе меряем уже исправленное. */
+      r.style.marginLeft = '';
+      r.style.marginRight = '';
+      r.style.width = '';
+      var left = r.getBoundingClientRect().left;
+      if (left <= 0.5) continue;          /* контейнер уже во всю ширину */
+      r.style.marginLeft = -left + 'px';
+      r.style.marginRight = -left + 'px';
+      r.style.width = win + 'px';
+    }
+  }
+
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('orientationchange', fit);
+  addEventListener('load', fit);
+
+  /* Наблюдаем за РОДИТЕЛЕМ, а не за корнем: ширину задаёт контейнер Тильды,
+     и правка корня на неё не влияет — петли не будет. Одного события resize
+     мало: контейнер меняет ширину и сам по себе, от правил самой Тильды. */
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(fit);
+    for (var j = 0; j < roots.length; j++) {
+      if (roots[j].parentElement) ro.observe(roots[j].parentElement);
+    }
+  }
+})();
+</script>
