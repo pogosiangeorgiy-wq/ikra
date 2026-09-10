@@ -2,6 +2,14 @@
      Все правила заперты под .gg-root — разметку Тильды не трогают. -->
 <style>
 
+@media (max-width:560px){
+  .gg-root .econ__prices{flex-direction:column; gap:var(--s-6)}}
+
+/* ===========================================================================
+   9. ВОПРОСЫ. Аккордеон на нативном <details>, без JS.
+   =========================================================================== */
+.gg-root .faq__item{border-bottom:var(--border-w) solid var(--c-line-light)}
+.gg-root .faq__item:first-child{border-top:var(--border-w) solid var(--c-line-light)}
 .gg-root .faq__q{
   display:flex; align-items:center; justify-content:space-between; gap:var(--s-5);
   padding-block:var(--s-5); cursor:pointer; list-style:none;
@@ -286,23 +294,16 @@
      над карточкой второй колонки, и глаз цеплялся именно за «почти».
      Побочно решается и старая причина этого правила: слово «ПРОИЗВОДСТВО»
      требует 244px, а левая колонка теперь 336px на 768 и 464px на 1024. */
-  .gg-root .section__head{grid-template-columns:repeat(2, minmax(0,1fr)); gap:var(--grid-gap)}}
-@media (max-width:760px){
-  /* На узком экране лента едет заметно быстрее относительно ширины окна,
-     поэтому оборот удлинён, а просвет и растушёвка ужаты.
-     Высота удвоена вместе с десктопной: 38px → 76px. Именно здесь разница
-     видна сильнее всего — на 360px знак высотой 38px занимал десятую часть
-     экрана по высоте и читался как значок, а не как логотип.
-     Оборот пересчитан по той же арифметике, что и в :root: ряд был
-     469+672 = 1141px за 78s = 14,6 px/s; стал 937+672 = 1609px,
-     значит 1609/14,6 = 110s. */
-  .gg-root{--gutter:20px; --grid-gap:24px; --trust-h:76px; --trust-gap:56px; --trust-dur:110s; --trust-fade:48px; --ls-legal:.04em; --map-h:360px}
-  /* Ссылка «Открыть в Яндекс Картах» на узком экране встаёт в поток,
-     а не прижимается вправо. */
-  .gg-root .map__link{margin-left:0}
-  .gg-root .section{padding-block:var(--s-8)}
-  .gg-root .trust{padding-block:var(--s-6) var(--s-7)}
-  .gg-root .trust__head{flex-wrap:wrap; gap:var(--s-3) var(--s-6)}
+  .gg-root .section__head{grid-template-columns:repeat(2, minmax(0,1fr)); gap:var(--grid-gap)}
+
+  /* ШТОРКА МЕНЮ. Порог переехал сюда с 760px 10.09.2026, когда в шапку
+     добавились «Этапы» и «Экономика». Замер: шесть пунктов при 13px и
+     просвете 48 занимают строкой ровно 770px, логотип — 103, просвет между
+     ними — 48. Итого 921 против 1036 полезной ширины на 1100 — влезает
+     впритык, правый край меню сходится с правым краем контейнера. Уже 1100
+     ряд начинает вылезать за экран, причём незаметно: шапка фиксирована, и
+     переполнение не отражается в scrollWidth — пункты просто срезаются.
+     Поэтому 1100 и есть та точка, где строка меняется на бургер. */
   .gg-root .nav{
     position:fixed; inset:0 0 auto; top:0; padding:96px var(--gutter) var(--s-8);
     flex-direction:column; gap:var(--s-6); background:rgba(var(--c-abyss-rgb), .97);
@@ -331,11 +332,30 @@
   .js-motion .gg-root .nav.is-open a:nth-child(2){transition-delay:120ms}
   .js-motion .gg-root .nav.is-open a:nth-child(3){transition-delay:180ms}
   .js-motion .gg-root .nav.is-open a:nth-child(4){transition-delay:240ms}
+  .js-motion .gg-root .nav.is-open a:nth-child(5){transition-delay:300ms}
+  .js-motion .gg-root .nav.is-open a:nth-child(6){transition-delay:360ms}
+  .gg-root .site-header .logo{position:relative; z-index:2} /* логотип поверх раскрытого меню */
+}
+@media (max-width:760px){
+  /* На узком экране лента едет заметно быстрее относительно ширины окна,
+     поэтому оборот удлинён, а просвет и растушёвка ужаты.
+     Высота удвоена вместе с десктопной: 38px → 76px. Именно здесь разница
+     видна сильнее всего — на 360px знак высотой 38px занимал десятую часть
+     экрана по высоте и читался как значок, а не как логотип.
+     Оборот пересчитан по той же арифметике, что и в :root: ряд был
+     469+672 = 1141px за 78s = 14,6 px/s; стал 937+672 = 1609px,
+     значит 1609/14,6 = 110s. */
+  .gg-root{--gutter:20px; --grid-gap:24px; --trust-h:76px; --trust-gap:56px; --trust-dur:110s; --trust-fade:48px; --ls-legal:.04em; --map-h:360px}
+  /* Ссылка «Открыть в Яндекс Картах» на узком экране встаёт в поток,
+     а не прижимается вправо. */
+  .gg-root .map__link{margin-left:0}
+  .gg-root .section{padding-block:var(--s-8)}
+  .gg-root .trust{padding-block:var(--s-6) var(--s-7)}
+  .gg-root .trust__head{flex-wrap:wrap; gap:var(--s-3) var(--s-6)}
   /* Шапка секции разворачивается в одну колонку здесь, а не на 640: между
      641 и 760 на заголовок оставалось меньше 244px — ширины слова
      «ПРОИЗВОДСТВО» при этом кегле. */
   .gg-root .section__head{grid-template-columns:1fr; gap:var(--s-5); align-items:start}
-  .gg-root .site-header .logo{position:relative; z-index:2} /* логотип поверх раскрытого меню */
   .gg-root .hero{min-height:92svh; padding-block:120px var(--s-7)}
   .gg-root .hero__media{width:100%; inset:0}
   /* На узком экране кадр занимает весь первый экран, и вуаль на нём была
