@@ -1,0 +1,257 @@
+<!-- Страница не найдена. Один блок T123 на всю страницу «/stranica-ne-naydena».
+     Внутри всё сразу: шрифты, стили, разметка и компенсатор ширины.
+     Шапку и подвал Тильды на этой странице не включать. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* Корень страницы. Всё, что ниже, действует только внутри него. */
+.gg-root{position:relative;
+  -webkit-text-size-adjust:100%; text-align:left;}
+.gg-root img{max-width:100%;}
+
+
+.gg-root{
+  --c-abyss:#191510; --c-abyss-rgb:25,21,16;
+  --c-bone:#E4E0D8; --c-ash:#A8A29A; --c-steel:#B9B2A6; --c-white-warm:#FFFDFA;
+  --c-ash-photo:#CFC9C0;
+  --c-line-dark:rgba(228,224,216,.20);
+  /* Шрифт один на всю страницу — тот же, что в заголовках лендинга. */
+  --f-display:"Golos Text","Inter","Helvetica Neue",Arial,sans-serif;
+  --fw-display:500;
+  --t-display-xl:clamp(64px,12vw,168px);
+  --t-body:clamp(14px,1.05vw,15px); --t-micro:12px;
+  --lh-tight:.88; --lh-body:1.75; --ls-wide:.18em;
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px;
+  --s-7:48px; --s-8:64px; --s-9:96px; --s-10:128px; --s-11:160px;
+  --container:1332px; --gutter:54px;
+  --radius:0px; --border-w:1px;
+  --ease:cubic-bezier(.2,.6,.2,1); --dur-fast:220ms;
+}
+.gg-root, .gg-root *, .gg-root *::before, .gg-root *::after{box-sizing:border-box}
+.gg-root{-webkit-text-size-adjust:100%}
+.gg-root{
+  margin:0; background:var(--c-abyss); color:var(--c-bone);
+  font-family:var(--f-display); font-size:var(--t-body); font-weight:400;
+  line-height:var(--lh-body); -webkit-font-smoothing:antialiased;
+}
+.gg-root img{display:block; max-width:100%; height:auto}
+.gg-root a{color:inherit}
+.gg-root h1, .gg-root p{margin:0}
+.gg-root ul{margin:0; padding:0; list-style:none}
+.gg-root :focus-visible{outline:2px solid var(--c-steel); outline-offset:3px}
+.gg-root .container{width:min(var(--container), 100% - var(--gutter)*2); margin-inline:auto}
+.gg-root .micro{font-size:var(--t-micro); font-weight:400; letter-spacing:var(--ls-wide); text-transform:uppercase; line-height:1.6}
+
+/* Плёночное зерно — тот же приём, что на главной и на документах */
+.gg-root::after{
+  content:""; position:fixed; inset:0; z-index:9999; pointer-events:none;
+  opacity:.045; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Шапка. Логотип и возврат — как на юридических страницах. */
+.gg-root .doc-header{position:relative; z-index:2; padding-block:var(--s-5)}
+.gg-root .doc-header__inner{display:flex; align-items:center; justify-content:space-between; gap:var(--s-5)}
+.gg-root .logo{display:block; line-height:0; text-decoration:none}
+.gg-root .logo img{height:clamp(30px,2.6vw,38px); width:auto; transition:opacity var(--dur-fast) var(--ease)}
+.gg-root .logo:hover img{opacity:.78}
+.gg-root .doc-header a.back{
+  font-size:var(--t-micro); font-weight:500; letter-spacing:var(--ls-wide);
+  text-transform:uppercase; color:var(--c-ash); text-decoration:none; white-space:nowrap;
+  transition:color var(--dur-fast) var(--ease);
+}
+.gg-root .doc-header a.back:hover{color:var(--c-bone)}
+
+/* ---------------------------------------------------------------------------
+   Экран ошибки. Повторяет .hero лендинга.
+   min-height считается с вычетом шапки, иначе экран получается выше окна
+   ровно на её высоту и появляется лишняя прокрутка на пустом месте.
+   --------------------------------------------------------------------------- */
+.gg-root .err{
+  position:relative; display:flex; flex-direction:column; justify-content:center;
+  min-height:calc(100svh - 88px); overflow:hidden;
+  padding-block:var(--s-8) var(--s-7); margin-top:calc(var(--s-5)*-1 - 38px);
+  padding-top:calc(var(--s-5) + 38px + var(--s-8));
+}
+.gg-root .err__media{position:absolute; inset:0 0 0 auto; width:62%; z-index:0}
+.gg-root .err__media img{
+  width:100%; height:100%; object-fit:cover; object-position:50% 50%;
+  /* Подъёма яркости больше нет: прежний тёмный кадр требовал
+     brightness(1.16) contrast(.94), новый снят в среднем ключе
+     и показывается как есть — см. разбор в шапке файла. */
+}
+/* Растушёвка левого края кадра в чистый фон — текст читается без плашки */
+.gg-root .err__media::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg,
+    var(--c-abyss) 0%,
+    rgba(var(--c-abyss-rgb), .90) 28%,
+    rgba(var(--c-abyss-rgb), .16) 70%,
+    rgba(var(--c-abyss-rgb), .38) 100%);
+}
+.gg-root .err__inner{position:relative; z-index:1}
+
+.gg-root .err__code{
+  font-family:var(--f-display); font-weight:var(--fw-display);
+  font-size:var(--t-display-xl); line-height:var(--lh-tight);
+  letter-spacing:-.02em; color:var(--c-white-warm);
+}
+.gg-root .err__rule{margin:var(--s-7) 0 var(--s-5); color:var(--c-steel)}
+.gg-root .err__title{
+  font-weight:500; font-size:var(--t-micro); letter-spacing:var(--ls-wide);
+  text-transform:uppercase; color:var(--c-bone);
+}
+.gg-root .err__lead{max-width:38ch; margin-top:var(--s-4); color:var(--c-ash-photo)}
+.gg-root .err__cta{margin-top:var(--s-7); display:flex; flex-wrap:wrap; gap:var(--s-4) var(--s-5); align-items:center}
+
+/* Кнопка — один в один с лендинга */
+.gg-root .btn{
+  display:inline-flex; align-items:center; gap:var(--s-5);
+  padding:var(--s-4) var(--s-6); border:var(--border-w) solid var(--c-line-dark);
+  border-radius:var(--radius); background:transparent; color:var(--c-bone);
+  font-size:var(--t-micro); font-weight:500; letter-spacing:var(--ls-wide);
+  text-transform:uppercase; text-decoration:none; cursor:pointer;
+  transition:background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.gg-root .btn__arrow{transition:transform var(--dur-fast) var(--ease)}
+.gg-root .btn:hover{background:var(--c-bone); color:var(--c-abyss); border-color:var(--c-bone)}
+.gg-root .btn:hover .btn__arrow{transform:translateX(6px)}
+.gg-root .btn:active{background:var(--c-steel); border-color:var(--c-steel)}
+
+/* Ряд разделов внизу экрана. Прижат к низу через margin-top:auto —
+   так же, как техническая строка первого экрана лендинга. */
+.gg-root .err__nav{
+  position:relative; z-index:1; margin-top:auto; padding-top:var(--s-9);
+  display:flex; flex-wrap:wrap; gap:var(--s-4) var(--s-7);
+  color:var(--c-ash-photo);
+}
+.gg-root .err__nav a{
+  text-decoration:none; color:inherit;
+  transition:color var(--dur-fast) var(--ease);
+}
+.gg-root .err__nav a:hover{color:var(--c-white-warm)}
+
+/* Подвал — сокращённый вариант подвала юридических страниц */
+.gg-root .doc-footer{border-top:var(--border-w) solid var(--c-line-dark); padding-block:var(--s-7); color:var(--c-ash)}
+.gg-root .doc-footer__inner{display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--s-3) var(--s-7)}
+.gg-root .doc-footer__legal{display:flex; flex-wrap:wrap; gap:var(--s-3) var(--s-6)}
+.gg-root .doc-footer a{color:var(--c-ash); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+.gg-root .doc-footer a:hover{color:var(--c-bone)}
+
+@media (max-width:1100px){ .gg-root{--gutter:32px}}
+@media (max-width:760px){
+  .gg-root{--gutter:20px}
+  /* Кадр уходит на весь фон и глушится сильнее: колонки в 62 % на узком
+     экране не остаётся, а текст обязан читаться поверх снимка. */
+  .gg-root .err__media{width:100%}
+  .gg-root .err__media::after{
+    background:linear-gradient(180deg,
+      rgba(var(--c-abyss-rgb), .92) 0%,
+      rgba(var(--c-abyss-rgb), .86) 55%,
+      rgba(var(--c-abyss-rgb), .94) 100%);
+  }
+  .gg-root .err__nav{padding-top:var(--s-8); gap:var(--s-3) var(--s-5)}
+  .gg-root .doc-footer__inner{flex-direction:column; gap:var(--s-4)}}
+@media (prefers-reduced-motion:reduce){
+  .gg-root, .gg-root *, .gg-root *::before, .gg-root *::after{animation-duration:.01ms !important; transition-duration:.01ms !important}}
+</style>
+
+<div class="gg-root">
+<header class="doc-header">
+  <div class="container doc-header__inner">
+    <a class="logo" href="/" aria-label="Гурман-Гуру — на главную">
+      <img src="https://pogosiangeorgiy-wq.github.io/ikra/assets/logo-gurman-guru.png" width="880" height="320" alt="Гурман-Гуру">
+    </a>
+    <a class="back" href="/">&#8592; На главную</a>
+  </div>
+</header>
+
+<!-- Экран отделён от  отдельной секцией намеренно. Сборщик блоков для
+     Тильды выбрасывает  — внутри чужой страницы он лишний, а второго
+      на странице быть не должно. Если на нём висит оформление, оно
+     уезжает вместе с тегом, поэтому вся раскладка держится на .err. -->
+
+<section class="err">
+  <div class="err__media" aria-hidden="true">
+    <img src="https://pogosiangeorgiy-wq.github.io/ikra/assets/doc-banki.jpg" width="1104" height="828" alt="">
+  </div>
+
+  <div class="container err__inner">
+    <h1 class="err__code">404</h1>
+    <div class="err__rule" aria-hidden="true">&#8212;&#8212;&#8212;&#8212;</div>
+    <p class="err__title">Страница не найдена</p>
+    <p class="err__lead">Такого адреса на сайте нет: страницу перенесли, удалили
+      или в ссылке опечатка. Вернитесь на главную или откройте нужный раздел.</p>
+    <div class="err__cta">
+      <a class="btn" href="/">
+        <span>На главную</span>
+        <span class="btn__arrow" aria-hidden="true">&#8594;</span>
+      </a>
+      <a class="btn" href="/#kontakty">
+        <span>Обсудить партию</span>
+        <span class="btn__arrow" aria-hidden="true">&#8594;</span>
+      </a>
+    </div>
+  </div>
+
+  <nav class="container err__nav micro" aria-label="Основные разделы">
+    <a href="/#uslugi">Услуги</a>
+    <a href="/#proizvodstvo">Производство</a>
+    <a href="/#upakovka">Упаковка</a>
+    <a href="/#kontakty">Контакты</a>
+  </nav>
+</section>
+
+
+<footer class="doc-footer">
+  <div class="container doc-footer__inner micro">
+    <span>&copy; ООО «ГУРМАН-ГУРУ», 2026 г.</span>
+    <span class="doc-footer__legal">
+      <a href="/politika">Политика конфиденциальности</a>
+      <a href="/soglasie">Согласие на обработку данных</a>
+    </span>
+  </div>
+</footer>
+</div>
+
+<script>
+/* Растягиваем корень на всю ширину окна: внутри контейнера Тильды
+   сплошные тёмные полосы иначе становятся врезанными панелями. */
+(function () {
+  var roots = document.querySelectorAll('.gg-root');
+  if (!roots.length) return;
+
+  function fit() {
+    var win = document.documentElement.clientWidth;
+    for (var i = 0; i < roots.length; i++) {
+      var r = roots[i];
+      /* Сбрасываем прошлую подгонку, иначе меряем уже исправленное. */
+      r.style.marginLeft = '';
+      r.style.marginRight = '';
+      r.style.width = '';
+      var left = r.getBoundingClientRect().left;
+      if (left <= 0.5) continue;          /* контейнер уже во всю ширину */
+      r.style.marginLeft = -left + 'px';
+      r.style.marginRight = -left + 'px';
+      r.style.width = win + 'px';
+    }
+  }
+
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('orientationchange', fit);
+  addEventListener('load', fit);
+
+  /* Наблюдаем за РОДИТЕЛЕМ, а не за корнем: ширину задаёт контейнер Тильды,
+     и правка корня на неё не влияет — петли не будет. Одного события resize
+     мало: контейнер меняет ширину и сам по себе, от правил самой Тильды. */
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(fit);
+    for (var j = 0; j < roots.length; j++) {
+      if (roots[j].parentElement) ro.observe(roots[j].parentElement);
+    }
+  }
+})();
+</script>

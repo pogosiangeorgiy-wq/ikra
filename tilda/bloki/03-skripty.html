@@ -658,6 +658,9 @@
 
      После переноса на Tilda оба режима не нужны: там форму принимает
      встроенный сервис приёма заявок, адрес прописывается в его настройках.
+     Переходник к нему лежит в tilda/sborka.py (FORM_JS) и подключается
+     только внутри Тильды — этот файл он не трогает. Переходник перехватывает
+     клик по кнопке раньше формы, поэтому обработчик ниже там не работает.
 
      Что уходит вместе с заявкой: дата и время, идентификатор формы и
      версия текста согласия (data-* на <form>). Это требование заказчика
@@ -897,5 +900,125 @@
       if (roots[j].parentElement) ro.observe(roots[j].parentElement);
     }
   }
+})();
+</script>
+
+<script>
+/* Заявки уходят в штатный приём данных Тильды. Подробности — в sborka.py. */
+(function () {
+  var form = document.getElementById('leadForm');
+  var all  = document.getElementById('allrecords');
+  if (!form || !all || !all.getAttribute('data-tilda-formskey')) return;
+
+  var status = document.getElementById('formStatus');
+  var rec    = form.closest ? form.closest('.r') : null;
+  if (!rec) return;
+
+  /* Человеческие подписи полей: под этими именами поля приедут в письмо.
+     В вёрстке имена короткие и латинские — читать такое письмо неудобно. */
+  var NAMES = {
+    name:    'Имя',
+    company: 'Компания',
+    phone:   'Телефон',
+    email:   'Почта',
+    product: 'Продукт',
+    volume:  'Объём партии',
+    message: 'Задача',
+    consent: 'Согласие'
+  };
+
+  var ready = false;
+
+  function hidden(name) {
+    var el = form.querySelector('input[type=hidden][name="' + name + '"]');
+    if (!el) {
+      el = document.createElement('input');
+      el.type = 'hidden';
+      el.name = name;
+      form.appendChild(el);
+    }
+    return el;
+  }
+
+  /* Класс — единственное, что нужно скрипту форм, чтобы узнать форму.
+     Класс t-form сюда НЕ добавляем: он тянет за собой оформление Тильды
+     и ломает вид формы. Для отправки он не требуется. */
+  form.setAttribute('method', 'POST');
+  form.setAttribute('action', '');
+  form.setAttribute('data-formactiontype', '2');
+  form.setAttribute('data-inputbox', '.t-input-group');
+  form.className += ' js-form-proccess';
+
+  /* Ждём, пока скрипт форм разберёт наш блок: initForms помечает разобранные
+     записи по их id. До этого переименовывать поля нельзя — иначе сломается
+     запасной путь через mailto, который читает поля по старым именам. */
+  var tries = 0;
+  function activate() {
+    if (window.initForms && window.initForms[rec.id]) {
+      for (var key in NAMES) {
+        var el = form.elements[key];
+        if (el) el.setAttribute('name', NAMES[key]);
+      }
+      var c = document.getElementById('f-consent');
+      if (c) c.value = 'да';       /* иначе в письме будет «on» */
+      ready = true;
+      return;
+    }
+    if (++tries < 60) setTimeout(activate, 100);
+  }
+
+  var SRC = 'https://static.tildacdn.com/js/tilda-forms-1.0.min.js';
+  if (!document.querySelector('script[src*="tilda-forms-1.0"]')) {
+    var s = document.createElement('script');
+    s.src = SRC;
+    s.onerror = function () {
+      /* Молча оставляем запасной путь: ready так и останется false. */
+    };
+    document.head.appendChild(s);
+  }
+  activate();
+
+  /* Перехват до Тильды: фаза погружения у document. */
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var btn = t && t.closest ? t.closest('#f-submit') : null;
+    if (!btn || !form.contains(btn)) return;
+    if (!ready) return;              /* Тильда не поднялась — уходим в mailto */
+
+    if (!form.checkValidity()) {
+      e.preventDefault();
+      e.stopPropagation();
+      status.textContent = 'Заполните имя, телефон и отметьте согласие.';
+      var bad = form.querySelector(':invalid');
+      if (bad) bad.focus();
+      return;
+    }
+
+    /* Служебные поля: без них нельзя подтвердить факт согласия.
+       IP-адрес отсюда не взять — его видит только сервер Тильды. */
+    hidden('Версия согласия').value = form.getAttribute('data-consent-version') || '';
+    hidden('Форма').value           = form.getAttribute('data-form-id') || '';
+    hidden('Страница').value        = location.href;
+    hidden('Время отправки').value  = new Date().toISOString();
+
+    status.textContent = 'Отправляем…';
+  }, true);
+
+  form.addEventListener('tildaform:aftersuccess', function () {
+    status.textContent = 'Заявка принята. Свяжемся с вами по указанным контактам.';
+    /* Тильда чистит поля сама, но снимает галочку согласия молча — кнопка
+       осталась бы активной. Возвращаем её в исходное состояние. */
+    setTimeout(function () {
+      var c = document.getElementById('f-consent');
+      if (c) {
+        c.checked = false;
+        c.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }, 0);
+  });
+
+  form.addEventListener('tildaform:aftererror', function () {
+    status.textContent = 'Не удалось отправить. Позвоните нам или напишите на почту — контакты выше.';
+  });
 })();
 </script>
