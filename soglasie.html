@@ -4,16 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Согласие на обработку персональных данных — Гурман-Гуру</title>
-<meta name="description" content="Согласие на обработку персональных данных, предоставляемое ИП Виленскому Павлу Александровичу при отправке заявки через форму на сайте.">
-<meta name="theme-color" content="#0B0B0B">
+<meta name="description" content="Согласие на обработку персональных данных, предоставляемое ООО «ГУРМАН-ГУРУ» при отправке заявки через форму на сайте.">
+<meta name="theme-color" content="#191510">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="assets/favicon.png" type="image/png">
 
 <!--
 =============================================================================
   СОГЛАСИЕ НА ОБРАБОТКУ ПЕРСОНАЛЬНЫХ ДАННЫХ
-  Текст перенесён без изменений с https://gurman.guru/soglasie
-  Юридический текст не редактировался: правки в него вносит только юрист.
+  Источник текста: «правки/soglasie_pdn_gurman_guru (2).docx» (редакция
+  от 2026-09-09). Юридический текст не редактировался: правки в него вносит
+  только юрист.
+
+  ЛИЦО СМЕНИЛОСЬ 2026-09-10: ИП Виленский П. А. → ООО «ГУРМАН-ГУРУ».
+  Подробности и полный список старых реквизитов — в шапке politika.html.
+  Текст под чекбоксом формы на главной («Приложение» к этому документу)
+  дословно повторяет присланную заказчиком формулировку — см. index.html,
+  блок .form__consent.
 
   Токены продублированы из index.html. Меняете палитру — правьте в трёх
   файлах: index.html, politika.html, soglasie.html.
@@ -22,14 +29,17 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --c-abyss:#0B0B0B; --c-carbon:#141414; --c-bone:#E4E0D8; --c-ash:#A8A29A;
-  --c-stone:#6A655F; --c-steel:#B9B2A6; --c-white-warm:#FFFDFA;
+  --c-abyss:#191510; --c-carbon:#221D17; --c-bone:#E4E0D8; --c-ash:#A8A29A;
+  /* --c-stone синхронизирован с index.html (#605A54). Он считан под светлый
+     фон и на этих тёмных страницах не используется: вторичный текст здесь
+     берёт --c-ash — на --c-abyss это 7,78 : 1 против 3,15 : 1 у камня. */
+  --c-stone:#605A54; --c-steel:#B9B2A6; --c-white-warm:#FFFDFA;
   --c-line-dark:rgba(228,224,216,.20);
-  --f-display:"Playfair Display","Prata",Georgia,"Times New Roman",serif;
+  --f-display:"Golos Text","Inter","Helvetica Neue",Arial,sans-serif;
   --f-mono:"Roboto Mono",ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;
   --t-display-m:clamp(28px,3.9vw,56px); --t-title-s:clamp(17px,1.55vw,22px);
   --t-body:clamp(14px,1.05vw,15px); --t-micro:12px;
@@ -78,7 +88,7 @@ body::after{
 /* Титул документа */
 .doc-title{padding-block:var(--s-9) var(--s-8); border-bottom:var(--border-w) solid var(--c-line-dark)}
 .doc-title h1{
-  font-family:var(--f-display); font-weight:400; font-size:var(--t-display-m);
+  font-family:var(--f-display); font-weight:500; font-size:var(--t-display-m);
   line-height:1.04; text-transform:uppercase; letter-spacing:.01em; color:var(--c-white-warm);
   max-width:22ch;
 }
@@ -89,7 +99,7 @@ body::after{
 .doc-body > *{max-width:82ch}
 .doc-body section + section{margin-top:var(--s-8)}
 .doc-body h2{
-  font-family:var(--f-display); font-weight:400; font-size:var(--t-title-s);
+  font-family:var(--f-display); font-weight:500; font-size:var(--t-title-s);
   letter-spacing:var(--ls-title); text-transform:uppercase; color:var(--c-white-warm);
   padding-bottom:var(--s-4); border-bottom:var(--border-w) solid var(--c-line-dark);
   margin-bottom:var(--s-5);
@@ -98,7 +108,7 @@ body::after{
 .doc-body p + p{margin-top:var(--s-4)}
 .doc-body ul{margin-top:var(--s-4); display:flex; flex-direction:column; gap:var(--s-3)}
 .doc-body li{color:var(--c-ash); padding-left:var(--s-5); position:relative}
-.doc-body li::before{content:"—"; position:absolute; left:0; color:var(--c-stone)}
+.doc-body li::before{content:"—"; position:absolute; left:0; color:var(--c-ash)}
 .doc-body a{color:var(--c-bone); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
 .doc-body a:hover{color:var(--c-steel)}
 .doc-body strong{font-weight:500; color:var(--c-bone)}
@@ -109,7 +119,7 @@ body::after{
 }
 
 /* Подвал документа */
-.doc-footer{border-top:var(--border-w) solid var(--c-line-dark); padding-block:var(--s-7); color:var(--c-stone)}
+.doc-footer{border-top:var(--border-w) solid var(--c-line-dark); padding-block:var(--s-7); color:var(--c-ash)}
 .doc-footer__inner{display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--s-3) var(--s-7)}
 .doc-footer__legal{display:flex; flex-wrap:wrap; gap:var(--s-3) var(--s-6)}
 .doc-footer a{color:var(--c-ash); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
@@ -147,7 +157,7 @@ body::after{
 
   <div class="container doc-body">
 
-    <p class="lead">Я, действуя свободно, своей волей и в своём интересе, подтверждая свою дееспособность, даю согласие Индивидуальному предпринимателю Виленскому Павлу Александровичу (ИП Виленский П. А., ИНН 773001052346, ОГРНИП 319774600717835, адрес: 119330, г. Москва, ул. Мосфильмовская, д. 11, корп. 2, кв. 24; адрес для корреспонденции: 121471, г. Москва, ул. Рябиновая, д. 43А, стр. 1; далее — «Оператор») на обработку моих персональных данных на следующих условиях.</p>
+    <p class="lead">Я, действуя свободно, своей волей и в своём интересе, подтверждая свою дееспособность, даю согласие Обществу с ограниченной ответственностью «ГУРМАН-ГУРУ» (ООО «ГУРМАН-ГУРУ», ИНН 9729312501, ОГРН 1217700391457, адрес: 121471, г. Москва, ул. Рябиновая, вл. 43А, эт. 2, пом. 23; далее — «Оператор») на обработку моих персональных данных на следующих условиях.</p>
 
     <section>
       <h2>1. Перечень персональных данных, на обработку которых даётся согласие</h2>
@@ -176,7 +186,7 @@ body::after{
 
     <section>
       <h2>5. Порядок отзыва согласия</h2>
-      <p>Согласие может быть отозвано мною в любое время путём направления Оператору заявления по адресу электронной почты <a href="mailto:2114111@mail.ru">2114111@mail.ru</a> либо по почтовому адресу: 121471, г. Москва, ул. Рябиновая, д. 43А, стр. 1. В случае отзыва согласия Оператор прекращает обработку персональных данных и уничтожает их в срок, не превышающий 30 (тридцати) дней с даты поступления отзыва, если отсутствуют иные правовые основания обработки, предусмотренные законодательством Российской Федерации.</p>
+      <p>Согласие может быть отозвано мною в любое время путём направления Оператору заявления по адресу электронной почты <a href="mailto:sale@gurman.guru">sale@gurman.guru</a> либо по почтовому адресу: 121471, г. Москва, ул. Рябиновая, вл. 43А, эт. 2, пом. 23. В случае отзыва согласия Оператор прекращает обработку персональных данных и уничтожает их в срок, не превышающий 30 (тридцати) дней с даты поступления отзыва, если отсутствуют иные правовые основания обработки, предусмотренные законодательством Российской Федерации.</p>
     </section>
 
     <section>
@@ -190,7 +200,7 @@ body::after{
 
 <footer class="doc-footer">
   <div class="container doc-footer__inner micro">
-    <span>&copy; ИП Виленский П.А., 2026 г.</span>
+    <span>&copy; ООО «ГУРМАН-ГУРУ», 2026 г.</span>
     <span class="doc-footer__legal">
       <a href="index.html">На главную</a>
       <a href="politika.html">Политика конфиденциальности</a>
