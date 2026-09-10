@@ -2,6 +2,18 @@
      Все правила заперты под .gg-root — разметку Тильды не трогают. -->
 <style>
 
+.gg-root .faq__q{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--s-5);
+  padding-block:var(--s-5); cursor:pointer; list-style:none;
+  font-family:var(--f-display); font-size:var(--t-title-s); letter-spacing:.02em; color:var(--c-graphite);
+}
+.gg-root .faq__q::-webkit-details-marker{display:none}
+.gg-root .faq__sign{flex:none; width:14px; height:14px; position:relative}
+.gg-root .faq__sign::before, .gg-root .faq__sign::after{content:""; position:absolute; background:var(--c-graphite); transition:transform var(--dur-fast) var(--ease)}
+.gg-root .faq__sign::before{left:0; top:6px; width:14px; height:1px}
+.gg-root .faq__sign::after{left:6px; top:0; width:1px; height:14px}
+.gg-root .faq__item[open] .faq__sign::after{transform:scaleY(0)}
+.gg-root .faq__a{padding-bottom:var(--s-5); max-width:70ch; color:var(--c-stone)}
 
 /* ===========================================================================
    10. ЗАЯВКА. Тёмная секция поверх кадра первого экрана. Поля без рамок,
@@ -61,7 +73,13 @@
    странице после Фазы 1. Взят --c-ash — 7,78 : 1. */
 .gg-root .cta__contacts dt{color:var(--c-ash)}
 .gg-root .cta__contacts dd{margin:var(--s-1) 0 0; color:var(--c-ash)}
-.gg-root .form__row{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:var(--s-5) var(--grid-gap)}
+/* Шесть полей в две колонки. Вертикальный шаг формы — 48px, и складывается он
+   из двух слагаемых: строчный gap сетки (24) плюс нижний отступ самого поля
+   (24). Внутри сетки это работает, а вот под ней — нет: у последней строки
+   остаётся только отступ поля, и перед одиночным полем «Задача» получалось
+   24 вместо 48. Свой margin-bottom у ряда добирает недостающие 24 и на
+   промежутки внутри сетки не влияет — он приложен к её внешнему краю. */
+.gg-root .form__row{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:var(--s-5) var(--grid-gap); margin-bottom:var(--s-5)}
 .gg-root .field{display:flex; flex-direction:column; gap:var(--s-2); margin-bottom:var(--s-5)}
 .gg-root .field label{font-size:var(--t-micro); letter-spacing:var(--ls-wide); text-transform:uppercase; color:var(--c-ash)}
 .gg-root .field input, .gg-root .field select, .gg-root .field textarea{
@@ -83,9 +101,10 @@
 /* Плейсхолдеры. Было rgba(168,162,154,.55) — на «абиссе» это давало цвет
    rgb(97,94,90) и контраст 3,06 : 1 при пороге 4,5. Единственное место на
    сайте, где замер показал прямой провал. Взят непрозрачный --c-ash: 7,78 : 1.
-   Подсказка всё равно легко отличается от введённого значения — то набрано
-   --c-bone, вдвое светлее. */
-.gg-root .field input::placeholder, .gg-root .field textarea::placeholder{color:var(--c-ash); opacity:1}
+   После осветления палитры 10.09.2026 ссылка переставлена на --c-hint —
+   это ровно то же значение, но вынесенное в отдельный токен: --c-ash ушёл
+   почти в белый, и подсказка сравнялась бы с введённым значением. */
+.gg-root .field input::placeholder, .gg-root .field textarea::placeholder{color:var(--c-hint); opacity:1}
 /* Согласие. Формулировка и ссылки — как на gurman.guru. */
 .gg-root .form__consent{display:flex; gap:var(--s-3); align-items:flex-start; margin:var(--s-5) 0 var(--s-6); color:var(--c-ash); font-size:var(--t-micro); line-height:1.7}
 .gg-root .form__consent input{accent-color:var(--c-steel); margin-top:4px; flex:none}
@@ -222,7 +241,15 @@
      в ту же полосу, где стоит вертикальная подпись. Убираем её здесь,
      а не на 640, иначе она перечёркивает «ПРОИЗВОДСТВО / ПО ТУ…». */
   .gg-root .statement__side{display:none}
-  .gg-root .chain{margin-top:var(--s-7)}
+  /* Цепочка в одну строку больше не помещается и переносится. При переносе
+     соединительное тире последнего в строке пункта повисало у правого края —
+     связывать ему было нечего. Гибкая строка о переносах ничего не знает,
+     поэтому на узких экранах цепочка переведена на сетку с явным числом
+     колонок: тогда известно, какие пункты заканчивают строку, и тире у них
+     снимается. Три колонки при 768 дают 208px на пункт — самый длинный
+     («Этикетирование», ~120px) входит вместе с тире и просветом. */
+  .gg-root .chain{margin-top:var(--s-7); display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:var(--s-5) var(--s-4)}
+  .gg-root .chain li:nth-child(3n)::after{content:none}
   .gg-root .docs__grid, .gg-root .cta__grid, .gg-root .origin__grid, .gg-root .about__grid{grid-template-columns:1fr; gap:var(--s-7)}
   /* «Контакты» на одной колонке. Секция вытягивается с 926 до 1422–1769px, и
      при object-fit:cover кадр 3:4 перестаёт обрезаться по высоте — начинает
@@ -327,6 +354,12 @@
   .gg-root .hero__lead{max-width:none}
   .gg-root .hero__meta{margin-top:var(--s-7); padding-top:var(--s-7); gap:var(--s-3) var(--s-6)}
   .gg-root .statement__head, .gg-root .chain{padding-left:0}
+  /* Две колонки вместо трёх: на 375 отведённые сеткой 161px пункт занимает
+     целиком, третья колонка не влезала. Правило про 3n перекрывается —
+     строку теперь заканчивает каждый чётный пункт. */
+  .gg-root .chain{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .gg-root .chain li:nth-child(3n)::after{content:""}
+  .gg-root .chain li:nth-child(2n)::after{content:none}
   .gg-root .chain li:not(:last-child)::after{width:18px}
   .gg-root .process__grid, .gg-root .start__grid, .gg-root .facts, .gg-root .equip, .gg-root .form__row, .gg-root .site-footer__grid{grid-template-columns:1fr}
   /* «Производство» на узком экране. В одну колонку секция вытягивается с
@@ -374,7 +407,13 @@
   .gg-root .scene__seg span{display:none}
   .gg-root .origin__specs div{grid-template-columns:1fr; gap:var(--s-1)}
   /* Ряд подвала здесь складывается в столбик — пункты целыми строками. */
-  .gg-root .site-footer__bottom{gap:var(--s-4)}
+  /* Запрет переносов внутри пункта снимается. Он держал ряд ровным, пока
+     пункты умещались в строку целиком, но на 375 «Согласие на обработку
+     персональных данных» — 342px в колонке 335px, и пункт вылезал за правый
+     край экрана. Здесь ряд и так стоит столбиком, по пункту на строку,
+     так что цельность пункта уже ничего не выигрывает: единственное, что
+     даёт nowrap на этой ширине, — горизонтальный вылет. */
+  .gg-root .site-footer__bottom{gap:var(--s-4); white-space:normal}
   /* Таблица форматов превращается в карточки — на 360px строки не помещаются */
   .gg-root .tbl, .gg-root .tbl tbody, .gg-root .tbl tr, .gg-root .tbl td, .gg-root .tbl caption{display:block; width:100%}
   .gg-root .tbl thead{display:none}
