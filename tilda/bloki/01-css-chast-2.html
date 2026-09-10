@@ -66,7 +66,7 @@
 .gg-root .field label{font-size:var(--t-micro); letter-spacing:var(--ls-wide); text-transform:uppercase; color:var(--c-ash)}
 .gg-root .field input, .gg-root .field select, .gg-root .field textarea{
   background:transparent; border:0; border-bottom:var(--border-w) solid var(--c-line-dark);
-  border-radius:var(--radius); color:var(--c-bone); font-family:var(--f-mono);
+  border-radius:var(--radius); color:var(--c-bone); font-family:var(--f-display);
   font-size:var(--t-body); padding:var(--s-3) 0; width:100%;
   /* Межстрочный интервал задан числом намеренно. При line-height:normal
      браузер считает высоту строки по метрикам конкретного элемента, и <select>
@@ -129,7 +129,7 @@
 .gg-root .site-footer a:hover{color:var(--c-bone)}
 /* Заголовки колонок и строка «Контрактная фасовка…» — жирным по указанию
    заказчика (2026-09-07). На референсе подвал ровный по весу, это осознанное
-   отступление. 700 — специально догруженное начертание Roboto Mono.
+   отступление. 700 — специально догруженное начертание Golos Text.
    Цвет не задаётся: у всех трёх заголовков в разметке есть класс micro, и
    правило .site-footer .micro (два класса против одного) всё равно перебивало
    стоявший здесь --c-stone. Объявление было мёртвым и при этом сбивало с
@@ -138,7 +138,7 @@
 .gg-root .site-footer__tagline{font-weight:700; margin-top:var(--s-5)}
 .gg-root .site-footer__list{margin-top:var(--s-4); display:flex; flex-direction:column; gap:var(--s-3)}
 /* Нижняя строка стояла на четырёхколоночной сетке колонок выше, но «Согласие
-   на обработку персональных данных» — 41 знак моноширинного с трекингом — в
+   на обработку персональных данных» — 41 знак с трекингом — в
    свою колонку (~300px) не входило и ломалось на две строки, пока соседи
    стояли в одну. По указанию заказчика ряд собран заново: кегль на ступень
    ниже (--t-micro-s) у всех четырёх пунктов сразу — одинаково ровно, — каждый

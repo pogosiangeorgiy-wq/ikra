@@ -37,7 +37,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 :root{
@@ -47,8 +47,9 @@
      берёт --c-ash — на --c-abyss это 7,78 : 1 против 3,15 : 1 у камня. */
   --c-stone:#605A54; --c-steel:#B9B2A6; --c-white-warm:#FFFDFA;
   --c-line-dark:rgba(228,224,216,.20);
+  /* Шрифт на странице один — тот же, что и в заголовках лендинга.
+     Моноширинный Roboto Mono убран 2026-09-10 вместе с токеном --f-mono. */
   --f-display:"Golos Text","Inter","Helvetica Neue",Arial,sans-serif;
-  --f-mono:"Roboto Mono",ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;
   --t-display-m:clamp(28px,3.9vw,56px); --t-title-s:clamp(17px,1.55vw,22px);
   --t-body:clamp(14px,1.05vw,15px); --t-micro:12px;
   --lh-body:1.75; --ls-wide:.18em; --ls-title:.12em;
@@ -62,7 +63,9 @@
 html{-webkit-text-size-adjust:100%}
 body{
   margin:0; background:var(--c-abyss); color:var(--c-bone);
-  font-family:var(--f-mono); font-size:var(--t-body); font-weight:300;
+  /* 300 у Golos Text нет — в наборе 400/500/600. Оставить 300 значило бы
+     отдать браузеру синтез начертания. Ставим 400, как в тексте лендинга. */
+  font-family:var(--f-display); font-size:var(--t-body); font-weight:400;
   line-height:var(--lh-body); -webkit-font-smoothing:antialiased;
 }
 img{display:block; max-width:100%; height:auto}

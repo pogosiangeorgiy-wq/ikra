@@ -1,10 +1,11 @@
 <!-- Стили лендинга, часть 1 из 2. Блок T123.
      Все правила заперты под .gg-root — разметку Тильды не трогают. -->
-<!-- Шрифты. Взяты из index.html как есть, вместе с весами:
-     Playfair Display 600 и Roboto Mono 700 нужны заголовкам. -->
+<!-- Шрифты. Взяты из index.html как есть, вместе с весами.
+     Семейство одно на всю страницу; отдельных весов ждут
+     только заголовки (500, 600) и подвал (700). -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 /* Корень лендинга. Всё, что ниже, действует только внутри него —
@@ -122,18 +123,19 @@
   --photo-pos: 50% 80%;
 
   /* --- Шрифт ---
-     Заголовочный шрифт сменён 2026-09-09 с антиквы Playfair Display на
-     гротеск Golos Text по просьбе заказчика: «буквы с засечками не нравятся,
-     хотелось бы прямые». Golos Text — кириллический гротеск Paratype, лежит
-     в Google Fonts, знаковый состав полный, поэтому запасной ряд собран из
-     системных гротесков, а не из антиквы.
+     Один шрифт на всю страницу — Golos Text, кириллический гротеск Paratype
+     из Google Fonts. Пришёл 2026-09-09 вместо антиквы Playfair Display
+     («буквы с засечками не нравятся, хотелось бы прямые»), а 2026-09-10
+     заказчик распространил его с заголовков на весь текст. Моноширинный
+     Roboto Mono, стоявший в основном наборе, убран вместе с токеном --f-mono:
+     держать имя «mono» для гротеска было бы враньём, а второй токен с той же
+     строкой — дубликатом. Запасной ряд собран из системных гротесков.
      --fw-display: гротеску нужен вес тяжелее антиквенного. Playfair держал
      крупный заголовок в 400, у Golos Text та же строка на кегле 112px
      выглядит бледной, поэтому по умолчанию 500. Вынесено в токен, чтобы
      вес правился в одном месте, а не в четырнадцати правилах. */
   --f-display: "Golos Text", "Inter", "Helvetica Neue", Arial, sans-serif;
   --fw-display: 500;
-  --f-mono: "Roboto Mono", ui-monospace, "SF Mono", "JetBrains Mono", Consolas, monospace;
 
   /* --- Кегли. Слева минимум для 360px, справа — замер с референса при 1440px --- */
   /* Замер с референса: строка «ДО ГОТОВОЙ» занимает 800px по ширине при
@@ -161,7 +163,7 @@
   --lh-tight: .88;  /* интерлиньяж крупной антиквы */
   --lh-hero: .98;
   --lh-body: 1.75;
-  /* Трекинг мелкого моно. Замер с референса давал .18em, но там этим кеглем
+  /* Трекинг мелких прописных. Замер с референса давал .18em, но там этим кеглем
      набраны единичные подписи, а у нас — треть текста. Разрядка разрывает
      слово на отдельные знаки: глаз читает по буквам, а не целым словом.
      Ужат до .12em — след референса сохраняется, слово снова читается разом. */
@@ -170,7 +172,7 @@
   --ls-title: .12em;
   --ls-legal: .12em; /* нижняя строка подвала; на ≤760 ужимается до .04em,
                         иначе «Согласие на обработку персональных данных»
-                        (41 знак моно) не входит в 320px одной строкой.
+                        (41 знак) не входит в 320px одной строкой.
                         Оба числа опущены на ступень 8 сентября 2026 вместе
                         с --t-micro-s: 11 → 12px, и при прежней разрядке
                         строка вылезала за поле на 15px при ширине окна 360. */
@@ -278,7 +280,7 @@ html.has-inertia .gg-root{scroll-behavior:auto}
    на macOS оно дополнительно утончает светлый текст на тёмном. */
 .gg-root{
   margin:0; background:var(--c-abyss); color:var(--c-bone);
-  font-family:var(--f-mono); font-size:var(--t-body); font-weight:400;
+  font-family:var(--f-display); font-size:var(--t-body); font-weight:400;
   line-height:var(--lh-body);
 }
 .gg-root img{display:block; max-width:100%; height:auto}
@@ -820,12 +822,11 @@ html:not(.js-motion) .gg-root .trust__row{flex-wrap:wrap; padding-left:0; margin
 .gg-root .origin__lead{color:var(--c-graphite); max-width:52ch}
 .gg-root .origin__lead p + p{margin-top:var(--s-5)}
 .gg-root .origin__lead .rule{margin-bottom:var(--s-6); color:var(--c-stone)}
-/* Подзаголовки внутри колонки. Набраны тем же моно, что и остальные
-   технические подписи страницы, а не дисплейным шрифтом: рядом с ними стоит
-   заголовок полосы «КАЧЕСТВО НАЧИНАЕТСЯ С СЫРЬЯ», и второй крупный шрифт
-   в том же экране начал бы спорить с ним за первенство. */
+/* Подзаголовки внутри колонки. От заголовка полосы «КАЧЕСТВО НАЧИНАЕТСЯ
+   С СЫРЬЯ» их отделяет теперь только кегль и трекинг: шрифт на странице один,
+   и раньше эту роль играло различие гротеска и моно. */
 .gg-root .origin__sub{
-  font-family:var(--f-mono); font-size:var(--t-micro); font-weight:500;
+  font-size:var(--t-micro); font-weight:500;
   letter-spacing:var(--ls-wide); text-transform:uppercase; line-height:1.6;
   margin:0 0 var(--s-4); color:var(--c-graphite);
 }

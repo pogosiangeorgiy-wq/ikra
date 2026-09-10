@@ -97,12 +97,12 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Roboto Mono 700 добавлен 2026-09-07: заказчик просил жирные заголовки
-     колонок подвала и строку о фасовке, а тяжелее 500 в наборе не было.
-     Playfair Display заменён на Golos Text 2026-09-09: заказчик просил
-     «прямые буквы, без засечек». Веса 500 и 600 нужны крупным заголовкам —
-     гротеск в 400 на кегле 112px читается как недопечатанный. -->
-<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<!-- Один шрифт на всю страницу — Golos Text. Playfair Display заменён на него
+     2026-09-09 («прямые буквы, без засечек»), а 2026-09-10 заказчик распространил
+     его и на текст: моноширинного Roboto Mono на странице больше нет.
+     Веса: 400 — основной текст, 500 и 600 — заголовки (гротеск в 400 на кегле
+     112px читается как недопечатанный), 700 — подвал. -->
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 /* ===========================================================================
@@ -213,18 +213,19 @@
   --photo-pos: 50% 80%;
 
   /* --- Шрифт ---
-     Заголовочный шрифт сменён 2026-09-09 с антиквы Playfair Display на
-     гротеск Golos Text по просьбе заказчика: «буквы с засечками не нравятся,
-     хотелось бы прямые». Golos Text — кириллический гротеск Paratype, лежит
-     в Google Fonts, знаковый состав полный, поэтому запасной ряд собран из
-     системных гротесков, а не из антиквы.
+     Один шрифт на всю страницу — Golos Text, кириллический гротеск Paratype
+     из Google Fonts. Пришёл 2026-09-09 вместо антиквы Playfair Display
+     («буквы с засечками не нравятся, хотелось бы прямые»), а 2026-09-10
+     заказчик распространил его с заголовков на весь текст. Моноширинный
+     Roboto Mono, стоявший в основном наборе, убран вместе с токеном --f-mono:
+     держать имя «mono» для гротеска было бы враньём, а второй токен с той же
+     строкой — дубликатом. Запасной ряд собран из системных гротесков.
      --fw-display: гротеску нужен вес тяжелее антиквенного. Playfair держал
      крупный заголовок в 400, у Golos Text та же строка на кегле 112px
      выглядит бледной, поэтому по умолчанию 500. Вынесено в токен, чтобы
      вес правился в одном месте, а не в четырнадцати правилах. */
   --f-display: "Golos Text", "Inter", "Helvetica Neue", Arial, sans-serif;
   --fw-display: 500;
-  --f-mono: "Roboto Mono", ui-monospace, "SF Mono", "JetBrains Mono", Consolas, monospace;
 
   /* --- Кегли. Слева минимум для 360px, справа — замер с референса при 1440px --- */
   /* Замер с референса: строка «ДО ГОТОВОЙ» занимает 800px по ширине при
@@ -252,7 +253,7 @@
   --lh-tight: .88;  /* интерлиньяж крупной антиквы */
   --lh-hero: .98;
   --lh-body: 1.75;
-  /* Трекинг мелкого моно. Замер с референса давал .18em, но там этим кеглем
+  /* Трекинг мелких прописных. Замер с референса давал .18em, но там этим кеглем
      набраны единичные подписи, а у нас — треть текста. Разрядка разрывает
      слово на отдельные знаки: глаз читает по буквам, а не целым словом.
      Ужат до .12em — след референса сохраняется, слово снова читается разом. */
@@ -261,7 +262,7 @@
   --ls-title: .12em;
   --ls-legal: .12em; /* нижняя строка подвала; на ≤760 ужимается до .04em,
                         иначе «Согласие на обработку персональных данных»
-                        (41 знак моно) не входит в 320px одной строкой.
+                        (41 знак) не входит в 320px одной строкой.
                         Оба числа опущены на ступень 8 сентября 2026 вместе
                         с --t-micro-s: 11 → 12px, и при прежней разрядке
                         строка вылезала за поле на 15px при ширине окна 360. */
@@ -369,7 +370,7 @@ html.has-inertia{scroll-behavior:auto}
    на macOS оно дополнительно утончает светлый текст на тёмном. */
 body{
   margin:0; background:var(--c-abyss); color:var(--c-bone);
-  font-family:var(--f-mono); font-size:var(--t-body); font-weight:400;
+  font-family:var(--f-display); font-size:var(--t-body); font-weight:400;
   line-height:var(--lh-body);
 }
 img{display:block; max-width:100%; height:auto}
@@ -918,12 +919,11 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 .origin__lead{color:var(--c-graphite); max-width:52ch}
 .origin__lead p + p{margin-top:var(--s-5)}
 .origin__lead .rule{margin-bottom:var(--s-6); color:var(--c-stone)}
-/* Подзаголовки внутри колонки. Набраны тем же моно, что и остальные
-   технические подписи страницы, а не дисплейным шрифтом: рядом с ними стоит
-   заголовок полосы «КАЧЕСТВО НАЧИНАЕТСЯ С СЫРЬЯ», и второй крупный шрифт
-   в том же экране начал бы спорить с ним за первенство. */
+/* Подзаголовки внутри колонки. От заголовка полосы «КАЧЕСТВО НАЧИНАЕТСЯ
+   С СЫРЬЯ» их отделяет теперь только кегль и трекинг: шрифт на странице один,
+   и раньше эту роль играло различие гротеска и моно. */
 .origin__sub{
-  font-family:var(--f-mono); font-size:var(--t-micro); font-weight:500;
+  font-size:var(--t-micro); font-weight:500;
   letter-spacing:var(--ls-wide); text-transform:uppercase; line-height:1.6;
   margin:0 0 var(--s-4); color:var(--c-graphite);
 }
@@ -1308,7 +1308,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 .field label{font-size:var(--t-micro); letter-spacing:var(--ls-wide); text-transform:uppercase; color:var(--c-ash)}
 .field input,.field select,.field textarea{
   background:transparent; border:0; border-bottom:var(--border-w) solid var(--c-line-dark);
-  border-radius:var(--radius); color:var(--c-bone); font-family:var(--f-mono);
+  border-radius:var(--radius); color:var(--c-bone); font-family:var(--f-display);
   font-size:var(--t-body); padding:var(--s-3) 0; width:100%;
   /* Межстрочный интервал задан числом намеренно. При line-height:normal
      браузер считает высоту строки по метрикам конкретного элемента, и <select>
@@ -1371,7 +1371,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 .site-footer a:hover{color:var(--c-bone)}
 /* Заголовки колонок и строка «Контрактная фасовка…» — жирным по указанию
    заказчика (2026-09-07). На референсе подвал ровный по весу, это осознанное
-   отступление. 700 — специально догруженное начертание Roboto Mono.
+   отступление. 700 — специально догруженное начертание Golos Text.
    Цвет не задаётся: у всех трёх заголовков в разметке есть класс micro, и
    правило .site-footer .micro (два класса против одного) всё равно перебивало
    стоявший здесь --c-stone. Объявление было мёртвым и при этом сбивало с
@@ -1380,7 +1380,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 .site-footer__tagline{font-weight:700; margin-top:var(--s-5)}
 .site-footer__list{margin-top:var(--s-4); display:flex; flex-direction:column; gap:var(--s-3)}
 /* Нижняя строка стояла на четырёхколоночной сетке колонок выше, но «Согласие
-   на обработку персональных данных» — 41 знак моноширинного с трекингом — в
+   на обработку персональных данных» — 41 знак с трекингом — в
    свою колонку (~300px) не входило и ломалось на две строки, пока соседи
    стояли в одну. По указанию заказчика ряд собран заново: кегль на ступень
    ниже (--t-micro-s) у всех четырёх пунктов сразу — одинаково ровно, — каждый
@@ -1859,8 +1859,8 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   </div>
 </section>
 
-<!-- 3. ЭТАПЫ РАБОТЫ 01–04. Четвёртый блок референса: номера антиквой,
-     заголовок в разрядку, кадр 5:4, моно-подпись.
+<!-- 3. ЭТАПЫ РАБОТЫ 01–04. Четвёртый блок референса: крупные номера,
+     заголовок в разрядку, кадр 5:4, мелкая подпись.
      Фото: assets/step-0X-*.jpg, четыре разных кадра цикла по ТЗ п. 2.
 
      Со скриптом секция превращается в липкую сцену: трек прокрутки высотой
