@@ -2,6 +2,52 @@
      Все правила заперты под .gg-root — разметку Тильды не трогают. -->
 <style>
 
+
+/* ===========================================================================
+   9-бис. ЭКОНОМИКА И УСЛОВИЯ. Тёмная секция с ценами.
+
+   Почему тёмная и почему именно здесь: цена — единственное место, где
+   посетитель останавливается и считает. Секция стоит между «Как начать» и
+   «Вопросами», обе светлые; тёмная полоса между ними работает как пауза и
+   не даёт цифрам утонуть в общем потоке. Внутри «Вопросов» те же условия
+   пересказаны словами — здесь они собраны в цифрах, и это не дублирование:
+   один блок отвечает на «сколько», другой на «а если…».
+
+   Строение: слева две цены крупно, справа три условия списком. Никаких
+   карточек и рамок — на сайте их нигде нет, всё держится на линиях.
+   =========================================================================== */
+.gg-root .econ__grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--s-9); align-items:start}
+.gg-root .econ__prices{display:flex; flex-direction:column; gap:var(--s-7)}
+.gg-root .econ__price{border-top:var(--border-w) solid var(--c-line-dark); padding-top:var(--s-5)}
+.gg-root .econ__label{color:var(--c-ash)}
+/* Кегль --t-num — тот же, что у номеров 01–07 в «Готовой партии»: цифры на
+   странице должны быть одного роста, иначе цена спорит с нумерацией. */
+.gg-root .econ__value{
+  font-family:var(--f-display); font-weight:var(--fw-display);
+  font-size:var(--t-num); line-height:1.05; letter-spacing:var(--ls-title);
+  margin-top:var(--s-3); color:var(--c-white-warm);
+}
+/* Единица измерения — не часть цифры, поэтому мельче и другим цветом:
+   «4 000» должно читаться первым, «₽/кг» — уточнением. */
+.gg-root .econ__unit{font-size:var(--t-body); font-weight:400; letter-spacing:var(--ls-wide); color:var(--c-steel)}
+.gg-root .econ__note{margin-top:var(--s-3); color:var(--c-ash)}
+.gg-root .econ__terms li{
+  border-top:var(--border-w) solid var(--c-line-dark);
+  padding-block:var(--s-5);
+}
+.gg-root .econ__terms li:last-child{border-bottom:var(--border-w) solid var(--c-line-dark)}
+.gg-root .econ__term{
+  font-family:var(--f-display); font-weight:var(--fw-display);
+  font-size:var(--t-title-s); letter-spacing:var(--ls-title);
+  text-transform:uppercase; color:var(--c-white-warm);
+}
+.gg-root .econ__text{margin-top:var(--s-3); color:var(--c-bone)}
+@media (max-width:900px){
+  .gg-root .econ__grid{grid-template-columns:1fr; gap:var(--s-8)}
+  /* Цены в две колонки: по одной на строку они уводят условия слишком
+     далеко вниз, а рядом читаются как одна цена за услугу и тару. */
+  .gg-root .econ__prices{flex-direction:row; gap:var(--grid-gap)}
+  .gg-root .econ__price{flex:1 1 0}}
 @media (max-width:560px){
   .gg-root .econ__prices{flex-direction:column; gap:var(--s-6)}}
 
@@ -406,6 +452,19 @@
      на светлый участок кадра. Названия этапов под шкалой убраны: на 360px
      четыре подписи в строку не читаются, остаются четыре отрезка. */
   .gg-root .scene.is-scene .scene__stage{padding:calc(var(--header-h) + var(--s-4)) 0 var(--s-7)}
+  /* Запас под адресную строку — тот же приём, что и в базовом блоке. Здесь он
+     повторён потому, что строка выше задаёт padding сокращённо и иначе затёрла
+     бы нижнее поле ровно на тех экранах, ради которых оно и вводилось. */
+  @supports (height:100lvh) and (height:100svh){
+    .gg-root .scene.is-scene .scene__stage{padding-bottom:calc(var(--s-7) + 100lvh - 100svh)}}
+  /* Сглаживание кадра на телефоне. Фотография и наезд ведутся сглаженной
+     долей, а текст, шкала и отрезки — сырой: так смена кадра успевает начаться
+     до смены подписи. При --scene-tau: 8 постоянная времени 125 мс — на
+     колесе мыши это и даёт задуманное опережение, но палец на телефоне
+     разгоняет страницу до ~3000 px/с, и за те же 125 мс кадр отстаёт почти на
+     целый этап: подпись уже «03 Фасовка», а на экране ещё предыдущий кадр.
+     20 — это 50 мс: сглаживание остаётся, рассинхрона нет. */
+  .gg-root{--scene-tau: 20}
   /* Оба слоя ослаблены: два наложенных градиента перемножаются, и вместе они
      уводили стопку кадров к медиане 14–17. Сцена — самый длинный по времени
      кусок страницы, и всё это время читатель смотрел в темноту.

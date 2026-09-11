@@ -279,7 +279,10 @@
      частоты кадров: доля за кадр считается как 1 − exp(−dt · tau).
      8.35 воспроизводит согласованный ранее характер инерции (0.13 за кадр
      при 60 Гц), но теперь одинаково на 60, 120 и 144 Гц.
-     --scene-tau ниже: картинка догоняет прокрутку чуть мягче страницы. */
+     --scene-tau ниже: картинка догоняет прокрутку чуть мягче страницы.
+     На экранах до 760px --scene-tau поднят до 20: палец разгоняет страницу
+     сильнее колеса, и мягкое схождение там читается как отставание кадра от
+     подписи. Значение читается скриптом один раз при включении сцены. */
   --inertia-tau: 8.35;
   --scene-tau: 8;
 }
@@ -710,12 +713,31 @@ html:not(.js-motion) .gg-root .trust__row{flex-wrap:wrap; padding-left:0; margin
 .gg-root .scene.is-scene{padding-block:0; background:var(--c-abyss)}
 .gg-root .scene.is-scene .scene__track{position:relative; height:var(--scene-track)}
 .gg-root .scene.is-scene .scene__stage{
-  position:sticky; top:0; height:100vh; height:100svh; overflow:hidden;
+  position:sticky; top:0; height:100vh; overflow:hidden;
   display:flex; flex-direction:column;
   /* Верхнее поле — под фиксированную шапку, иначе подпись «Этапы работы»
      уезжает под логотип. */
   padding:calc(var(--header-h) + var(--s-5)) 0 var(--s-8);
 }
+/* Высота экрана на телефоне.
+   На мобильных браузерах видимая область меняется: с показанной адресной
+   строкой это 100svh, со спрятанной — 100lvh (и ровно столько же даёт 100vh).
+   Раньше экран был 100svh, то есть по меньшей высоте. Как только при
+   прокрутке адресная строка уезжала, экран оказывался на 90–110 px короче
+   окна, и под фотографией на всю ширину вылезала полоса голого фона, а шкала
+   этапов повисала над ней.
+   Берём большую высоту (100vh = 100lvh) — кадр всегда закрывает окно целиком.
+   Чтобы при показанной адресной строке нижняя часть экрана не оказалась за
+   краем окна, ровно на разницу высот увеличиваем нижнее поле: содержимое
+   (тексты и шкала) остаётся внутри малой высоты и видно всегда.
+   Обе единицы статические, поэтому при появлении и уходе адресной строки
+   ничего не пересчитывается — ни рывка, ни перекладки четырёх полноэкранных
+   кадров. Браузер, который не знает lvh и svh, эту строку пропустит и получит
+   прежнее поведение по 100vh. */
+@supports (height:100lvh) and (height:100svh){
+  .gg-root .scene.is-scene .scene__stage{
+    padding-bottom:calc(var(--s-8) + 100lvh - 100svh);
+  }}
 
 /* Стопка кадров. Наезд задан на обёртке, а не на самих снимках: затемнение
    лежит отдельным слоем и масштабироваться вместе с фотографией не должно. */
@@ -1111,50 +1133,4 @@ html:not(.js-motion) .gg-root .trust__row{flex-wrap:wrap; padding-left:0; margin
 .gg-root .start__term{color:var(--c-stone)}
 .gg-root .start__title{font-family:var(--f-display); font-weight:var(--fw-display); font-size:var(--t-title-s); letter-spacing:var(--ls-title); text-transform:uppercase; margin-top:var(--s-3); color:var(--c-graphite)}
 .gg-root .start__text{margin-top:var(--s-3); color:var(--c-stone)}
-
-/* ===========================================================================
-   9-бис. ЭКОНОМИКА И УСЛОВИЯ. Тёмная секция с ценами.
-
-   Почему тёмная и почему именно здесь: цена — единственное место, где
-   посетитель останавливается и считает. Секция стоит между «Как начать» и
-   «Вопросами», обе светлые; тёмная полоса между ними работает как пауза и
-   не даёт цифрам утонуть в общем потоке. Внутри «Вопросов» те же условия
-   пересказаны словами — здесь они собраны в цифрах, и это не дублирование:
-   один блок отвечает на «сколько», другой на «а если…».
-
-   Строение: слева две цены крупно, справа три условия списком. Никаких
-   карточек и рамок — на сайте их нигде нет, всё держится на линиях.
-   =========================================================================== */
-.gg-root .econ__grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--s-9); align-items:start}
-.gg-root .econ__prices{display:flex; flex-direction:column; gap:var(--s-7)}
-.gg-root .econ__price{border-top:var(--border-w) solid var(--c-line-dark); padding-top:var(--s-5)}
-.gg-root .econ__label{color:var(--c-ash)}
-/* Кегль --t-num — тот же, что у номеров 01–07 в «Готовой партии»: цифры на
-   странице должны быть одного роста, иначе цена спорит с нумерацией. */
-.gg-root .econ__value{
-  font-family:var(--f-display); font-weight:var(--fw-display);
-  font-size:var(--t-num); line-height:1.05; letter-spacing:var(--ls-title);
-  margin-top:var(--s-3); color:var(--c-white-warm);
-}
-/* Единица измерения — не часть цифры, поэтому мельче и другим цветом:
-   «4 000» должно читаться первым, «₽/кг» — уточнением. */
-.gg-root .econ__unit{font-size:var(--t-body); font-weight:400; letter-spacing:var(--ls-wide); color:var(--c-steel)}
-.gg-root .econ__note{margin-top:var(--s-3); color:var(--c-ash)}
-.gg-root .econ__terms li{
-  border-top:var(--border-w) solid var(--c-line-dark);
-  padding-block:var(--s-5);
-}
-.gg-root .econ__terms li:last-child{border-bottom:var(--border-w) solid var(--c-line-dark)}
-.gg-root .econ__term{
-  font-family:var(--f-display); font-weight:var(--fw-display);
-  font-size:var(--t-title-s); letter-spacing:var(--ls-title);
-  text-transform:uppercase; color:var(--c-white-warm);
-}
-.gg-root .econ__text{margin-top:var(--s-3); color:var(--c-bone)}
-@media (max-width:900px){
-  .gg-root .econ__grid{grid-template-columns:1fr; gap:var(--s-8)}
-  /* Цены в две колонки: по одной на строку они уводят условия слишком
-     далеко вниз, а рядом читаются как одна цена за услугу и тару. */
-  .gg-root .econ__prices{flex-direction:row; gap:var(--grid-gap)}
-  .gg-root .econ__price{flex:1 1 0}}
 </style>
