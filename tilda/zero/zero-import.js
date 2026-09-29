@@ -258,7 +258,7 @@ function bystryeTaimery() {
 // уходят за край. Поэтому высота телефонной раскладки ужимается до
 // содержимого с полями, а содержимое сдвигается на полразницы: центровка
 // сохраняется. Фон на всю высоту и подписи, прижатые к низу, не трогаются.
-function telefonPoOknu(code, {vh = 92, pole = 48} = {}) {
+function telefonPoOknu(code, {vh = 92, pole = 40} = {}) {
   const s = 320;
   const H = abH(code, s);
   const obychnye = elementy(code).filter((el) => {
@@ -275,6 +275,52 @@ function telefonPoOknu(code, {vh = 92, pole = 48} = {}) {
   obychnye.forEach((el, i) => set(el, 'top', s, Math.round(g[i].T - sdvig)));
   code[`ab_height-res-${s}`] = String(nH);
   code[`ab_height_vh-res-${s}`] = String(vh);
+}
+
+// Телефонная раскладка снимается с лендинга на ширине 375 — самой частой у
+// телефонов — и пересчитывается в сетку 320 с коэффициентом 320/375. Zero
+// показывает её с автомасштабом по ширине окна, и на экране 375 она выходит
+// ровно в размер лендинга (360 → 0,96, 414 → 1,1). Если снимать сразу на 320,
+// на 375 всё выходит на 17 % крупнее и текст переносится чаще.
+const TELEFON = 375;
+const K_TEL = 320 / TELEFON;
+const SNYATIE = [1200, 960, 640, 480, TELEFON];
+function eff375(obj, f) {
+  let v = obj[f];
+  for (const t of SNYATIE.slice(1)) {
+    const x = obj[`${f}-res-${t}`];
+    if (x !== undefined && x !== '') v = x;
+  }
+  return v;
+}
+const MASSHTAB = ['top', 'left', 'width', 'height', 'fontsize', 'letterspacing', 'borderwidth'];
+function vSetku320(code, stroki, ramki) {
+  const r1 = (v) => String(Math.round(num(v) * K_TEL * 10) / 10);
+  for (const el of elementy(code)) {
+    const res = Object.keys(el).filter((k) => k.endsWith(`-res-${TELEFON}`));
+    const polya = new Set([...MASSHTAB, 'lineheight', 'borderradius', ...res.map((k) => k.slice(0, -`-res-${TELEFON}`.length))]);
+    const nov = {};
+    for (const f of polya) {
+      const v = eff375(el, f);
+      if (v === undefined || v === '') continue;
+      if (MASSHTAB.includes(f)) nov[f] = r1(v);
+      else if (f === 'lineheight' && num(v) > 3) nov[f] = r1(v);
+      else if (f === 'borderradius' && /px$/.test(v)) nov[f] = `${r1(v)}px`;
+      else if (res.includes(`${f}-res-${TELEFON}`)) nov[f] = v;
+    }
+    res.forEach((k) => delete el[k]);
+    Object.entries(nov).forEach(([f, v]) => { el[`${f}-res-320`] = v; });
+  }
+  const ab = Object.fromEntries(Object.entries(code).filter(([k]) => k.startsWith('ab_')).map(([k, v]) => [k.slice(3), v]));
+  const hAb = eff375(ab, 'height');
+  Object.keys(code).filter((k) => k.startsWith('ab_') && k.endsWith(`-res-${TELEFON}`)).forEach((k) => delete code[k]);
+  if (hAb) code['ab_height-res-320'] = r1(hAb);
+  code.ab_screens = String(code.ab_screens || '').replace(String(TELEFON), '320') || '320,480,640,960,1200';
+  Object.values(stroki).forEach((z) => { if (z[TELEFON]) z[320] = {l: z[TELEFON].l * K_TEL, fs: z[TELEFON].fs * K_TEL}; });
+  Object.values(ramki).forEach((z) => {
+    const r = z[TELEFON];
+    if (r) z[320] = {t: r.t * K_TEL, l: r.l * K_TEL, w: r.w * K_TEL, h: Math.max(1, r.h * K_TEL), c: r.c};
+  });
 }
 
 async function build(key, selector, opts = {}) {
@@ -302,7 +348,7 @@ async function build(key, selector, opts = {}) {
   try {
     code = await mod.html__buildBackendData(html, selector, {
       viewportWidth: 1200, viewportHeight: 800, rootMode: 'artboard',
-      bypassMaxDepth: true, breakpoints: SCREENS, materialOnly: true,
+      bypassMaxDepth: true, breakpoints: opts.mobileScale === false ? SCREENS : SNYATIE, materialOnly: true,
       // По умолчанию конвертер уступает браузеру каждые 8 мс через таймер, а
       // в фоновой вкладке таймер тянется секунду и больше — экран собирался
       // минутами. Без пауз он проходит за один заход.
@@ -312,6 +358,7 @@ async function build(key, selector, opts = {}) {
     nablyudatel.disconnect();
     vernutTaimery();
   }
+  if (opts.mobileScale !== false) vSetku320(code, window.__ziLines, window.__ziRamki);
   const neHvataet = SCREENS.filter((s) => !Object.values(window.__ziLines).some((z) => z[s]));
   if (neHvataet.length) console.warn('zero-zamer: нет замеров строк на ширинах', neHvataet);
   if (opts.vh) {
