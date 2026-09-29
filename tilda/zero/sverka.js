@@ -72,10 +72,11 @@ function listya(doc, ekran) {
     let blok = el;
     // Строки заголовков, на которые их режет скрипт лендинга (.line), —
     // части одного заголовка, как и строчные элементы внутри абзаца.
-    while (blok.parentElement && (win.getComputedStyle(blok).display.startsWith('inline')
+    while (blok.parentElement && (win.getComputedStyle(blok).display === 'inline'
       || /(^|\s)line(__i)?(\s|$)/.test(blok.className || ''))) blok = blok.parentElement;
     if (out.some((o) => o.el === blok)) continue;
-    const t = norm(blok.textContent);
+    // innerText, а не textContent: перенос <br> в заголовке Zero — это пробел.
+    const t = norm(blok.innerText || blok.textContent);
     if (t.length < 2) continue;
     const ek = ekran(blok);
     if (!ek) continue;
