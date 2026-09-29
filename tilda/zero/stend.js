@@ -20,6 +20,15 @@ export const EKRANY = {
   proizvodstvo: {title: 'Производство', orig: '#proizvodstvo'},
   partiya: {title: 'Готовая партия', orig: 'h2:Готовая'},
   'o-kompanii': {title: 'О компании', orig: '#o-kompanii'},
+  // posle — после какого блока ставить экран, если его ещё нет на странице.
+  trust: {title: 'Нам доверяют', orig: 'section.trust', posle: 'hero'},
+  etapy: {title: 'Этапы работы', orig: '#etapy', posle: 'uslugi', anchor: 'etapy'},
+  upakovka: {title: 'Тара и маркировка', orig: '#upakovka', posle: 'proizvodstvo', anchor: 'upakovka'},
+  start: {title: 'Как начать', orig: 'h2:Как начать', posle: 'o-kompanii'},
+  ekonomika: {title: 'Экономика и условия', orig: '#ekonomika', posle: 'start', anchor: 'ekonomika'},
+  kontakty: {title: 'Контакты', orig: '#kontakty', posle: 'ekonomika', anchor: 'kontakty'},
+  map: {title: 'Как добраться', orig: 'section.map', posle: 'kontakty'},
+  footer: {title: 'Подвал', sel: 'footer', orig: 'footer.site-footer', posle: 'map'},
 };
 
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -58,9 +67,12 @@ export function fon(kluchi, {posle} = {}) {
       try {
         const e = EKRANY[k];
         const code = await ZI.build(k, e.sel || 'main > section', e.opts || {});
-        const est = bloki()[k];
-        const id = est ? await ZI.replace(est, code) : await ZI.put(code, posle ?? Object.values(bloki()).pop());
+        const b = bloki();
+        const est = b[k];
+        const id = est ? await ZI.replace(est, code) : await ZI.put(code, posle ?? b[e.posle] ?? Object.values(b).pop());
         await nazvat(id, e.title);
+        if (e.anchor) await window.tp__fetch({url: '/page/submit/', body: {comm: 'saverecord',
+          pageid: window.pageid, recordid: id, onlythisfield: 'rec_anchor', rec_anchor: e.anchor}});
         hod.log.push(`${k} ✓`);
       } catch (err) {
         hod.log.push(`${k}: ОШИБКА ${err.message}`);
