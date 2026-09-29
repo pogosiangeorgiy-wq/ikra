@@ -121,14 +121,20 @@ function vertikalnyyTekst(code) {
 // Конвертер округляет кегль (46,8 → 47), и строка, влезавшая в рамку
 // впритык, в Тильде переносится. Рамке текста даётся запас 3 %, со сдвигом
 // по выравниванию, чтобы строка не уехала с места.
+// Многострочному тексту запас даётся ровно на округление кегля (до 0,5 px
+// на строку), иначе в строку начнут влезать лишние слова и переносы уедут
+// от оригинала. Однострочному — 3 %: там переносить нечего.
 function zapasTeksta(code, dolya = 0.03) {
   for (const el of elementy(code)) {
     if (el.elem_type !== 'text') continue;
     const g = geometriya(code, el);
     for (const s of SCREENS) {
       if (g[s].skryt) continue;
-      const {L, w} = g[s];
-      const d = Math.ceil(w * dolya) + 2;
+      const {L, w, h} = g[s];
+      const fs = num(eff(el, 'fontsize', s)) || 16;
+      const lh = num(eff(el, 'lineheight', s)) || 1.4;
+      const strok = Math.round(h / (fs * (lh > 3 ? lh / fs : lh)));
+      const d = strok <= 1 ? Math.ceil(w * dolya) + 2 : Math.ceil(w * 0.5 / fs) + 1;
       const al = eff(el, 'align', s) || 'left';
       set(el, 'width', s, Math.round(w + d));
       set(el, 'left', s, Math.round(al === 'center' ? L - d / 2 : al === 'right' ? L - d : L));
@@ -142,7 +148,13 @@ function zapasTeksta(code, dolya = 0.03) {
 function podlozhkiPodTekst(code) {
   const els = elementy(code).sort((a, b) => num(a.zindex) - num(b.zindex));
   const box = (el) => { const g = geometriya(code, el)[1200]; return [g.L, g.T, g.L + g.w, g.T + g.h]; };
-  const nakryvaet = (a, b) => a[0] <= b[0] + 2 && a[1] <= b[1] + 2 && a[2] >= b[2] - 2 && a[3] >= b[3] - 2;
+  // «Накрывает» — пересечение не меньше 80 % меньшей из рамок: фото в
+  // рамке параллакса выше своей полосы, и строгое вложение не срабатывает.
+  const ploshad = (r) => Math.max(0, r[2] - r[0]) * Math.max(0, r[3] - r[1]);
+  const nakryvaet = (a, b) => {
+    const x = [Math.max(a[0], b[0]), Math.max(a[1], b[1]), Math.min(a[2], b[2]), Math.min(a[3], b[3])];
+    return ploshad(x) >= 0.8 * Math.min(ploshad(a), ploshad(b));
+  };
   const poryadok = [...els];
   for (const sh of els.filter((e) => e.elem_type === 'shape' && /tn-pseudo/.test(e.layer || ''))) {
     const b = box(sh);
