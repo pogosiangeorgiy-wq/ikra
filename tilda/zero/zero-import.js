@@ -764,6 +764,8 @@ function scena(code, roli, rol) {
   code.ab_ovrflw = 'visible';
   code.ab_bgcolor = '#191510';
 
+  // Высота кадра при снятии — окно конвертера (по замеру первого снимка).
+  const kadrH = (s) => (roli[s] || []).find((r) => r.rol === 'kadr-0')?.h || vEdinicah(s, 800);
   const svoi = new Set(rol.values());
   for (const [r, el] of rol) {
     const g = geometriya(code, el);
@@ -775,7 +777,7 @@ function scena(code, roli, rol) {
     el.animmobile = 'y';
     for (const s of S_KOMP) {
       const {L, w, T, h} = g[s];
-      const H0 = vEdinicah(s, 800); // высота кадра при снятии — окно конвертера
+      const H0 = kadrH(s);
       if (okno) {
         set(el, 'container', s, 'window'); set(el, 'axisx', s, 'left'); set(el, 'left', s, 0);
         set(el, 'widthunits', s, '%'); set(el, 'width', s, 100);
