@@ -101,17 +101,35 @@ export function sravnit({porogX = 6, porogY = 10, ekrany = null} = {}) {
   // сверить не всю страницу, а отдельные экраны.
   const a = listya(A.contentDocument, ekranOrig).filter((x) => !ekrany || ekrany.includes(x.metka));
   const b = listya(B.contentDocument, ekranChern);
+  // Экран лендинга сопоставляется с блоком черновика, у которого с ним больше
+  // всего общих текстов: одинаковые «01», пункты меню и подвала иначе
+  // попадают в пары из чужих экранов.
+  const ekranyA = [...new Set(a.map((x) => x.ek))];
+  const blokiB = [...new Set(b.map((x) => x.ek))];
+  const pará = new Map();
+  for (const ea of ekranyA) {
+    const ta = new Set(a.filter((x) => x.ek === ea).map((x) => x.t));
+    let best = null, bestN = 0;
+    for (const eb of blokiB) {
+      const n = b.filter((y) => y.ek === eb && ta.has(y.t)).length;
+      if (n > bestN) { best = eb; bestN = n; }
+    }
+    pará.set(ea, best);
+  }
   const poTekstu = new Map();
   b.forEach((x) => { if (!poTekstu.has(x.t)) poTekstu.set(x.t, []); poTekstu.get(x.t).push(x); });
   const res = [];
   let sovp = 0, net = 0;
   for (const x of a) {
-    const kand = poTekstu.get(x.t);
+    const vse = poTekstu.get(x.t) || [];
+    const svoi = vse.filter((y) => y.ek === pará.get(x.ek));
+    const kand = svoi.length ? svoi : vse;
     if (!kand || !kand.length) { net += 1; res.push({ekran: x.metka, t: x.t.slice(0, 50), problema: 'нет в черновике'}); continue; }
     // Одинаковый текст бывает в разных местах (пункт меню и подпись) —
     // в пару берётся ближайший по положению.
     kand.sort((p, q) => (Math.abs(p.L - x.L) + Math.abs(p.Trel - x.Trel)) - (Math.abs(q.L - x.L) + Math.abs(q.Trel - x.Trel)));
-    const y = kand.shift();
+    const y = kand[0];
+    vse.splice(vse.indexOf(y), 1);
     const raz = [];
     if (Math.abs(x.L - y.L) > porogX) raz.push(`x ${x.L}→${y.L}`);
     if (Math.abs(x.Trel - y.Trel) > porogY) raz.push(`y ${x.Trel}→${y.Trel}`);
