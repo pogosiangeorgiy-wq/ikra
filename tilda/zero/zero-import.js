@@ -704,8 +704,7 @@ function naznachitRoli(code, roli = []) {
   return res;
 }
 
-function scena(code, roli) {
-  const rol = naznachitRoli(code, roli[TOP]);
+function scena(code, roli, rol) {
   const akty = 1 + Math.max(-1, ...[...rol.keys()].filter((k) => /^akt-\d+-/.test(k)).map((k) => +k.split('-')[1]));
   if (akty < 2) throw new Error('сцена: не нашлись акты');
   const SEG = 1 / akty, FADE = 0.06, XFADE = 0.10, ZOOM = 1.06;
@@ -819,8 +818,7 @@ function scena(code, roli) {
 // Фото справа «липнет» к верху окна под шапкой (85 + 48 px) и едет со
 // списком до конца его колонки — штатная фиксация Zero. На узких
 // раскладках колонка одна, фото стоит на месте.
-function spisokChteniya(code, roli) {
-  const rol = naznachitRoli(code, roli[TOP]);
+function spisokChteniya(code, roli, rol) {
   const linii = [...rol.keys()].filter((k) => k.startsWith('dline-'));
   const PER = 40;
   for (const k of linii) {
@@ -914,6 +912,10 @@ async function build(key, selector, opts = {}) {
     vernutTaimery();
   }
   vRazmetku(code, window.__ziLines, window.__ziRamki);
+  // Роли элементов (data-zi) опознаются по исходной геометрии конвертера —
+  // до поправок, которые переводят элементы в проценты и «окно».
+  const roli = zameryVRazmetku(window.__ziRoli);
+  const rol = roli[TOP] ? naznachitRoli(code, roli[TOP]) : new Map();
   const neHvataet = SCREENS.filter((s) => !Object.values(window.__ziLines).some((z) => z[s]));
   if (neHvataet.length) console.warn('zero-zamer: нет замеров строк на ширинах', neHvataet);
   if (opts.vh) {
@@ -946,8 +948,8 @@ async function build(key, selector, opts = {}) {
   else parallaks(code);
   if (opts.schetchiki) schetchiki(code, opts.schetchiki);
   if (opts.lenta) begushayaLenta(code, opts.lenta);
-  if (opts.scena) scena(code, zameryVRazmetku(window.__ziRoli));
-  if (opts.spisokChteniya) spisokChteniya(code, zameryVRazmetku(window.__ziRoli));
+  if (opts.scena) scena(code, roli, rol);
+  if (opts.spisokChteniya) spisokChteniya(code, roli, rol);
   navedenie(code);
   if (opts.after) opts.after(code);
   return code;
