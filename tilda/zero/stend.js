@@ -26,6 +26,7 @@ export const EKRANY = {
   upakovka: {title: 'Тара и маркировка', orig: '#upakovka', posle: 'proizvodstvo', anchor: 'upakovka'},
   start: {title: 'Как начать', orig: 'h2:Как начать', posle: 'o-kompanii'},
   ekonomika: {title: 'Экономика и условия', orig: '#ekonomika', posle: 'start', anchor: 'ekonomika'},
+  voprosy: {title: 'Вопросы', orig: 'h2:Вопросы', posle: 'ekonomika', anchor: 'voprosy'},
   kontakty: {title: 'Контакты', orig: '#kontakty', posle: 'ekonomika', anchor: 'kontakty'},
   map: {title: 'Как добраться', orig: 'section.map', posle: 'kontakty'},
   footer: {title: 'Подвал', sel: 'footer', orig: 'footer.site-footer', posle: 'map'},
