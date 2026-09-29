@@ -1666,6 +1666,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 .px,.px-frame img{transform:none!important}
 .hero__media img,.bg-media>img,.bg-media--soft>img,.section__photo img{filter:none!important;transform:none!important}
 </style>
+<style id="zero-dop">.zi-stage .scene__track{height:100vh}.zi-stage .scene__stage{position:relative}.zi-stage .scene__frame{opacity:1!important;filter:none!important}.zi-stage .scene__media{transform:none!important}.zi-stage .zi-scrim-x,.zi-stage .zi-scrim-y{position:absolute;inset:0;z-index:1;pointer-events:none}.zi-stage .zi-scrim-x{background:var(--scrim-x)}.zi-stage .zi-scrim-y{background:var(--scrim-y)}.zi-stage .step{opacity:1!important}.zi-stage .step__num,.zi-stage .step__title,.zi-stage .step__text{opacity:1!important;transform:none!important}.zi-stage .scene__bar i{transform:none!important}.zi-stage .scene__seg{position:relative}.zi-stage .scene__seg .zi-lbl-on{position:absolute;left:0;right:0;top:2px;color:var(--c-bone);opacity:1}@media (max-width:760px){.zi-stage{display:none!important}}@media (min-width:761px){.zi-plain{display:none!important}}</style>
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
@@ -1678,7 +1679,45 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   </filter>
 </svg>
 <main id="top">
-<section class="section section--light scene" id="etapy">
+<div class="zi-scena">
+<section class="section section--light scene is-scene zi-stage" id="etapy-scena">
+ <div class="scene__track">
+  <div class="scene__stage"><div class="scene__media"><img class="zi-kadr-0 scene__frame" data-zi="kadr-0" src="https://static.tildacdn.com/tild3066-3261-4437-b165-303963636131/step-01-priemka-z.jpg" alt=""><img class="zi-kadr-1 scene__frame" data-zi="kadr-1" src="https://static.tildacdn.com/tild3434-3534-4861-b139-633331656234/step-02-kontrol-z.jpg" alt=""><img class="zi-kadr-2 scene__frame" data-zi="kadr-2" src="https://static.tildacdn.com/tild3864-6262-4564-b835-323039356230/step-03-fasovka-z.jpg" alt=""><img class="zi-kadr-3 scene__frame" data-zi="kadr-3" src="https://static.tildacdn.com/tild6566-3535-4936-b231-336439626366/step-04-upakovka-z.jpg" alt=""></div><div class="zi-scrim-x" data-zi="scrim-x"></div><div class="zi-scrim-y" data-zi="scrim-y"></div>
+  <div class="container">
+    <div class="process__head reveal">
+      <p class="micro" data-zi="shapka">Этапы работы</p>
+    </div>
+    <ol class="process__grid">
+      <li class="step reveal">
+        <div class="step__num" data-zi="akt-0-num">01</div>
+        <h3 class="step__title" data-zi="akt-0-title">Приёмка</h3>
+        
+        <p class="step__text" data-zi="akt-0-text">Принимаем сырьё, сверяем документы, проверяем температуру и условия транспортировки.</p>
+      </li>
+      <li class="step reveal">
+        <div class="step__num" data-zi="akt-1-num">02</div>
+        <h3 class="step__title" data-zi="akt-1-title">Контроль</h3>
+        
+        <p class="step__text" data-zi="akt-1-text">Входной контроль: органолептика, калибр икринок, плотность оболочки, массовая доля соли.</p>
+      </li>
+      <li class="step reveal">
+        <div class="step__num" data-zi="akt-2-num">03</div>
+        <h3 class="step__title" data-zi="akt-2-title">Фасовка</h3>
+        
+        <p class="step__text" data-zi="akt-2-text">Фасуем в подобранную тару с контролем веса каждой единицы и минимальными потерями продукта.</p>
+      </li>
+      <li class="step reveal">
+        <div class="step__num" data-zi="akt-3-num">04</div>
+        <h3 class="step__title" data-zi="akt-3-title">Упаковка</h3>
+        
+        <p class="step__text" data-zi="akt-3-text">Клеим этикетку, наносим маркировку партии, укладываем в короб и передаём на склад отгрузки.</p>
+      </li>
+    </ol><div class="scene__hud"><div class="scene__seg"><div class="scene__bar" data-zi="bar-0"><i class="zi-fill" data-zi="fill-0"></i></div><span class="zi-lbl" data-zi="lbl-0">Приёмка</span><span class="zi-lbl-on" data-zi="lblon-0">Приёмка</span></div><div class="scene__seg"><div class="scene__bar" data-zi="bar-1"><i class="zi-fill" data-zi="fill-1"></i></div><span class="zi-lbl" data-zi="lbl-1">Контроль</span><span class="zi-lbl-on" data-zi="lblon-1">Контроль</span></div><div class="scene__seg"><div class="scene__bar" data-zi="bar-2"><i class="zi-fill" data-zi="fill-2"></i></div><span class="zi-lbl" data-zi="lbl-2">Фасовка</span><span class="zi-lbl-on" data-zi="lblon-2">Фасовка</span></div><div class="scene__seg"><div class="scene__bar" data-zi="bar-3"><i class="zi-fill" data-zi="fill-3"></i></div><span class="zi-lbl" data-zi="lbl-3">Упаковка</span><span class="zi-lbl-on" data-zi="lblon-3">Упаковка</span></div></div>
+  </div>
+  </div>
+ </div>
+</section>
+<section class="section section--light scene zi-plain" id="etapy-spisok">
  <div class="scene__track">
   <div class="scene__stage">
   <div class="container">
@@ -1727,6 +1766,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   </div>
  </div>
 </section>
+</div>
 </main>
 <script id="zero-zamer">
 (function () {
@@ -1737,7 +1777,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
   var ramkiStore = P.__ziRamki = P.__ziRamki || {};
   var spisok = null;
-  function koren() { return document.querySelector('main > section, footer'); }
+  function koren() { return document.querySelector('main > .zi-scena, main > section, footer'); }
   function ramki() {
     if (!spisok) {
       spisok = Array.prototype.filter.call(document.querySelectorAll('main *, footer *'), function (el) {
@@ -1808,7 +1848,62 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
       if (!prev || prev.l < hi - lo) store[key][w] = {l: hi - lo, fs: parseFloat(getComputedStyle(el).fontSize)};
     }
   }
-  function vse() { ramki(); measure(); }
+  // Блоки появления (.reveal): рамка и место в каскаде, как их считает
+  // скрипт лендинга (раздел 4): по месту среди соседей, не больше 4 шагов;
+  // на первом экране — по порядку. Шаг каскада (70 мс, на телефоне 50)
+  // подставляет zero-import.js. Снимаются на каждой ширине: часть блоков
+  // видна только на телефоне (список актов вместо сцены).
+  function revealy() {
+    var w = Math.round(window.innerWidth);
+    var kr = koren().getBoundingClientRect();
+    var hero = document.querySelector('.hero');
+    var heroI = 0;
+    var out = [];
+    // Заголовки, которые скрипт лендинга режет на строки (SPLIT_SEL): блок
+    // с таким заголовком только проявляется, без сдвига, а строки заголовка
+    // выезжают снизу. Таблица тары так же: сама проявляется, строки — по
+    // очереди с шагом 60 мс.
+    var SPLIT = 'h1, .statement h2, .band h2, .section__head h2, .cta__grid h2, .about__quote';
+    function ramka(el) {
+      var r = el.getBoundingClientRect();
+      return {l: r.left - kr.left, t: r.top - kr.top, w: r.width, h: r.height};
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('main .reveal, footer .reveal'), function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
+      var z = ramka(el);
+      if (hero && hero.contains(el)) { z.hero = heroI; heroI += 1; }
+      else z.mesto = Math.min(Array.prototype.indexOf.call(el.parentNode.children, el), 4);
+      var zag = el.matches(SPLIT) ? [el] : Array.prototype.slice.call(el.querySelectorAll(SPLIT));
+      if (zag.length) z.linii = 1;
+      if (el.classList.contains('tbl')) z.tbl = 1;
+      out.push(z);
+      zag.forEach(function (h) {
+        var q = ramka(h); q.zagolovok = 1; q.hero = z.hero; q.mesto = z.mesto; out.push(q);
+      });
+      if (z.tbl) Array.prototype.forEach.call(el.querySelectorAll('tbody tr'), function (tr, n) {
+        var q = ramka(tr); q.stroka = n; q.hero = z.hero; q.mesto = z.mesto; out.push(q);
+      });
+    });
+    var st = P.__ziReveal = P.__ziReveal || {};
+    st[w] = out;
+  }
+  // Роли элементов сцены (data-zi): что кадр, что акт, что шкала.
+  function roli() {
+    var w = Math.round(window.innerWidth);
+    var kr = koren().getBoundingClientRect();
+    var out = [];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-zi]'), function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width < 1 && r.height < 1) return;
+      out.push({rol: el.getAttribute('data-zi'), l: r.left - kr.left, t: r.top - kr.top, w: r.width, h: r.height,
+        tekst: el.tagName === 'IMG' || el.tagName === 'I' ? '' : norm(el.textContent)});
+    });
+    if (!out.length) return;
+    var st = P.__ziRoli = P.__ziRoli || {};
+    st[w] = out;
+  }
+  function vse() { ramki(); measure(); revealy(); roli(); }
   // Событие resize в невидимом фрейме приходит только при отрисовке, а в
   // фоновой вкладке её нет. Поэтому замер вызывает и сам редактор — сразу,
   // как конвертер поменял ширину фрейма (см. build в zero-import.js).

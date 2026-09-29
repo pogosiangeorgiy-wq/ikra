@@ -1666,6 +1666,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 .px,.px-frame img{transform:none!important}
 .hero__media img,.bg-media>img,.bg-media--soft>img,.section__photo img{filter:none!important;transform:none!important}
 </style>
+<style id="zero-dop">.docs__list li .zi-docs-line{position:absolute;left:0;right:0;bottom:-1px;height:1px;display:block;background:var(--c-graphite)}.docs__list li .zi-docs-idx{position:absolute;left:0;top:var(--s-5);color:var(--c-graphite)}</style>
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
@@ -1687,60 +1688,60 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
     <div class="docs__grid">
       <ul class="docs__list reveal">
         
-        <li>
-          <span class="docs__idx">01</span>
+        <li data-zi="dli-0">
+          <span class="docs__idx" data-zi="didx0-0">01</span>
           <div>
             <p class="docs__name micro">Декларация ЕАЭС N RU Д-RU.РА06.В.31427/23</p>
             <p class="docs__desc micro">Декларация о соответствии на продукцию</p>
           </div>
-        </li>
-        <li>
-          <span class="docs__idx">02</span>
+        <i class="zi-docs-line" data-zi="dline-0"></i><span class="docs__idx zi-docs-idx" data-zi="didx-0">01</span></li>
+        <li data-zi="dli-1">
+          <span class="docs__idx" data-zi="didx0-1">02</span>
           <div>
             <p class="docs__name micro">СТО 57865978-001-2022</p>
             <p class="docs__desc micro">Стандарт организации, по которому выпускается продукция</p>
           </div>
-        </li>
-        <li>
-          <span class="docs__idx">03</span>
+        <i class="zi-docs-line" data-zi="dline-1"></i><span class="docs__idx zi-docs-idx" data-zi="didx-1">02</span></li>
+        <li data-zi="dli-2">
+          <span class="docs__idx" data-zi="didx0-2">03</span>
           <div>
             <p class="docs__name micro">ТУ 10.20.26-001-2023</p>
             <p class="docs__desc micro">Технические условия, по которым выпускается фасованная икра</p>
           </div>
-        </li>
-        <li>
-          <span class="docs__idx">04</span>
+        <i class="zi-docs-line" data-zi="dline-2"></i><span class="docs__idx zi-docs-idx" data-zi="didx-2">03</span></li>
+        <li data-zi="dli-3">
+          <span class="docs__idx" data-zi="didx0-3">04</span>
           <div>
             <p class="docs__name micro">HACCP / ISO 22000</p>
             <p class="docs__desc micro">Система менеджмента безопасности пищевой продукции на производственной площадке</p>
           </div>
-        </li>
+        <i class="zi-docs-line" data-zi="dline-3"></i><span class="docs__idx zi-docs-idx" data-zi="didx-3">04</span></li>
         
-        <li>
-          <span class="docs__idx">05</span>
+        <li data-zi="dli-4">
+          <span class="docs__idx" data-zi="didx0-4">05</span>
           <div>
             <p class="docs__name micro">Контроль каждой партии</p>
             <p class="docs__desc micro">Органолептические показатели, калибр, массовая доля соли и температура контролируются при работе с каждой партией</p>
           </div>
-        </li>
-        <li>
-          <span class="docs__idx">06</span>
+        <i class="zi-docs-line" data-zi="dline-4"></i><span class="docs__idx zi-docs-idx" data-zi="didx-4">05</span></li>
+        <li data-zi="dli-5">
+          <span class="docs__idx" data-zi="didx0-5">06</span>
           <div>
             <p class="docs__name micro">Хранение</p>
             <p class="docs__desc micro">Чёрная икра хранится при −2…−4 °C, красная — при −2…−6 °C</p>
           </div>
-        </li>
-        <li>
-          <span class="docs__idx">07</span>
+        <i class="zi-docs-line" data-zi="dline-5"></i><span class="docs__idx zi-docs-idx" data-zi="didx-5">06</span></li>
+        <li data-zi="dli-6">
+          <span class="docs__idx" data-zi="didx0-6">07</span>
           <div>
             <p class="docs__name micro">Отгрузка</p>
             <p class="docs__desc micro">Забор продукции вашим транспортом или доставка по согласованию</p>
           </div>
-        </li>
+        <i class="zi-docs-line" data-zi="dline-6"></i><span class="docs__idx zi-docs-idx" data-zi="didx-6">07</span></li>
       </ul>
-      <figure class="docs__media reveal">
+      <figure class="docs__media reveal" data-zi="dfig">
         
-        <img src="https://static.tildacdn.com/tild3430-6162-4234-b035-376635313933/doc-banki.jpg" width="1104" height="828" loading="lazy"
+        <img class="zi-docs-foto" data-zi="dfoto" src="https://static.tildacdn.com/tild3430-6162-4234-b035-376635313933/doc-banki.jpg" width="1104" height="828" loading="lazy"
              alt="Открытый транспортный короб с рядами закрытых жестяных банок на стальном столе, позади — второй заклеенный короб">
       </figure>
     </div>
@@ -1766,7 +1767,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
   var ramkiStore = P.__ziRamki = P.__ziRamki || {};
   var spisok = null;
-  function koren() { return document.querySelector('main > section, footer'); }
+  function koren() { return document.querySelector('main > .zi-scena, main > section, footer'); }
   function ramki() {
     if (!spisok) {
       spisok = Array.prototype.filter.call(document.querySelectorAll('main *, footer *'), function (el) {
@@ -1837,7 +1838,62 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
       if (!prev || prev.l < hi - lo) store[key][w] = {l: hi - lo, fs: parseFloat(getComputedStyle(el).fontSize)};
     }
   }
-  function vse() { ramki(); measure(); }
+  // Блоки появления (.reveal): рамка и место в каскаде, как их считает
+  // скрипт лендинга (раздел 4): по месту среди соседей, не больше 4 шагов;
+  // на первом экране — по порядку. Шаг каскада (70 мс, на телефоне 50)
+  // подставляет zero-import.js. Снимаются на каждой ширине: часть блоков
+  // видна только на телефоне (список актов вместо сцены).
+  function revealy() {
+    var w = Math.round(window.innerWidth);
+    var kr = koren().getBoundingClientRect();
+    var hero = document.querySelector('.hero');
+    var heroI = 0;
+    var out = [];
+    // Заголовки, которые скрипт лендинга режет на строки (SPLIT_SEL): блок
+    // с таким заголовком только проявляется, без сдвига, а строки заголовка
+    // выезжают снизу. Таблица тары так же: сама проявляется, строки — по
+    // очереди с шагом 60 мс.
+    var SPLIT = 'h1, .statement h2, .band h2, .section__head h2, .cta__grid h2, .about__quote';
+    function ramka(el) {
+      var r = el.getBoundingClientRect();
+      return {l: r.left - kr.left, t: r.top - kr.top, w: r.width, h: r.height};
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('main .reveal, footer .reveal'), function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
+      var z = ramka(el);
+      if (hero && hero.contains(el)) { z.hero = heroI; heroI += 1; }
+      else z.mesto = Math.min(Array.prototype.indexOf.call(el.parentNode.children, el), 4);
+      var zag = el.matches(SPLIT) ? [el] : Array.prototype.slice.call(el.querySelectorAll(SPLIT));
+      if (zag.length) z.linii = 1;
+      if (el.classList.contains('tbl')) z.tbl = 1;
+      out.push(z);
+      zag.forEach(function (h) {
+        var q = ramka(h); q.zagolovok = 1; q.hero = z.hero; q.mesto = z.mesto; out.push(q);
+      });
+      if (z.tbl) Array.prototype.forEach.call(el.querySelectorAll('tbody tr'), function (tr, n) {
+        var q = ramka(tr); q.stroka = n; q.hero = z.hero; q.mesto = z.mesto; out.push(q);
+      });
+    });
+    var st = P.__ziReveal = P.__ziReveal || {};
+    st[w] = out;
+  }
+  // Роли элементов сцены (data-zi): что кадр, что акт, что шкала.
+  function roli() {
+    var w = Math.round(window.innerWidth);
+    var kr = koren().getBoundingClientRect();
+    var out = [];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-zi]'), function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width < 1 && r.height < 1) return;
+      out.push({rol: el.getAttribute('data-zi'), l: r.left - kr.left, t: r.top - kr.top, w: r.width, h: r.height,
+        tekst: el.tagName === 'IMG' || el.tagName === 'I' ? '' : norm(el.textContent)});
+    });
+    if (!out.length) return;
+    var st = P.__ziRoli = P.__ziRoli || {};
+    st[w] = out;
+  }
+  function vse() { ramki(); measure(); revealy(); roli(); }
   // Событие resize в невидимом фрейме приходит только при отрисовке, а в
   // фоновой вкладке её нет. Поэтому замер вызывает и сам редактор — сразу,
   // как конвертер поменял ширину фрейма (см. build в zero-import.js).

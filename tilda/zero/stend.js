@@ -17,13 +17,26 @@ export const EKRANY = {
   uslugi: {title: 'Услуги', orig: '#uslugi'},
   band: {title: 'Качество начинается с сырья', orig: 'section.band'},
   syrye: {title: 'Сырьё', orig: '#syrye'},
-  proizvodstvo: {title: 'Производство', orig: '#proizvodstvo'},
-  partiya: {title: 'Готовая партия', orig: 'h2:Готовая'},
+  proizvodstvo: {title: 'Производство', orig: '#proizvodstvo', opts: {schetchiki: /^(до 300|4|−4 °C|2)$/}},
+  partiya: {title: 'Готовая партия', orig: 'h2:Готовая', opts: {spisokChteniya: true}},
   'o-kompanii': {title: 'О компании', orig: '#o-kompanii'},
   // posle — после какого блока ставить экран, если его ещё нет на странице.
-  trust: {title: 'Нам доверяют', orig: 'section.trust', posle: 'hero'},
-  etapy: {title: 'Этапы работы', orig: '#etapy', posle: 'uslugi', anchor: 'etapy'},
-  upakovka: {title: 'Тара и маркировка', orig: '#upakovka', posle: 'proizvodstvo', anchor: 'upakovka'},
+  // Лента: числа сняты с работающего лендинга на 1440 и 375 (высота
+  // логотипа, промежуток, отступ ряда, верх ряда, высота секции, круг в с).
+  trust: {title: 'Нам доверяют', orig: 'section.trust', posle: 'hero', opts: {lenta: {
+    desktop: {h: 104, gap: 96, pad: 96, top: 101, secH: 269, dur: 88},
+    mobile: {h: 76, gap: 56, pad: 56, top: 85, secH: 209, dur: 110},
+    fade: 120,
+  }}},
+  // Липкие сцены: кадр высотой в окно (на телефоне — список актов) и за ним
+  // «прокрутка» — прозрачный блок высотой в ход сцены (prostavka).
+  etapy: {title: 'Этапы работы', sel: 'main > .zi-scena', orig: '#etapy', posle: 'uslugi', anchor: 'etapy',
+    opts: {scena: true}},
+  'etapy-prokrutka': {title: 'Этапы работы — прокрутка', prostavka: true, posle: 'etapy'},
+  upakovka: {title: 'Тара и маркировка', sel: 'main > .zi-scena', orig: '#upakovka', posle: 'proizvodstvo',
+    anchor: 'upakovka', opts: {scena: true}},
+  'upakovka-prokrutka': {title: 'Тара и маркировка — прокрутка', prostavka: true, posle: 'upakovka'},
+  'upakovka-tablica': {title: 'Тара — форматы', orig: '#upakovka', posle: 'upakovka-prokrutka'},
   start: {title: 'Как начать', orig: 'h2:Как начать', posle: 'o-kompanii'},
   ekonomika: {title: 'Экономика и условия', orig: '#ekonomika', posle: 'start', anchor: 'ekonomika'},
   voprosy: {title: 'Вопросы', orig: 'h2:Вопросы', posle: 'ekonomika', anchor: 'voprosy', opts: {podSetkuTildy: true}},
@@ -75,7 +88,7 @@ export function fon(kluchi, {posle} = {}) {
     for (const k of kluchi) {
       try {
         const e = EKRANY[k];
-        const code = await ZI.build(k, e.sel || 'main > section', e.opts || {});
+        const code = e.prostavka ? ZI.prostavka() : await ZI.build(k, e.sel || 'main > section', e.opts || {});
         const b = bloki();
         const est = b[k];
         const id = est ? await ZI.replace(est, code) : await ZI.put(code, posle ?? b[e.posle] ?? Object.values(b).pop());
