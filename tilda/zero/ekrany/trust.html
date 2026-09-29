@@ -10,13 +10,7 @@
 
 
 
-<!-- Превью ссылки в мессенджерах и соцсетях. Кадр assets/og-cover.jpg сделан
-     под это отдельно: 1200×630, банка с чистой этикеткой и рулон этикеток
-     крупно, правая половина тёмная — под подпись, если превью будете
-     собирать с текстом. Заменён 10.09.2026 по промпту PROMPTS.md §34, кадр 5:
-     прежний файл повторял полосу «Сырьё» и дублировал её в выдаче ссылок.
-     Домен указан по месту публикации — GitHub Pages (8 сентября 2026).
-     Если сайт переедет на собственный домен, замените адрес в og:url и og:image. -->
+
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
 <meta property="og:title" content="Гурман-Гуру — контрактная фасовка красной и чёрной икры под вашим брендом">
@@ -28,83 +22,11 @@
 <meta property="og:image:alt" content="Открытая жестяная банка чёрной икры с ложкой на стальном столе">
 <meta name="twitter:card" content="summary_large_image">
 
-<!--
-=============================================================================
-  ГУРМАН-ГУРУ — одностраничный сайт контрактной фасовки икры
-  Дизайн-система снята с референса reference/referens-maket.jpeg
-  Структура и содержание разделов — по файлу «тз для дизайнера.docx», п. 7
-  Все значения — из токенов в блоке :root ниже. Новых цветов и кеглей нет.
 
-  ОТКУДА ЧТО ВЗЯТО.
-
-  1) С РЕФЕРЕНСА (стилистика и типографика, менять не нужно):
-     • название «Гурман-Гуру», пункты меню, крупные заголовки
-     • ТУ 10.20.26-001-2023 · HACCP / ISO 22000
-     • перечень: красная и чёрная икра, стекло и жесть, этикетирование, маркировка
-     • четыре шага цикла: ПРИЁМКА · КОНТРОЛЬ · ФАСОВКА · УПАКОВКА
-     • нулевые радиусы, отсутствие теней, плёночное зерно
-
-  2) ИЗ ТЗ ДЛЯ ДИЗАЙНЕРА (структура и содержание):
-     • порядок разделов: первый экран → полный цикл → этапы работы →
-       происхождение и качество сырья → производство → тара и маркировка →
-       готовая партия
-     • заголовок «Качество начинается с сырья»
-     • акцент на красной И чёрной икре одновременно, а не только на чёрной
-
-  3) ЮРИДИЧЕСКОЕ ЛИЦО И ЮРИДИЧЕСКИЕ ТЕКСТЫ — из папки «правки»
-     (файлы «politika gurman_guru.docx» и «soglasie_pdn_gurman_guru (2).docx»):
-     • ООО «ГУРМАН-ГУРУ»
-     • ИНН 9729312501 · ОГРН 1217700391457
-     • адрес: 121471, г. Москва, ул. Рябиновая, вл. 43А, эт. 2, пом. 23
-     • почта sale@gurman.guru · телефон +7 (926) 676-59-58
-     • тексты страниц politika.html и soglasie.html
-     ЛИЦО СМЕНИЛОСЬ 2026-09-10. До этого здесь стоял ИП Виленский Павел
-     Александрович, ИНН 773001052346, ОГРНИП 319774600717835, почта
-     2114111@mail.ru, телефон +7 (985) 146-11-11. Это не переименование,
-     а другое юридическое лицо, поэтому старые реквизиты убраны полностью.
-     Контакты производства (Карпюк, Никитин, Рябиновая 43А стр. 1) — из
-     «когнтакты.docx», они не совпадают с юридическим адресом и это не
-     ошибка: юридический адрес — эт. 2, пом. 23, производство — строение 1.
-
-  3a) ИЗ ФАЙЛА «о нас.docx» — раздел «О компании», дословно:
-     • текст о компании и фраза про соответствие цеха нормам фасовки
-     • Декларация ЕАЭС N RU Д-RU.РА06.В.31427/23 · СТО 57865978-001-2022
-     • точки продаж: Рублёвский привоз, Даниловский рынок,
-       «ОСТРОВА» на Новой Риге (ESTATE MALL), Черёмушкинский рынок
-     ВНИМАНИЕ: СТО 57865978-001-2022 из этого файла и ТУ 10.20.26-001-2023
-     с референса — разные документы. Оба выведены в разделе «Готовая партия».
-     Подтвердите, какой из них верный, лишний удалите.
-
-  3b) ИЗ ФАЙЛА «когнтакты.docx» — контакты производства, дословно:
-     • Карпюк Никита Александрович, +7 (926) 634-35-52, labgurman@ya.ru
-     • Никитин Артём Сергеевич, +7 (936) 125-16-17
-     • адрес: Москва, ул. Рябиновая, владение 43А, строение 1
-
-  4) ПРИДУМАНО КАК ПРАВДОПОДОБНЫЙ ЗАПОЛНИТЕЛЬ — ПРОВЕРЬТЕ И ЗАМЕНИТЕ:
-     • граммовки, материалы и минимальные партии в таблице «Форматы»
-     • все цифры в секции «Производство»: 1 200 кг/сутки, 14 форматов и т. д.
-     • сроки в секции «Как начать»
-     • числа в ответах раздела «Вопросы»
-     Каждое такое место помечено комментарием  ЗАМЕНИТЬ.
-
-  5) ФОТОГРАФИИ — сгенерированы по промптам из PROMPTS.md, раздел 7, и
-     переданы заказчиком (папка «фото»). Кадры из референса больше не
-     используются. На всех этикетках и ярлыках намеренно нет печати:
-     белое поле под ваш макет.
-     ВАЖНО: это постановочные кадры под стилистику, а не съёмка вашей
-     площадки и вашего оборудования. Показывать их как фото производства
-     на Рябиновой нельзя — для этого нужна своя съёмка.
-     Пропорции слотов указаны у каждого <img>. Подробности в README.
-=============================================================================
--->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Один шрифт на всю страницу — Golos Text. Playfair Display заменён на него
-     2026-09-09 («прямые буквы, без засечек»), а 2026-09-10 заказчик распространил
-     его и на текст: моноширинного Roboto Mono на странице больше нет.
-     Веса: 400 — основной текст, 500 и 600 — заголовки (гротеск в 400 на кегле
-     112px читается как недопечатанный), 700 — подвал. -->
+
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -1737,11 +1659,13 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 }
 </style>
 
-<!-- Класс .js-motion ставится до первой отрисовки — иначе первый экран
-     успел бы мелькнуть и только потом спрятаться. Он же выключает всю
-     анимацию, когда её нет кому показать: скрипт отключён или в системе
-     стоит «уменьшить движение». Тогда страница просто статична и вся видна. -->
 
+
+<style id="zero-popravki">
+.reveal,.reveal *{opacity:1!important;transform:none!important;transition:none!important}
+.px,.px-frame img{transform:none!important}
+.hero__media img,.bg-media>img,.bg-media--soft>img,.section__photo img{filter:none!important;transform:none!important}
+</style>
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
@@ -1762,32 +1686,32 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   <div class="trust__viewport">
     <div class="trust__track">
       <ul class="trust__row">
-        <li><img src="assets/trust-lucky-group.png" width="124" height="132" alt="Lucky Group" decoding="async"></li>
-        <li><img src="assets/trust-white-rabbit.png" width="127" height="132" alt="White Rabbit Restaurant &amp; Bar" decoding="async"></li>
-        <li><img src="assets/trust-tsum.png" width="128" height="132" alt="ЦУМ" decoding="async"></li>
-        <li><img src="assets/trust-novikov.png" width="181" height="132" alt="Novikov Group of Companies" decoding="async"></li>
-        <li><img src="assets/trust-crave.png" width="82" height="132" alt="Crave" decoding="async"></li>
-        <li><img src="assets/trust-jun.png" width="105" height="132" alt="Jun" decoding="async"></li>
-        <li><img src="assets/trust-manul.png" width="177" height="132" alt="Manul Restaurant" decoding="async"></li>
-        <li><img src="assets/trust-kiyomi.png" width="188" height="132" alt="Kiyomi" decoding="async"></li>
-        <li><img src="assets/trust-maison-dellos.png" width="148" height="132" alt="Maison Dellos" decoding="async"></li>
-        <li><img src="assets/trust-niki.png" width="85" height="132" alt="Niki Piano Bar" decoding="async"></li>
-        <li><img src="assets/trust-veb-arena.png" width="168" height="132" alt="ВЭБ Арена" decoding="async"></li>
-        <li><img src="assets/trust-spartak.png" width="115" height="132" alt="Спартак" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3630-6635-4565-a235-636230303263/trust-lucky-group.png" width="124" height="132" alt="Lucky Group" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3633-6361-4334-a232-323063353337/trust-white-rabbit.png" width="127" height="132" alt="White Rabbit Restaurant &amp; Bar" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3839-6137-4536-b233-626432353930/trust-tsum.png" width="128" height="132" alt="ЦУМ" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild6138-3530-4466-b835-316437306535/trust-novikov.png" width="181" height="132" alt="Novikov Group of Companies" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3332-3464-4761-a161-333565346338/trust-crave.png" width="82" height="132" alt="Crave" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3661-6236-4462-a563-313235393135/trust-jun.png" width="105" height="132" alt="Jun" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3266-3830-4463-a633-363135626563/trust-manul.png" width="177" height="132" alt="Manul Restaurant" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3263-3939-4033-b662-663534653661/trust-kiyomi.png" width="188" height="132" alt="Kiyomi" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3163-3936-4033-b864-333562356337/trust-maison-dellos.png" width="148" height="132" alt="Maison Dellos" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3930-3638-4237-b862-656430383737/trust-niki.png" width="85" height="132" alt="Niki Piano Bar" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3362-3664-4033-b061-623164663966/trust-veb-arena.png" width="168" height="132" alt="ВЭБ Арена" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild6530-3931-4237-b866-396366353733/trust-spartak.png" width="115" height="132" alt="Спартак" decoding="async"></li>
       </ul>
       <ul class="trust__row" aria-hidden="true">
-        <li><img src="assets/trust-lucky-group.png" width="124" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-white-rabbit.png" width="127" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-tsum.png" width="128" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-novikov.png" width="181" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-crave.png" width="82" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-jun.png" width="105" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-manul.png" width="177" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-kiyomi.png" width="188" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-maison-dellos.png" width="148" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-niki.png" width="85" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-veb-arena.png" width="168" height="132" alt="" loading="lazy" decoding="async"></li>
-        <li><img src="assets/trust-spartak.png" width="115" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3630-6635-4565-a235-636230303263/trust-lucky-group.png" width="124" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3633-6361-4334-a232-323063353337/trust-white-rabbit.png" width="127" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3839-6137-4536-b233-626432353930/trust-tsum.png" width="128" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild6138-3530-4466-b835-316437306535/trust-novikov.png" width="181" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3332-3464-4761-a161-333565346338/trust-crave.png" width="82" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3661-6236-4462-a563-313235393135/trust-jun.png" width="105" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3266-3830-4463-a633-363135626563/trust-manul.png" width="177" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3263-3939-4033-b662-663534653661/trust-kiyomi.png" width="188" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3163-3936-4033-b864-333562356337/trust-maison-dellos.png" width="148" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3930-3638-4237-b862-656430383737/trust-niki.png" width="85" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild3362-3664-4033-b061-623164663966/trust-veb-arena.png" width="168" height="132" alt="" loading="lazy" decoding="async"></li>
+        <li><img src="https://static.tildacdn.com/tild6530-3931-4237-b866-396366353733/trust-spartak.png" width="115" height="132" alt="" loading="lazy" decoding="async"></li>
       </ul>
     </div>
   </div>

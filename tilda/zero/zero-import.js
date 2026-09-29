@@ -1,0 +1,141 @@
+// Импорт экрана лендинга в Zero Block.
+//
+// Запускается в редакторе страницы Тильды (tilda.ru/page/?pageid=…) —
+// там есть встроенный конвертер HTML → Zero, которым Тильда превращает свои
+// «Вайб-блоки» в Zero Block. Мы кормим его экранами из tilda/zero/ekrany/,
+// поправляем то, чего конвертер не знает про наш макет, и превращаем
+// обычный блок страницы в Zero с этими элементами.
+//
+//   const ZI = (await import('https://pogosiangeorgiy-wq.github.io/ikra/tilda/zero/zero-import.js?v=' + Date.now())).default;
+//   const code = await ZI.build('hero', 'section.hero', {vh: 100, pinBottom: /^(Москва|ТУ 10|HACCP)/});
+//   await ZI.put(code);            // в конец страницы
+//   await ZI.replace(recid, code); // на место существующего блока
+//
+// Подробности и причины каждой поправки — tilda/zero/КАК-РАБОТАЕТ.md.
+
+const BAZA = 'https://pogosiangeorgiy-wq.github.io/ikra/tilda/zero/ekrany/';
+// Ширины Zero Block. 1200 — основная, значения без суффикса.
+const SCREENS = [1200, 960, 640, 480, 320];
+const MODUL = './index-bbX7hnLP.min.js';
+
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+const kluch = (field, s) => (s === 1200 ? field : `${field}-res-${s}`);
+const elementy = (code) => Object.keys(code).filter((k) => /^\d+$/.test(k)).map((k) => code[k]);
+
+// Значение поля на ширине s с учётом наследования: меньшие ширины берут
+// значение у ближайшей большей, где оно задано.
+function eff(obj, field, s) {
+  let v = obj[field];
+  for (const t of SCREENS.slice(1)) {
+    if (t < s) break;
+    const x = obj[`${field}-res-${t}`];
+    if (x !== undefined && x !== '') v = x;
+  }
+  return v;
+}
+const num = (v) => parseFloat(v || 0);
+function set(obj, field, s, val) { obj[kluch(field, s)] = String(val); }
+const abH = (code, s) => num(eff(Object.fromEntries(
+  Object.entries(code).filter(([k]) => k.startsWith('ab_')).map(([k, v]) => [k.slice(3), v])), 'height', s));
+const skryt = (el, s) => eff(el, 'hidden', s) === 'y';
+
+// Фото и вуали, которые у лендинга уходят под край окна, конвертер кладёт
+// в сетку 1200 — на широком экране они обрывались бы на её краю.
+// Здесь они переводятся в «контейнер: окно» с шириной в процентах.
+function kKrayuOkna(code, {vh = false} = {}) {
+  for (const el of elementy(code)) {
+    if (el.elem_type !== 'image' && el.elem_type !== 'shape') continue;
+    for (const s of SCREENS) {
+      if (skryt(el, s)) continue;
+      const L = num(eff(el, 'left', s)), w = num(eff(el, 'width', s));
+      const T = num(eff(el, 'top', s)), h = num(eff(el, 'height', s));
+      const H = abH(code, s);
+      const lev = L <= 1, prav = L + w >= s - 1;
+      if (!lev && !prav) {
+        // На этой ширине элемент внутри сетки — явно возвращаем сетку,
+        // иначе он унаследует «окно» от большей ширины.
+        set(el, 'container', s, 'grid'); set(el, 'axisx', s, 'left');
+        set(el, 'widthunits', s, 'px'); set(el, 'left', s, Math.round(L)); set(el, 'width', s, Math.round(w));
+        continue;
+      }
+      set(el, 'container', s, 'window');
+      set(el, 'axisx', s, lev ? 'left' : 'right');
+      set(el, 'left', s, 0);
+      set(el, 'widthunits', s, '%');
+      set(el, 'width', s, lev && prav ? 100 : +(w / s * 100).toFixed(2));
+      if (vh) {
+        // Экран растягивается по высоте окна: фон на всю высоту — в процентах.
+        const verh = T <= 1, niz = T + h >= H - 1;
+        if (verh && niz) { set(el, 'top', s, 0); set(el, 'heightunits', s, '%'); set(el, 'height', s, 100); }
+        else if (niz) { set(el, 'axisy', s, 'bottom'); set(el, 'top', s, 0); }
+      }
+    }
+  }
+}
+
+// Подписи внизу первого экрана: прижать к низу окна, а по горизонтали
+// оставить на месте в сетке (ось — центр, смещение от центра).
+function kNizu(code, re) {
+  for (const el of elementy(code)) {
+    if (!re.test(el.layer || '')) continue;
+    for (const s of SCREENS) {
+      const L = num(eff(el, 'left', s)), w = num(eff(el, 'width', s));
+      const T = num(eff(el, 'top', s)), h = num(eff(el, 'height', s));
+      set(el, 'container', s, 'window');
+      set(el, 'axisx', s, 'center'); set(el, 'left', s, Math.round(L - s / 2 + w / 2));
+      set(el, 'axisy', s, 'bottom'); set(el, 'top', s, Math.round(T + h - abH(code, s)));
+    }
+  }
+}
+
+async function build(key, selector, opts = {}) {
+  const html = await fetch(`${BAZA}${key}.html?v=${Date.now()}`).then((r) => {
+    if (!r.ok) throw new Error(`${key}.html: HTTP ${r.status}`);
+    return r.text();
+  });
+  const mod = await window.tp__fallbackImport(MODUL);
+  const code = await mod.html__buildBackendData(html, selector, {
+    viewportWidth: 1200, viewportHeight: 800, rootMode: 'artboard',
+    bypassMaxDepth: true, breakpoints: SCREENS, materialOnly: true,
+  });
+  if (opts.vh) {
+    code.ab_height_vh = String(opts.vh);
+    code.ab_valign = 'center';
+  }
+  kKrayuOkna(code, {vh: !!opts.vh});
+  if (opts.pinBottom) kNizu(code, opts.pinBottom);
+  if (opts.after) opts.after(code);
+  return code;
+}
+
+const zapisi = () => [...document.querySelectorAll('.record')];
+
+async function put(code, afterid) {
+  const bylo = new Set(zapisi().map((r) => r.id));
+  window.tp__addRecord('106', afterid);
+  let rec = null;
+  for (let i = 0; i < 40 && !rec; i += 1) {
+    await pause(300);
+    rec = zapisi().find((r) => !bylo.has(r.id));
+  }
+  if (!rec) throw new Error('Блок не добавился');
+  const id = +rec.id.replace('record', '');
+  const otvet = await window.tp__fetch({
+    url: '/page/submit/',
+    body: {comm: 'converttozero', pageid: window.pageid, recordid: id, code: JSON.stringify(code)},
+    explanation: 'convert block to ZeroBlock',
+  });
+  if (String(otvet) !== 'OK' && String(otvet) !== '') throw new Error(`converttozero: ${String(otvet).slice(0, 200)}`);
+  window.tp__updateRecord(id, '396');
+  await pause(1500);
+  return id;
+}
+
+async function replace(recid, code) {
+  const id = await put(code, recid);
+  window.tp__delRecord(recid);
+  await pause(1200);
+  return id;
+}
+
+export default {SCREENS, eff, build, put, replace, elementy};
