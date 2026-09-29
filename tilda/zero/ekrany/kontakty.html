@@ -1839,7 +1839,8 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
       if (!(hi > lo)) continue;
       var key = norm(el.textContent);
       store[key] = store[key] || {};
-      store[key][w] = Math.max(store[key][w] || 0, hi - lo);
+      var prev = store[key][w];
+      if (!prev || prev.l < hi - lo) store[key][w] = {l: hi - lo, fs: parseFloat(getComputedStyle(el).fontSize)};
     }
   }
   function vse() {

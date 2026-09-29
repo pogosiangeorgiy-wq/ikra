@@ -123,9 +123,11 @@ function vertikalnyyTekst(code) {
 // по выравниванию, чтобы строка не уехала с места.
 // Однострочному тексту — запас 3 %: конвертер округляет кегль (46,8 → 47),
 // и строка, влезавшая впритык, в Тильде переносится.
-// Многострочному — ширина самой длинной его строки на лендинге (её снимает
-// замерщик в экране, см. ZAMER_JS в sborka-zero.py) плюс поправка на
-// округление кегля. При такой ширине Тильда переносит слова ровно там же.
+// Многострочному — ширина самой длинной его строки на лендинге плюс ровно
+// столько, на сколько округление кегля расширило текст. Оба числа снимает
+// замерщик в экране (ZAMER_JS в sborka-zero.py). При такой ширине Тильда
+// переносит слова там же, где лендинг. Текст — «высота по содержимому»:
+// с фиксированной высотой Zero центрирует его по вертикали.
 const normTekst = (html) => {
   const d = document.createElement('div');
   d.innerHTML = html || '';
@@ -134,6 +136,7 @@ const normTekst = (html) => {
 function zapasTeksta(code, stroki = {}, dolya = 0.03) {
   for (const el of elementy(code)) {
     if (el.elem_type !== 'text') continue;
+    el.textfit = 'autoheight';
     const g = geometriya(code, el);
     const zamer = stroki[normTekst(el.text)] || {};
     for (const s of SCREENS) {
@@ -145,12 +148,13 @@ function zapasTeksta(code, stroki = {}, dolya = 0.03) {
       let nw;
       if (strok <= 1) nw = w + Math.ceil(w * dolya) + 2;
       else {
-        const line = zamer[s];
-        const base = line && line < w ? line : w;
-        nw = Math.min(w + Math.ceil(w * 0.5 / fs) + 1, base + Math.ceil(base * 0.5 / fs) + 2);
+        const z = zamer[s];
+        const base = z && z.l < w ? z.l : w;
+        const rost = z && z.fs ? Math.max(0, fs / z.fs - 1) : 0;
+        nw = base + base * rost + 1.5;
       }
       const al = eff(el, 'align', s) || 'left';
-      set(el, 'width', s, Math.round(nw));
+      set(el, 'width', s, Math.ceil(nw));
       set(el, 'left', s, Math.round(al === 'center' ? L + (w - nw) / 2 : al === 'right' ? L + w - nw : L));
     }
   }
