@@ -97,6 +97,63 @@ function kNizu(code, re) {
   }
 }
 
+// Подпись, поставленная на ребро через writing-mode: vertical-rl, приходит
+// узкой высокой рамкой с поворотом 180°. В Zero writing-mode нет, поэтому
+// строка кладётся горизонтально и поворачивается вокруг того же центра:
+// vertical-rl + rotate(180deg) = 270°, просто vertical-rl = 90°.
+function vertikalnyyTekst(code) {
+  for (const el of elementy(code)) {
+    if (el.elem_type !== 'text') continue;
+    const g = geometriya(code, el);
+    const {w, h} = g[1200];
+    if (!(h > 3 * w && (el.text || '').length > 5)) continue;
+    set(el, 'rotate', 1200, num(el.rotate) === 180 ? 270 : 90);
+    for (const s of SCREENS) {
+      if (g[s].skryt) continue;
+      const {L, T, w: ws, h: hs} = g[s];
+      const cx = L + ws / 2, cy = T + hs / 2;
+      set(el, 'width', s, Math.round(hs)); set(el, 'height', s, Math.round(ws));
+      set(el, 'left', s, Math.round(cx - hs / 2)); set(el, 'top', s, Math.round(cy - ws / 2));
+    }
+  }
+}
+
+// Конвертер округляет кегль (46,8 → 47), и строка, влезавшая в рамку
+// впритык, в Тильде переносится. Рамке текста даётся запас 3 %, со сдвигом
+// по выравниванию, чтобы строка не уехала с места.
+function zapasTeksta(code, dolya = 0.03) {
+  for (const el of elementy(code)) {
+    if (el.elem_type !== 'text') continue;
+    const g = geometriya(code, el);
+    for (const s of SCREENS) {
+      if (g[s].skryt) continue;
+      const {L, w} = g[s];
+      const d = Math.ceil(w * dolya) + 2;
+      const al = eff(el, 'align', s) || 'left';
+      set(el, 'width', s, Math.round(w + d));
+      set(el, 'left', s, Math.round(al === 'center' ? L - d / 2 : al === 'right' ? L - d : L));
+    }
+  }
+}
+
+// Конвертер ставит слои в порядке разметки, не глядя на z-index. Вуаль,
+// повешенная на саму секцию (::after), оказывается последней — поверх текста.
+// Фигура, накрывающая картинку, переезжает сразу за эту картинку.
+function podlozhkiPodTekst(code) {
+  const els = elementy(code).sort((a, b) => num(a.zindex) - num(b.zindex));
+  const box = (el) => { const g = geometriya(code, el)[1200]; return [g.L, g.T, g.L + g.w, g.T + g.h]; };
+  const nakryvaet = (a, b) => a[0] <= b[0] + 2 && a[1] <= b[1] + 2 && a[2] >= b[2] - 2 && a[3] >= b[3] - 2;
+  const poryadok = [...els];
+  for (const sh of els.filter((e) => e.elem_type === 'shape' && /tn-pseudo/.test(e.layer || ''))) {
+    const b = box(sh);
+    const img = els.find((e) => e.elem_type === 'image' && nakryvaet(b, box(e)));
+    if (!img) continue; // декоративная фигура без фото — остаётся где была
+    poryadok.splice(poryadok.indexOf(sh), 1);
+    poryadok.splice(poryadok.indexOf(img) + 1, 0, sh);
+  }
+  poryadok.forEach((e, i) => { e.zindex = String(3 + i); });
+}
+
 async function build(key, selector, opts = {}) {
   const html = await fetch(`${BAZA}${key}.html?v=${Date.now()}`).then((r) => {
     if (!r.ok) throw new Error(`${key}.html: HTTP ${r.status}`);
@@ -111,6 +168,9 @@ async function build(key, selector, opts = {}) {
     code.ab_height_vh = String(opts.vh);
     code.ab_valign = 'center';
   }
+  vertikalnyyTekst(code);
+  zapasTeksta(code);
+  podlozhkiPodTekst(code);
   kKrayuOkna(code, {vh: !!opts.vh});
   if (opts.pinBottom) kNizu(code, opts.pinBottom);
   if (opts.after) opts.after(code);
