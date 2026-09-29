@@ -109,12 +109,17 @@ function kKrayuOkna(code, {vh = false} = {}) {
 // Zero не масштабирует вместе с сеткой, поэтому там левый край задаётся в
 // процентах ширины: L/320 от окна — ровно то место, куда автомасштаб ставит
 // левый край сетки.
-function kNizu(code, re, {telefon = []} = {}) {
+function kNizu(code, re, {telefon = [], krome = []} = {}) {
   for (const el of elementy(code)) {
     if (!re.test(el.layer || '')) continue;
     const g = geometriya(code, el);
     for (const s of SCREENS) {
       const {L, w, T, h, H} = g[s];
+      if (krome.includes(s)) {
+        set(el, 'container', s, 'grid'); set(el, 'axisx', s, 'left'); set(el, 'axisy', s, 'top');
+        set(el, 'leftunits', s, 'px'); set(el, 'left', s, Math.round(L)); set(el, 'top', s, Math.round(T));
+        continue;
+      }
       set(el, 'container', s, 'window');
       set(el, 'axisy', s, 'bottom'); set(el, 'top', s, Math.round(T + h - H));
       if (telefon.includes(s)) {
@@ -274,22 +279,25 @@ function bystryeTaimery() {
   return () => { window.setTimeout = st; window.clearTimeout = ct; };
 }
 
-// Первый экран на телефоне. Высота «по окну» при автомасштабе берётся как
-// большее из (высота раскладки × масштаб) и высоты окна. Раскладка снята во
-// фрейме конвертера высотой больше обычного телефона, и на экране 375×660
-// первый экран выходил выше окна — подписи внизу уходили за край. Поэтому
-// высота телефонной раскладки ужимается до содержимого с полем снизу:
-// дальше её дотягивает до 92 % окна сама Тильда (как 92svh у лендинга), а
-// подписи прижаты к низу окна. Содержимое стоит сверху — так и в лендинге.
-function telefonPoOknu(code, {vh = 92, pole = 40} = {}) {
+// Первый экран на телефоне (у лендинга ≤760). Там у строки подписей нет
+// margin-top:auto, и всё содержимое — от заголовка до подписей — центрируется
+// по вертикали внутри 92svh с отступами 120 сверху и 48 снизу. Конвертер
+// снял его во фрейме высотой 800, то есть уже с центровкой под 736 px. Здесь
+// содержимое сдвигается к верхнему отступу, высота раскладки становится
+// «содержимое + отступы», а центровку по высоте окна делает сам артборд:
+// выравнивание по центру и высота 92 % окна. Фон на всю высоту не трогается.
+function telefonPoOknu(code, {vh = 92, verhPx = 120, nizPx = 48} = {}) {
   for (const s of S_TELEFON) {
-    const H = abH(code, s);
+    const k = s / RAZMETKA.find((r) => r.s === s).c;
     const obychnye = elementy(code).filter((el) => !skryt(el, s) && eff(el, 'container', s) !== 'window');
     if (!obychnye.length) continue;
-    const niz = Math.max(...obychnye.map((el) => { const g = geometriya(code, el)[s]; return g.T + g.h; }));
-    const nH = Math.round(niz + pole);
-    if (nH < H) code[`ab_height-res-${s}`] = String(nH);
+    const g = obychnye.map((el) => geometriya(code, el)[s]);
+    const verh = Math.min(...g.map((x) => x.T)), niz = Math.max(...g.map((x) => x.T + x.h));
+    const sdvig = verh - verhPx * k;
+    obychnye.forEach((el, i) => set(el, 'top', s, Math.round(g[i].T - sdvig)));
+    code[`ab_height-res-${s}`] = String(Math.round(niz - sdvig + nizPx * k));
     code[`ab_height_vh-res-${s}`] = String(vh);
+    code[`ab_valign-res-${s}`] = 'center';
   }
 }
 
@@ -439,7 +447,9 @@ async function build(key, selector, opts = {}) {
   podlozhkiPodTekst(code);
   dobavitLinii(code, window.__ziRamki);
   kKrayuOkna(code, {vh: !!opts.vh});
-  if (opts.pinBottom) kNizu(code, opts.pinBottom, {telefon: S_MASSHTABOM});
+  // На телефонных раскладках подписи первого экрана остаются в сетке под
+  // кнопкой — их ставит на место telefonPoOknu.
+  if (opts.pinBottom) kNizu(code, opts.pinBottom, {telefon: S_MASSHTABOM, krome: opts.vh ? S_TELEFON : []});
   if (opts.vh) telefonPoOknu(code);
   if (opts.podSetkuTildy) podSetkuTildy(code);
   if (opts.after) opts.after(code);
