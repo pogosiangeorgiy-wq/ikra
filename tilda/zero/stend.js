@@ -93,8 +93,8 @@ export async function statya(stranica, {posle = null} = {}) {
       uppercase: 'uppercase', letterspacing: '2.6px', letterspacing_res_480: '2px', lineheight: '1.75'}),
     text_typo: JSON.stringify({fontsize: '15px', fontsize_res_480: '14px', fontweight: '400', color: '#e8e5df',
       lineheight: '1.75', lineheight_res_480: '1.75'}),
-    margintop: '64', marginbottom: '128', margintop_res_480: '48', marginbottom_res_480: '64',
-    bgcolor: '#191510',
+    margintop: '64px', marginbottom: '128px', margintop_res_480: '48px', marginbottom_res_480: '64px',
+    blockbackground: '#191510', // у «Статьи» фон — общее поле блока
   };
   const otvety = {};
   for (const [f, znach] of Object.entries(polya)) {
