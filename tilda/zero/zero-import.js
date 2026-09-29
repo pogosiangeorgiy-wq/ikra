@@ -220,6 +220,29 @@ function dobavitLinii(code, ramki = {}) {
   });
 }
 
+// Когда вкладка Chrome скрыта, браузер пускает цепочки таймеров раз в
+// минуту, а конвертер между шагами ждёт по 80–200 мс через setTimeout —
+// экран собирался бы десятки минут. На время сборки короткие таймеры
+// редактора идут через MessageChannel: его сообщения не притормаживаются.
+function bystryeTaimery() {
+  const st = window.setTimeout, ct = window.clearTimeout;
+  const moi = new Map();
+  let n = 1e9;
+  window.setTimeout = function (fn, ms = 0, ...args) {
+    if (document.visibilityState === 'visible' || ms > 1000 || typeof fn !== 'function') return st.call(window, fn, ms, ...args);
+    const id = n += 1, konec = performance.now() + (+ms || 0), ch = new MessageChannel();
+    moi.set(id, ch);
+    ch.port1.onmessage = () => {
+      if (!moi.has(id)) return;
+      if (performance.now() >= konec) { moi.delete(id); fn(...args); } else ch.port2.postMessage(0);
+    };
+    ch.port2.postMessage(0);
+    return id;
+  };
+  window.clearTimeout = function (id) { if (moi.has(id)) moi.delete(id); else ct.call(window, id); };
+  return () => { window.setTimeout = st; window.clearTimeout = ct; };
+}
+
 async function build(key, selector, opts = {}) {
   const html = await fetch(`${BAZA}${key}.html?v=${Date.now()}`).then((r) => {
     if (!r.ok) throw new Error(`${key}.html: HTTP ${r.status}`);
@@ -240,6 +263,7 @@ async function build(key, selector, opts = {}) {
     }
   });
   nablyudatel.observe(document.body, {subtree: true, attributes: true, attributeFilter: ['style']});
+  const vernutTaimery = bystryeTaimery();
   let code;
   try {
     code = await mod.html__buildBackendData(html, selector, {
@@ -252,6 +276,7 @@ async function build(key, selector, opts = {}) {
     });
   } finally {
     nablyudatel.disconnect();
+    vernutTaimery();
   }
   const neHvataet = SCREENS.filter((s) => !Object.values(window.__ziLines).some((z) => z[s]));
   if (neHvataet.length) console.warn('zero-zamer: нет замеров строк на ширинах', neHvataet);
