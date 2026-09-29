@@ -35,6 +35,12 @@ export async function otkryt(w = 1280, h = 900) {
   document.body.appendChild(d);
   await Promise.all([A, B].map((f) => new Promise((r) => { f.onload = r; })));
   await pause(3500);
+  // У лендинга блоки стоят в стартовом положении появления (сдвиг вниз,
+  // прозрачность), пока их не «увидит» прокрутка, а в скрытом окне она не
+  // срабатывает. Для сверки — конечное положение, как после появления.
+  const st = A.contentDocument.createElement('style');
+  st.textContent = '.reveal,.reveal *,.line__i{transform:none!important;opacity:1!important;transition:none!important}';
+  A.contentDocument.head.appendChild(st);
   // Прокрутка до конца и обратно будит ленивую загрузку и появления.
   for (const f of [A, B]) {
     const win = f.contentWindow, doc = f.contentDocument;
@@ -64,7 +70,10 @@ function listya(doc, ekran) {
     // Берём самый внешний блочный предок текста: <a> или <span> внутри <p>
     // сравниваются в составе абзаца.
     let blok = el;
-    while (blok.parentElement && win.getComputedStyle(blok).display.startsWith('inline')) blok = blok.parentElement;
+    // Строки заголовков, на которые их режет скрипт лендинга (.line), —
+    // части одного заголовка, как и строчные элементы внутри абзаца.
+    while (blok.parentElement && (win.getComputedStyle(blok).display.startsWith('inline')
+      || /(^|\s)line(__i)?(\s|$)/.test(blok.className || ''))) blok = blok.parentElement;
     if (out.some((o) => o.el === blok)) continue;
     const t = norm(blok.textContent);
     if (t.length < 2) continue;
@@ -99,6 +108,9 @@ export function sravnit({porogX = 6, porogY = 10, ekrany = null} = {}) {
   for (const x of a) {
     const kand = poTekstu.get(x.t);
     if (!kand || !kand.length) { net += 1; res.push({ekran: x.metka, t: x.t.slice(0, 50), problema: 'нет в черновике'}); continue; }
+    // Одинаковый текст бывает в разных местах (пункт меню и подпись) —
+    // в пару берётся ближайший по положению.
+    kand.sort((p, q) => (Math.abs(p.L - x.L) + Math.abs(p.Trel - x.Trel)) - (Math.abs(q.L - x.L) + Math.abs(q.Trel - x.Trel)));
     const y = kand.shift();
     const raz = [];
     if (Math.abs(x.L - y.L) > porogX) raz.push(`x ${x.L}→${y.L}`);
