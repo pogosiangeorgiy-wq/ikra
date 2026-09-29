@@ -84,196 +84,46 @@ function kKrayuOkna(code, {vh = false} = {}) {
 
 // Подписи внизу первого экрана: прижать к низу окна, а по горизонтали
 // оставить на месте в сетке (ось — центр, смещение от центра).
-// На телефонной раскладке с автомасштабом подписи остаются в сетке: элементы
-// «по окну» Zero не масштабирует вместе с сеткой, и строка съезжала вправо
-// от заголовка. Там их прижимает к низу telefonPoOknu — вместе со всем
-// содержимым экрана.
-function kNizu(code, re, {krome = []} = {}) {
+// Подписи внизу первого экрана прижимаются к низу окна. По горизонтали на
+// широких раскладках — ось по центру и смещение от центра (сетка стоит по
+// центру окна). На телефонной раскладке с автомасштабом элементы «по окну»
+// Zero не масштабирует вместе с сеткой, поэтому там левый край задаётся в
+// процентах ширины: L/320 от окна — ровно то место, куда автомасштаб ставит
+// левый край сетки.
+function kNizu(code, re, {telefon = []} = {}) {
   for (const el of elementy(code)) {
     if (!re.test(el.layer || '')) continue;
     const g = geometriya(code, el);
     for (const s of SCREENS) {
       const {L, w, T, h, H} = g[s];
-      if (krome.includes(s)) {
-        set(el, 'container', s, 'grid'); set(el, 'axisx', s, 'left'); set(el, 'axisy', s, 'top');
-        set(el, 'left', s, Math.round(L)); set(el, 'top', s, Math.round(T));
-        continue;
-      }
       set(el, 'container', s, 'window');
-      set(el, 'axisx', s, 'center'); set(el, 'left', s, Math.round(L - s / 2 + w / 2));
       set(el, 'axisy', s, 'bottom'); set(el, 'top', s, Math.round(T + h - H));
-    }
-  }
-}
-
-// Подпись, поставленная на ребро через writing-mode: vertical-rl, приходит
-// узкой высокой рамкой с поворотом 180°. В Zero writing-mode нет, поэтому
-// строка кладётся горизонтально и поворачивается вокруг того же центра:
-// vertical-rl + rotate(180deg) = 270°, просто vertical-rl = 90°.
-function vertikalnyyTekst(code) {
-  for (const el of elementy(code)) {
-    if (el.elem_type !== 'text') continue;
-    const g = geometriya(code, el);
-    const {w, h} = g[1200];
-    if (!(h > 3 * w && (el.text || '').length > 5)) continue;
-    set(el, 'rotate', 1200, num(el.rotate) === 180 ? 270 : 90);
-    for (const s of SCREENS) {
-      if (g[s].skryt) continue;
-      const {L, T, w: ws, h: hs} = g[s];
-      const cx = L + ws / 2, cy = T + hs / 2;
-      set(el, 'width', s, Math.round(hs)); set(el, 'height', s, Math.round(ws));
-      set(el, 'left', s, Math.round(cx - hs / 2)); set(el, 'top', s, Math.round(cy - ws / 2));
-    }
-  }
-}
-
-// Конвертер округляет кегль (46,8 → 47), и строка, влезавшая в рамку
-// впритык, в Тильде переносится. Рамке текста даётся запас 3 %, со сдвигом
-// по выравниванию, чтобы строка не уехала с места.
-// Однострочному тексту — запас 3 %: конвертер округляет кегль (46,8 → 47),
-// и строка, влезавшая впритык, в Тильде переносится.
-// Многострочному — ширина самой длинной его строки на лендинге плюс ровно
-// столько, на сколько округление кегля расширило текст. Оба числа снимает
-// замерщик в экране (ZAMER_JS в sborka-zero.py). При такой ширине Тильда
-// переносит слова там же, где лендинг. Текст — «высота по содержимому»:
-// с фиксированной высотой Zero центрирует его по вертикали.
-const normTekst = (html) => {
-  const d = document.createElement('div');
-  d.innerHTML = html || '';
-  return d.textContent.replace(/\s+/g, ' ').trim();
-};
-function zapasTeksta(code, stroki = {}, dolya = 0.03) {
-  for (const el of elementy(code)) {
-    if (el.elem_type !== 'text') continue;
-    el.textfit = 'autoheight';
-    const g = geometriya(code, el);
-    const zamer = stroki[normTekst(el.text)] || {};
-    for (const s of SCREENS) {
-      if (g[s].skryt) continue;
-      const {L, w, h} = g[s];
-      const fs = num(eff(el, 'fontsize', s)) || 16;
-      const lh = num(eff(el, 'lineheight', s)) || 1.4;
-      const strok = Math.round(h / (fs * (lh > 3 ? lh / fs : lh)));
-      let nw;
-      if (strok <= 1) nw = w + Math.ceil(w * dolya) + 2;
-      else {
-        const z = zamer[s];
-        const base = z && z.l < w ? z.l : w;
-        const rost = z && z.fs ? Math.max(0, fs / z.fs - 1) : 0;
-        nw = base + base * rost + 1.5;
+      if (telefon.includes(s)) {
+        set(el, 'axisx', s, 'left'); set(el, 'leftunits', s, '%');
+        set(el, 'left', s, +(L / s * 100).toFixed(2));
+      } else {
+        set(el, 'axisx', s, 'center'); set(el, 'leftunits', s, 'px');
+        set(el, 'left', s, Math.round(L - s / 2 + w / 2));
       }
-      const al = eff(el, 'align', s) || 'left';
-      set(el, 'width', s, Math.ceil(nw));
-      set(el, 'left', s, Math.round(al === 'center' ? L + (w - nw) / 2 : al === 'right' ? L + w - nw : L));
     }
   }
-}
-
-// Конвертер ставит слои в порядке разметки, не глядя на z-index. Вуаль,
-// повешенная на саму секцию (::after), оказывается последней — поверх текста.
-// Фигура, накрывающая картинку, переезжает сразу за эту картинку.
-function podlozhkiPodTekst(code) {
-  const els = elementy(code).sort((a, b) => num(a.zindex) - num(b.zindex));
-  const box = (el) => { const g = geometriya(code, el)[1200]; return [g.L, g.T, g.L + g.w, g.T + g.h]; };
-  // «Накрывает» — пересечение не меньше 80 % меньшей из рамок: фото в
-  // рамке параллакса выше своей полосы, и строгое вложение не срабатывает.
-  const ploshad = (r) => Math.max(0, r[2] - r[0]) * Math.max(0, r[3] - r[1]);
-  const nakryvaet = (a, b) => {
-    const x = [Math.max(a[0], b[0]), Math.max(a[1], b[1]), Math.min(a[2], b[2]), Math.min(a[3], b[3])];
-    return ploshad(x) >= 0.8 * Math.min(ploshad(a), ploshad(b));
-  };
-  const poryadok = [...els];
-  for (const sh of els.filter((e) => e.elem_type === 'shape' && /tn-pseudo/.test(e.layer || ''))) {
-    const b = box(sh);
-    const img = els.find((e) => e.elem_type === 'image' && nakryvaet(b, box(e)));
-    if (!img) continue; // декоративная фигура без фото — остаётся где была
-    poryadok.splice(poryadok.indexOf(sh), 1);
-    poryadok.splice(poryadok.indexOf(img) + 1, 0, sh);
-  }
-  poryadok.forEach((e, i) => { e.zindex = String(3 + i); });
-}
-
-// Линии частичных границ (низ строки таблицы, верх пункта списка) конвертер
-// не получает: их снимает и замеряет скрипт в самом экране (ZAMER_JS в
-// sborka-zero.py). Здесь каждая линия становится фигурой толщиной в линию —
-// с положением на каждой ширине и скрытием там, где линии нет.
-function cvetFona(c) {
-  const m = String(c).match(/rgba?\(([^)]+)\)/);
-  if (!m) return c;
-  const [r, g, b, a = 1] = m[1].split(/[ ,/]+/).filter(Boolean).map(Number);
-  if (a >= 1) return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
-  const rgba = `rgba(${r},${g},${b},${a})`;
-  return `linear-gradient(0deg, ${rgba} 0%, ${rgba} 100%)`;
-}
-function dobavitLinii(code, ramki = {}) {
-  const kluchi = Object.keys(code).filter((k) => /^\d+$/.test(k)).map(Number);
-  let sled = kluchi.length ? Math.max(...kluchi) + 1 : 0;
-  let z = Math.max(2, ...elementy(code).map((e) => num(e.zindex)));
-  const baza = Date.now() % 1e9;
-  Object.values(ramki).forEach((poShirinam, i) => {
-    const iz = SCREENS.find((s) => poShirinam[s]);
-    if (!iz) return;
-    const el = {layer: 'Линия', elem_type: 'shape', elem_id: `${baza}${i + 1}`,
-      bgcolor: cvetFona(poShirinam[iz].c), rotate: '0', borderradius: '0px'};
-    for (const s of SCREENS) {
-      const r = poShirinam[s];
-      if (!r) { set(el, 'hidden', s, 'y'); continue; }
-      set(el, 'hidden', s, 'n');
-      set(el, 'top', s, Math.round(r.t)); set(el, 'left', s, Math.round(r.l));
-      set(el, 'width', s, Math.max(1, Math.round(r.w))); set(el, 'height', s, Math.max(1, Math.round(r.h)));
-    }
-    z += 1;
-    el.zindex = String(z);
-    code[String(sled)] = el;
-    sled += 1;
-  });
-}
-
-// Когда вкладка Chrome скрыта, браузер пускает цепочки таймеров раз в
-// минуту, а конвертер между шагами ждёт по 80–200 мс через setTimeout —
-// экран собирался бы десятки минут. На время сборки короткие таймеры
-// редактора идут через MessageChannel: его сообщения не притормаживаются.
-function bystryeTaimery() {
-  const st = window.setTimeout, ct = window.clearTimeout;
-  const moi = new Map();
-  let n = 1e9;
-  window.setTimeout = function (fn, ms = 0, ...args) {
-    if (document.visibilityState === 'visible' || ms > 1000 || typeof fn !== 'function') return st.call(window, fn, ms, ...args);
-    const id = n += 1, konec = performance.now() + (+ms || 0), ch = new MessageChannel();
-    moi.set(id, ch);
-    ch.port1.onmessage = () => {
-      if (!moi.has(id)) return;
-      if (performance.now() >= konec) { moi.delete(id); fn(...args); } else ch.port2.postMessage(0);
-    };
-    ch.port2.postMessage(0);
-    return id;
-  };
-  window.clearTimeout = function (id) { if (moi.has(id)) moi.delete(id); else ct.call(window, id); };
-  return () => { window.setTimeout = st; window.clearTimeout = ct; };
 }
 
 // Первый экран на телефоне. Высота «по окну» при автомасштабе берётся как
-// большее из (высота раскладки × масштаб) и высоты окна; замеренные 649 px
-// раскладки «320» на экране 375 дают 761 px — выше окна, и подписи внизу
-// уходят за край. Поэтому высота телефонной раскладки ужимается до
-// содержимого с полями, а содержимое сдвигается на полразницы: центровка
-// сохраняется. Фон на всю высоту и подписи, прижатые к низу, не трогаются.
+// большее из (высота раскладки × масштаб) и высоты окна. Раскладка снята во
+// фрейме конвертера высотой больше обычного телефона, и на экране 375×660
+// первый экран выходил выше окна — подписи внизу уходили за край. Поэтому
+// высота телефонной раскладки ужимается до содержимого с полем снизу:
+// дальше её дотягивает до 92 % окна сама Тильда (как 92svh у лендинга), а
+// подписи прижаты к низу окна. Содержимое стоит сверху — так и в лендинге.
 function telefonPoOknu(code, {vh = 92, pole = 40} = {}) {
   const s = 320;
   const H = abH(code, s);
-  const obychnye = elementy(code).filter((el) => {
-    if (skryt(el, s)) return false;
-    return !(eff(el, 'container', s) === 'window'
-      && (eff(el, 'axisy', s) === 'bottom' || eff(el, 'heightunits', s) === '%'));
-  });
+  const obychnye = elementy(code).filter((el) => !skryt(el, s) && eff(el, 'container', s) !== 'window');
   if (!obychnye.length) return;
-  const g = obychnye.map((el) => geometriya(code, el)[s]);
-  const verh = Math.min(...g.map((x) => x.T)), niz = Math.max(...g.map((x) => x.T + x.h));
-  const nH = Math.round(niz - verh + 2 * pole);
-  if (nH >= H) return;
-  const sdvig = Math.round((H - nH) / 2);
-  obychnye.forEach((el, i) => set(el, 'top', s, Math.round(g[i].T - sdvig)));
-  code[`ab_height-res-${s}`] = String(nH);
+  const niz = Math.max(...obychnye.map((el) => { const g = geometriya(code, el)[s]; return g.T + g.h; }));
+  const nH = Math.round(niz + pole);
+  if (nH < H) code[`ab_height-res-${s}`] = String(nH);
   code[`ab_height_vh-res-${s}`] = String(vh);
 }
 
@@ -364,8 +214,10 @@ async function build(key, selector, opts = {}) {
   const neHvataet = SCREENS.filter((s) => !Object.values(window.__ziLines).some((z) => z[s]));
   if (neHvataet.length) console.warn('zero-zamer: нет замеров строк на ширинах', neHvataet);
   if (opts.vh) {
+    // Содержимое первого экрана в лендинге стоит сверху (у строки подписей
+    // margin-top:auto забирает всё свободное место), лишняя высота — снизу.
     code.ab_height_vh = String(opts.vh);
-    code.ab_valign = 'center';
+    code.ab_valign = 'top';
   }
   // Телефонная раскладка (экраны 320–479) масштабируется под ширину окна —
   // штатный автомасштаб Zero. Без него на 375–430 раскладка «320» стоит
@@ -376,7 +228,7 @@ async function build(key, selector, opts = {}) {
   podlozhkiPodTekst(code);
   dobavitLinii(code, window.__ziRamki);
   kKrayuOkna(code, {vh: !!opts.vh});
-  if (opts.pinBottom) kNizu(code, opts.pinBottom, {krome: opts.mobileScale !== false ? [320] : []});
+  if (opts.pinBottom) kNizu(code, opts.pinBottom, {telefon: opts.mobileScale !== false ? [320] : []});
   if (opts.vh && opts.mobileScale !== false) telefonPoOknu(code);
   if (opts.after) opts.after(code);
   return code;
