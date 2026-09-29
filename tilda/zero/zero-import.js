@@ -444,7 +444,8 @@ function kPolyamTildy(code) {
     const [L1, R1] = POLYA_TILDY[s];
     for (const el of vid) {
       const {L, w} = g.get(el)[s];
-      const lev = Math.abs(L - L0) < 2, prav = Math.abs(L + w - R0) < 2;
+      // Допуск у правого края — с запасом ширины однострочного текста (3 %).
+      const lev = Math.abs(L - L0) < 2, prav = Math.abs(L + w - R0) <= Math.max(2, 0.05 * w);
       if (lev && prav) { set(el, 'left', s, Math.round(L1)); set(el, 'width', s, Math.round(R1 - L1)); }
       else if (prav) set(el, 'left', s, Math.round(R1 - w));
       else set(el, 'left', s, Math.round(L1 + (L - L0)));
