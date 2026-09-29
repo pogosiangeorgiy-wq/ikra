@@ -79,15 +79,18 @@ function listya(doc, ekran) {
     const bs = win.getComputedStyle(blok);
     const lh = parseFloat(bs.lineHeight) || parseFloat(bs.fontSize) * 1.3;
     const ekR = ek.getBoundingClientRect();
-    out.push({el: blok, t, ek, L: Math.round(L), W: Math.round(R - L), Trel: Math.round(T - ekR.top),
+    const metka = ek.id || (ek.className && String(ek.className).split(' ')[0]) || ek.tagName;
+    out.push({el: blok, t, ek, metka, L: Math.round(L), W: Math.round(R - L), Trel: Math.round(T - ekR.top),
       stroki: Math.max(1, Math.round((Bn - T) / lh)), fs: parseFloat(bs.fontSize), fw: bs.fontWeight,
       c: bs.color, tt: bs.textTransform, ls: bs.letterSpacing});
   }
   return out;
 }
 
-export function sravnit({porogX = 6, porogY = 10} = {}) {
-  const a = listya(A.contentDocument, ekranOrig);
+export function sravnit({porogX = 6, porogY = 10, ekrany = null} = {}) {
+  // ekrany — список меток секций лендинга (id или первый класс), если нужно
+  // сверить не всю страницу, а отдельные экраны.
+  const a = listya(A.contentDocument, ekranOrig).filter((x) => !ekrany || ekrany.includes(x.metka));
   const b = listya(B.contentDocument, ekranChern);
   const poTekstu = new Map();
   b.forEach((x) => { if (!poTekstu.has(x.t)) poTekstu.set(x.t, []); poTekstu.get(x.t).push(x); });
@@ -95,7 +98,7 @@ export function sravnit({porogX = 6, porogY = 10} = {}) {
   let sovp = 0, net = 0;
   for (const x of a) {
     const kand = poTekstu.get(x.t);
-    if (!kand || !kand.length) { net += 1; res.push({t: x.t.slice(0, 50), problema: 'нет в черновике'}); continue; }
+    if (!kand || !kand.length) { net += 1; res.push({ekran: x.metka, t: x.t.slice(0, 50), problema: 'нет в черновике'}); continue; }
     const y = kand.shift();
     const raz = [];
     if (Math.abs(x.L - y.L) > porogX) raz.push(`x ${x.L}→${y.L}`);
@@ -105,7 +108,7 @@ export function sravnit({porogX = 6, porogY = 10} = {}) {
     if (x.stroki !== y.stroki) raz.push(`строк ${x.stroki}→${y.stroki}`);
     if (x.c !== y.c) raz.push(`цвет ${x.c}→${y.c}`);
     if (x.tt !== y.tt && !(x.tt === 'none' && y.tt === '')) raz.push(`регистр ${x.tt}→${y.tt}`);
-    if (raz.length) res.push({t: x.t.slice(0, 50), problema: raz.join('; ')});
+    if (raz.length) res.push({ekran: x.metka, t: x.t.slice(0, 50), problema: raz.join('; ')});
     else sovp += 1;
   }
   const lishnie = [...poTekstu.values()].flat().map((y) => y.t.slice(0, 50));
