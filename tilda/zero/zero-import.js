@@ -428,6 +428,30 @@ function podSetkuTildy(code) {
   }
 }
 
+// Политика и согласие: текст документа — блок «Статья», он стоит в сетке
+// Тильды (1200/960/640 с полями 20 px). Zero-блоки этих страниц (шапка с
+// заголовком, подвал) встают по тем же полям, чтобы края совпадали: что у
+// левого края контейнера — к левому полю, что у правого — к правому, линия во
+// всю ширину — между полями. Ширины текстов не меняются, переносы те же.
+function kPolyamTildy(code) {
+  const els = elementy(code).filter((el) => eff(el, 'container', TOP) !== 'window');
+  const g = new Map(els.map((el) => [el, geometriya(code, el)]));
+  for (const s of SCREENS) {
+    const vid = els.filter((el) => !g.get(el)[s].skryt);
+    if (!vid.length) continue;
+    const L0 = Math.min(...vid.map((el) => g.get(el)[s].L));
+    const R0 = Math.max(...vid.map((el) => g.get(el)[s].L + g.get(el)[s].w));
+    const [L1, R1] = POLYA_TILDY[s];
+    for (const el of vid) {
+      const {L, w} = g.get(el)[s];
+      const lev = Math.abs(L - L0) < 2, prav = Math.abs(L + w - R0) < 2;
+      if (lev && prav) { set(el, 'left', s, Math.round(L1)); set(el, 'width', s, Math.round(R1 - L1)); }
+      else if (prav) set(el, 'left', s, Math.round(R1 - w));
+      else set(el, 'left', s, Math.round(L1 + (L - L0)));
+    }
+  }
+}
+
 // Форма заявки. Конвертер делает из <form> штатную форму Zero: поля, подписи,
 // варианты списка, кнопку. Имена полей он берёт из атрибута name — в вёрстке
 // они короткие латинские, а в «Заявках» Тильды и в письмах поля должны
@@ -991,6 +1015,7 @@ async function build(key, selector, opts = {}) {
   if (opts.geroy) telefonPoOknu(code);
   if (opts.nizProcentom) nizProcentom(code);
   if (opts.podSetkuTildy) podSetkuTildy(code);
+  if (opts.polyaTildy) kPolyamTildy(code);
   if (opts.forma) podpravitFormu(code, opts.forma);
   // Движение. Рамки .reveal и роли сцены сняты на ширинах снятия — здесь
   // они пересчитываются в единицы раскладок.

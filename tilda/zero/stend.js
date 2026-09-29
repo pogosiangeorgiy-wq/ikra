@@ -58,7 +58,52 @@ export const EKRANY = {
   '404': {title: 'Страница 404', sel: '.zi-stranica', opts: {vh: 93, nizProcentom: true,
     pinBottom: /^(Услуги|Производство|Упаковка|Контакты)$/}},
   '404-podval': {title: 'Подвал страницы', sel: '.zi-stranica', posle: '404'},
+  // Политика и согласие: шапка с заголовком документа, текст — блок
+  // «Статья» (S.statya), подвал. Zero-блоки встают по полям сетки Тильды —
+  // по тем же, что и колонка статьи.
+  'politika-verh': {title: 'Шапка и заголовок', sel: '.zi-stranica', opts: {polyaTildy: true}},
+  'politika-podval': {title: 'Подвал страницы', sel: '.zi-stranica', opts: {polyaTildy: true}},
+  'soglasie-verh': {title: 'Шапка и заголовок', sel: '.zi-stranica', opts: {polyaTildy: true}},
+  'soglasie-podval': {title: 'Подвал страницы', sel: '.zi-stranica', opts: {polyaTildy: true}},
 };
+
+// Блок «Статья» (TX24) с текстом документа: содержимое — из
+// tilda/zero/dokumenty/<страница>.json (собирает statya.py), типографика и
+// поля — как у .doc-body лендинга: заголовок раздела Golos 500, 22 px
+// (телефон 17), заглавные, разрядка 0,12 em, белый; текст 15 px (14),
+// интерлиньяж 1,75, #E8E5DF; колонка 8 из 12 (≈ 82 знака), поля блока
+// 64 / 128 px (телефон 48 / 64), фон #191510.
+export async function statya(stranica, {posle = null} = {}) {
+  let rec = document.querySelector('.record[data-record-type="1211"]');
+  if (!rec) {
+    const bylo = new Set([...document.querySelectorAll('.record')].map((r) => r.id));
+    window.tp__addRecord('1211', posle);
+    for (let i = 0; i < 40 && !rec; i += 1) {
+      await pause(300);
+      rec = [...document.querySelectorAll('.record')].find((r) => !bylo.has(r.id));
+    }
+    if (!rec) throw new Error('Статья не добавилась');
+  }
+  const id = rec.id.replace('record', '');
+  const bloki = await fetch(`${KOREN}tilda/zero/dokumenty/${stranica}.json?v=${Date.now()}`).then((r) => r.json());
+  const polya = {
+    blockeditordata: JSON.stringify(bloki),
+    columns: '8', prefix: '0',
+    title_typo: JSON.stringify({fontsize: '22px', fontsize_res_480: '17px', fontweight: '500', color: '#ffffff',
+      uppercase: 'uppercase', letterspacing: '2.6px', letterspacing_res_480: '2px', lineheight: '1.75'}),
+    text_typo: JSON.stringify({fontsize: '15px', fontsize_res_480: '14px', fontweight: '400', color: '#e8e5df',
+      lineheight: '1.75', lineheight_res_480: '1.75'}),
+    margintop: '64', marginbottom: '128', margintop_res_480: '48', marginbottom_res_480: '64',
+    bgcolor: '#191510',
+  };
+  const otvety = {};
+  for (const [f, znach] of Object.entries(polya)) {
+    otvety[f] = String(await window.tp__fetch({url: '/page/submit/', body: {comm: 'saverecord',
+      pageid: window.pageid, recordid: id, onlythisfield: f, [f]: znach}})).slice(0, 20);
+  }
+  window.tp__updateRecord(id, '1211');
+  return {id, otvety};
+}
 
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 let ZI = null;
@@ -164,4 +209,4 @@ export async function k(kluch, dy = 0) {
     vysotaLending: rb ? Math.round(rb.getBoundingClientRect().height) : 0});
 }
 
-export default {EKRANY, bloki, nazvat, fon, hodRaboty, sverka, zakryt, k};
+export default {EKRANY, bloki, nazvat, fon, hodRaboty, sverka, zakryt, k, statya};
