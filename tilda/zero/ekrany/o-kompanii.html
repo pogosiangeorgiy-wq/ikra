@@ -1792,6 +1792,10 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
     }
   }
   function vse() { ramki(); measure(); }
+  // Событие resize в невидимом фрейме приходит только при отрисовке, а в
+  // фоновой вкладке её нет. Поэтому замер вызывает и сам редактор — сразу,
+  // как конвертер поменял ширину фрейма (см. build в zero-import.js).
+  window.__ziVse = vse;
   window.addEventListener('resize', vse);
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(vse);
 })();

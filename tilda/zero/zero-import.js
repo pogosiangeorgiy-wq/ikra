@@ -228,10 +228,29 @@ async function build(key, selector, opts = {}) {
   const mod = await window.tp__fallbackImport(MODUL);
   window.__ziLines = {}; // сюда пишет замерщик строк из экрана
   window.__ziRamki = {}; // а сюда — линии частичных границ
-  const code = await mod.html__buildBackendData(html, selector, {
-    viewportWidth: 1200, viewportHeight: 800, rootMode: 'artboard',
-    bypassMaxDepth: true, breakpoints: SCREENS, materialOnly: true,
+  // Конвертер меняет ширину своего фрейма и через 120 мс замеряет. Замерщик
+  // в экране вызывается прямо отсюда, микрозадачей после смены ширины: на
+  // событие resize в фоновой вкладке рассчитывать нельзя.
+  const nablyudatel = new MutationObserver((zapisi) => {
+    for (const z of zapisi) {
+      const f = z.target;
+      if (f.tagName === 'IFRAME' && f.classList.contains('tn-html-import__iframe')) {
+        try { f.contentWindow.__ziVse?.(); } catch (e) { console.warn('zero-zamer', e); }
+      }
+    }
   });
+  nablyudatel.observe(document.body, {subtree: true, attributes: true, attributeFilter: ['style']});
+  let code;
+  try {
+    code = await mod.html__buildBackendData(html, selector, {
+      viewportWidth: 1200, viewportHeight: 800, rootMode: 'artboard',
+      bypassMaxDepth: true, breakpoints: SCREENS, materialOnly: true,
+    });
+  } finally {
+    nablyudatel.disconnect();
+  }
+  const neHvataet = SCREENS.filter((s) => !Object.values(window.__ziLines).some((z) => z[s]));
+  if (neHvataet.length) console.warn('zero-zamer: нет замеров строк на ширинах', neHvataet);
   if (opts.vh) {
     code.ab_height_vh = String(opts.vh);
     code.ab_valign = 'center';
