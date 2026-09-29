@@ -466,6 +466,10 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
     for (const it of inputs) {
       if (imena[it.li_nm]) it.li_nm = imena[it.li_nm];
       if (it.li_type === 'cb' && soglasie) it.li_title = soglasie;
+      // Подписи полей у лендинга заглавными (.field label, text-transform);
+      // у подписей формы Zero регистра нет — заглавные в самом тексте.
+      // В заявку уходит имя поля (li_nm), не подпись.
+      else if (it.li_title && it.li_type !== 'hd') it.li_title = it.li_title.toUpperCase();
     }
     let n = inputs.length;
     for (const h of skrytye) {
