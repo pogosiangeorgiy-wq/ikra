@@ -797,8 +797,16 @@ function scena(code, roli, rol) {
       const {L, w, T, h} = g[s];
       const H0 = kadrH(s);
       if (okno) {
-        set(el, 'container', s, 'window'); set(el, 'axisx', s, 'left'); set(el, 'left', s, 0);
-        set(el, 'widthunits', s, '%'); set(el, 'width', s, 100);
+        // Во всю ширину окна. На раскладках с автомасштабом — в сетке во всю
+        // её ширину (она там и есть окно): элементы «по окну» Zero не
+        // масштабирует, и их сдвиг после сцены отстал бы от остальных.
+        if (S_MASSHTABOM.includes(s)) {
+          set(el, 'container', s, 'grid'); set(el, 'axisx', s, 'left'); set(el, 'left', s, 0);
+          set(el, 'widthunits', s, 'px'); set(el, 'width', s, s);
+        } else {
+          set(el, 'container', s, 'window'); set(el, 'axisx', s, 'left'); set(el, 'left', s, 0);
+          set(el, 'widthunits', s, '%'); set(el, 'width', s, 100);
+        }
         // По высоте — доли окна, как у лендинга (кадры и вуали — во весь кадр,
         // полосы вертикальной вуали — верх 24 % и низ 42 %).
         set(el, 'axisy', s, 'top'); set(el, 'topunits', s, '%'); set(el, 'top', s, +(T / H0 * 100).toFixed(2));
