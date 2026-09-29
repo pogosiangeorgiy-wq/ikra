@@ -779,8 +779,10 @@ function scena(code, roli, rol) {
       if (okno) {
         set(el, 'container', s, 'window'); set(el, 'axisx', s, 'left'); set(el, 'left', s, 0);
         set(el, 'widthunits', s, '%'); set(el, 'width', s, 100);
-        set(el, 'axisy', s, 'top'); set(el, 'topunits', s, 'px'); set(el, 'top', s, 0);
-        set(el, 'heightunits', s, '%'); set(el, 'height', s, 100);
+        // По высоте — доли окна, как у лендинга (кадры и вуали — во весь кадр,
+        // полосы вертикальной вуали — верх 24 % и низ 42 %).
+        set(el, 'axisy', s, 'top'); set(el, 'topunits', s, '%'); set(el, 'top', s, +(T / H0 * 100).toFixed(2));
+        set(el, 'heightunits', s, '%'); set(el, 'height', s, +(h / H0 * 100).toFixed(2));
         set(el, 'sbstrgofst', s, 0);
       } else {
         const oY = y === 'top' ? 0 : y === 'center' ? H0 / 2 : H0;
