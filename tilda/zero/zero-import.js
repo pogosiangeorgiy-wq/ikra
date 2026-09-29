@@ -879,13 +879,17 @@ function spisokChteniya(code, roli, rol) {
 }
 
 // «Прокрутка» сцены: пустой прозрачный блок высотой в ход сцены. На
-// телефоне сцены нет — высота 0.
-function prostavka() {
+// телефоне сцены нет. Нулевую высоту Тильда при сохранении выбрасывает
+// (и берёт высоту большей раскладки), поэтому там — 1 px цвета фона
+// списка актов над ним, чтобы шва не было видно.
+function prostavka({fonTelefon = ''} = {}) {
   const code = {ab_screens: [...SCREENS].sort((x, y) => x - y).join(','), ab_bgcolor: ''};
+  const tel = RAZMETKA.find((r) => r.c <= 760).s;
   for (const {s, c} of RAZMETKA) {
-    code[kluch('ab_height', s)] = String(c > 760 ? hodSceny() : 0);
+    code[kluch('ab_height', s)] = String(c > 760 ? hodSceny() : 1);
     if (s !== TOP) code[`ab_upscale-res-${s}`] = S_MASSHTABOM.includes(s) ? 'window' : 'grid';
   }
+  if (fonTelefon) code[`ab_bgcolor-res-${tel}`] = fonTelefon;
   return code;
 }
 

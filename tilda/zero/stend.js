@@ -32,10 +32,10 @@ export const EKRANY = {
   // «прокрутка» — прозрачный блок высотой в ход сцены (prostavka).
   etapy: {title: 'Этапы работы', sel: 'main > .zi-scena', orig: '#etapy', posle: 'uslugi', anchor: 'etapy',
     opts: {scena: true}},
-  'etapy-prokrutka': {title: 'Этапы работы — прокрутка', prostavka: true, posle: 'etapy'},
+  'etapy-prokrutka': {title: 'Этапы работы — прокрутка', prostavka: {fonTelefon: '#e9e4de'}, posle: 'etapy'},
   upakovka: {title: 'Тара и маркировка', sel: 'main > .zi-scena', orig: '#upakovka', posle: 'proizvodstvo',
     anchor: 'upakovka', opts: {scena: true}},
-  'upakovka-prokrutka': {title: 'Тара и маркировка — прокрутка', prostavka: true, posle: 'upakovka'},
+  'upakovka-prokrutka': {title: 'Тара и маркировка — прокрутка', prostavka: {fonTelefon: '#191510'}, posle: 'upakovka'},
   'upakovka-tablica': {title: 'Тара — форматы', orig: '#upakovka', posle: 'upakovka-prokrutka'},
   start: {title: 'Как начать', orig: 'h2:Как начать', posle: 'o-kompanii'},
   ekonomika: {title: 'Экономика и условия', orig: '#ekonomika', posle: 'start', anchor: 'ekonomika'},
@@ -88,7 +88,7 @@ export function fon(kluchi, {posle} = {}) {
     for (const k of kluchi) {
       try {
         const e = EKRANY[k];
-        const code = e.prostavka ? ZI.prostavka() : await ZI.build(k, e.sel || 'main > section', e.opts || {});
+        const code = e.prostavka ? ZI.prostavka(e.prostavka) : await ZI.build(k, e.sel || 'main > section', e.opts || {});
         const b = bloki();
         const est = b[k];
         const id = est ? await ZI.replace(est, code) : await ZI.put(code, posle ?? b[e.posle] ?? Object.values(b).pop());
