@@ -84,12 +84,21 @@ function kKrayuOkna(code, {vh = false} = {}) {
 
 // Подписи внизу первого экрана: прижать к низу окна, а по горизонтали
 // оставить на месте в сетке (ось — центр, смещение от центра).
-function kNizu(code, re) {
+// На телефонной раскладке с автомасштабом подписи остаются в сетке: элементы
+// «по окну» Zero не масштабирует вместе с сеткой, и строка съезжала вправо
+// от заголовка. Там их прижимает к низу telefonPoOknu — вместе со всем
+// содержимым экрана.
+function kNizu(code, re, {krome = []} = {}) {
   for (const el of elementy(code)) {
     if (!re.test(el.layer || '')) continue;
     const g = geometriya(code, el);
     for (const s of SCREENS) {
       const {L, w, T, h, H} = g[s];
+      if (krome.includes(s)) {
+        set(el, 'container', s, 'grid'); set(el, 'axisx', s, 'left'); set(el, 'axisy', s, 'top');
+        set(el, 'left', s, Math.round(L)); set(el, 'top', s, Math.round(T));
+        continue;
+      }
       set(el, 'container', s, 'window');
       set(el, 'axisx', s, 'center'); set(el, 'left', s, Math.round(L - s / 2 + w / 2));
       set(el, 'axisy', s, 'bottom'); set(el, 'top', s, Math.round(T + h - H));
@@ -318,7 +327,7 @@ async function build(key, selector, opts = {}) {
   podlozhkiPodTekst(code);
   dobavitLinii(code, window.__ziRamki);
   kKrayuOkna(code, {vh: !!opts.vh});
-  if (opts.pinBottom) kNizu(code, opts.pinBottom);
+  if (opts.pinBottom) kNizu(code, opts.pinBottom, {krome: opts.mobileScale !== false ? [320] : []});
   if (opts.vh && opts.mobileScale !== false) telefonPoOknu(code);
   if (opts.after) opts.after(code);
   return code;
