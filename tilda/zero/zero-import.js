@@ -121,23 +121,37 @@ function vertikalnyyTekst(code) {
 // Конвертер округляет кегль (46,8 → 47), и строка, влезавшая в рамку
 // впритык, в Тильде переносится. Рамке текста даётся запас 3 %, со сдвигом
 // по выравниванию, чтобы строка не уехала с места.
-// Многострочному тексту запас даётся ровно на округление кегля (до 0,5 px
-// на строку), иначе в строку начнут влезать лишние слова и переносы уедут
-// от оригинала. Однострочному — 3 %: там переносить нечего.
-function zapasTeksta(code, dolya = 0.03) {
+// Однострочному тексту — запас 3 %: конвертер округляет кегль (46,8 → 47),
+// и строка, влезавшая впритык, в Тильде переносится.
+// Многострочному — ширина самой длинной его строки на лендинге (её снимает
+// замерщик в экране, см. ZAMER_JS в sborka-zero.py) плюс поправка на
+// округление кегля. При такой ширине Тильда переносит слова ровно там же.
+const normTekst = (html) => {
+  const d = document.createElement('div');
+  d.innerHTML = html || '';
+  return d.textContent.replace(/\s+/g, ' ').trim();
+};
+function zapasTeksta(code, stroki = {}, dolya = 0.03) {
   for (const el of elementy(code)) {
     if (el.elem_type !== 'text') continue;
     const g = geometriya(code, el);
+    const zamer = stroki[normTekst(el.text)] || {};
     for (const s of SCREENS) {
       if (g[s].skryt) continue;
       const {L, w, h} = g[s];
       const fs = num(eff(el, 'fontsize', s)) || 16;
       const lh = num(eff(el, 'lineheight', s)) || 1.4;
       const strok = Math.round(h / (fs * (lh > 3 ? lh / fs : lh)));
-      const d = strok <= 1 ? Math.ceil(w * dolya) + 2 : Math.ceil(w * 0.5 / fs) + 1;
+      let nw;
+      if (strok <= 1) nw = w + Math.ceil(w * dolya) + 2;
+      else {
+        const line = zamer[s];
+        const base = line && line < w ? line : w;
+        nw = Math.min(w + Math.ceil(w * 0.5 / fs) + 1, base + Math.ceil(base * 0.5 / fs) + 2);
+      }
       const al = eff(el, 'align', s) || 'left';
-      set(el, 'width', s, Math.round(w + d));
-      set(el, 'left', s, Math.round(al === 'center' ? L - d / 2 : al === 'right' ? L - d : L));
+      set(el, 'width', s, Math.round(nw));
+      set(el, 'left', s, Math.round(al === 'center' ? L + (w - nw) / 2 : al === 'right' ? L + w - nw : L));
     }
   }
 }
@@ -172,6 +186,7 @@ async function build(key, selector, opts = {}) {
     return r.text();
   });
   const mod = await window.tp__fallbackImport(MODUL);
+  window.__ziLines = {}; // сюда пишет замерщик строк из экрана
   const code = await mod.html__buildBackendData(html, selector, {
     viewportWidth: 1200, viewportHeight: 800, rootMode: 'artboard',
     bypassMaxDepth: true, breakpoints: SCREENS, materialOnly: true,
@@ -181,7 +196,7 @@ async function build(key, selector, opts = {}) {
     code.ab_valign = 'center';
   }
   vertikalnyyTekst(code);
-  zapasTeksta(code);
+  zapasTeksta(code, window.__ziLines);
   podlozhkiPodTekst(code);
   kKrayuOkna(code, {vh: !!opts.vh});
   if (opts.pinBottom) kNizu(code, opts.pinBottom);

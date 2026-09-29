@@ -1714,5 +1714,40 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   </div>
 </section>
 </main>
+<script id="zero-zamer">
+(function () {
+  var P = window.parent;
+  if (!P || P === window) return;
+  var store = P.__ziLines = P.__ziLines || {};
+  function norm(s) { return s.replace(/\s+/g, ' ').trim(); }
+  function measure() {
+    var w = Math.round(window.innerWidth);
+    var all = document.querySelectorAll('main *, footer *');
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i];
+      var own = false;
+      for (var c = el.firstChild; c; c = c.nextSibling) {
+        if (c.nodeType === 3 && c.textContent.trim()) { own = true; break; }
+      }
+      if (!own) continue;
+      var d = getComputedStyle(el).display;
+      if (d === 'inline' || d === 'contents' || d === 'none') continue;
+      var r = document.createRange();
+      r.selectNodeContents(el);
+      var rects = r.getClientRects(), lo = Infinity, hi = -Infinity;
+      for (var j = 0; j < rects.length; j++) {
+        if (rects[j].width < 0.5) continue;
+        lo = Math.min(lo, rects[j].left); hi = Math.max(hi, rects[j].right);
+      }
+      if (!(hi > lo)) continue;
+      var key = norm(el.textContent);
+      store[key] = store[key] || {};
+      store[key][w] = Math.max(store[key][w] || 0, hi - lo);
+    }
+  }
+  window.addEventListener('resize', measure);
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(measure);
+})();
+</script>
 </body>
 </html>
