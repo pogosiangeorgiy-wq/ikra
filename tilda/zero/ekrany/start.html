@@ -1711,20 +1711,24 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   var store = P.__ziLines = P.__ziLines || {};
   function norm(s) { return s.replace(/\s+/g, ' ').trim(); }
   var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
+  var ramkiStore = P.__ziRamki = P.__ziRamki || {};
   var spisok = null;
+  function koren() { return document.querySelector('main > section, footer'); }
   function ramki() {
     if (!spisok) {
       spisok = Array.prototype.filter.call(document.querySelectorAll('main *, footer *'), function (el) {
-        return el.tagName !== 'HR' && el.tagName !== 'IMG' && !/tn-pseudo/.test(el.className);
+        return el.tagName !== 'HR' && el.tagName !== 'IMG';
       });
     }
     spisok.forEach(function (el) {
       if (el.hasAttribute('data-zi-css')) el.style.cssText = el.getAttribute('data-zi-css');
-      if (el.__ziLines) el.__ziLines.forEach(function (l) { l.style.display = 'none'; });
     });
-    spisok.forEach(function (el) {
+    var w = Math.round(window.innerWidth);
+    var kr = koren().getBoundingClientRect();
+    var zapis = [];
+    spisok.forEach(function (el, idx) {
       var cs = getComputedStyle(el);
-      if (cs.display === 'inline' || cs.display === 'none') return;
+      if (cs.display === 'inline' || cs.display === 'none' || cs.visibility === 'hidden') return;
       var st = SIDES.map(function (S) {
         return {S: S, w: parseFloat(cs['border' + S + 'Width']) || 0,
                 st: cs['border' + S + 'Style'], c: cs['border' + S + 'Color']};
@@ -1733,30 +1737,25 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
       if (!vis.length) return;
       var odna = vis.length === 4 && vis.every(function (x) { return x.w === vis[0].w && x.c === vis[0].c; });
       if (odna) return;
-      if (!el.hasAttribute('data-zi-css')) el.setAttribute('data-zi-css', el.style.cssText);
-      if (!el.__ziLines) {
-        el.__ziLines = SIDES.map(function () {
-          var l = document.createElement('i');
-          l.className = 'zi-line';
-          l.style.cssText = 'display:none;position:absolute;margin:0;padding:0;border:0';
-          el.appendChild(l);
-          return l;
-        });
-      }
-      if (cs.position === 'static') el.style.position = 'relative';
+      var r = el.getBoundingClientRect();
+      if (r.width < 1 && r.height < 1) return;
       vis.forEach(function (x) {
-        var i = SIDES.indexOf(x.S), l = el.__ziLines[i];
+        var t = r.top - kr.top, l = r.left - kr.left, ww = r.width, hh = r.height;
+        if (x.S === 'Top') hh = x.w;
+        if (x.S === 'Bottom') { t = r.bottom - kr.top - x.w; hh = x.w; }
+        if (x.S === 'Left') ww = x.w;
+        if (x.S === 'Right') { l = r.right - kr.left - x.w; ww = x.w; }
+        zapis.push({id: idx + x.S, t: t, l: l, w: ww, h: hh, c: x.c});
+      });
+      if (!el.hasAttribute('data-zi-css')) el.setAttribute('data-zi-css', el.style.cssText);
+      vis.forEach(function (x) {
         el.style['border' + x.S + 'Width'] = '0px';
         el.style['padding' + x.S] = (parseFloat(cs['padding' + x.S]) + x.w) + 'px';
-        l.style.display = 'block';
-        l.style.background = x.c;
-        l.style.top = x.S === 'Bottom' ? 'auto' : '0';
-        l.style.bottom = x.S === 'Bottom' ? '0' : 'auto';
-        l.style.left = x.S === 'Right' ? 'auto' : '0';
-        l.style.right = x.S === 'Right' ? '0' : 'auto';
-        l.style.width = (x.S === 'Top' || x.S === 'Bottom') ? '100%' : x.w + 'px';
-        l.style.height = (x.S === 'Top' || x.S === 'Bottom') ? x.w + 'px' : '100%';
       });
+    });
+    zapis.forEach(function (z) {
+      ramkiStore[z.id] = ramkiStore[z.id] || {};
+      ramkiStore[z.id][w] = z;
     });
   }
   function measure() {
@@ -1785,16 +1784,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
       if (!prev || prev.l < hi - lo) store[key][w] = {l: hi - lo, fs: parseFloat(getComputedStyle(el).fontSize)};
     }
   }
-  function vse() {
-    ramki();
-    // Полоски на время замера прячутся: иначе они попадут в ширину строк.
-    var ls = document.querySelectorAll('.zi-line'), shown = [];
-    for (var i = 0; i < ls.length; i++) {
-      if (ls[i].style.display === 'block') { shown.push(ls[i]); ls[i].style.display = 'none'; }
-    }
-    measure();
-    shown.forEach(function (l) { l.style.display = 'block'; });
-  }
+  function vse() { ramki(); measure(); }
   window.addEventListener('resize', vse);
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(vse);
 })();

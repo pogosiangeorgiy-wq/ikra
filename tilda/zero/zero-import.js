@@ -184,6 +184,42 @@ function podlozhkiPodTekst(code) {
   poryadok.forEach((e, i) => { e.zindex = String(3 + i); });
 }
 
+// Линии частичных границ (низ строки таблицы, верх пункта списка) конвертер
+// не получает: их снимает и замеряет скрипт в самом экране (ZAMER_JS в
+// sborka-zero.py). Здесь каждая линия становится фигурой толщиной в линию —
+// с положением на каждой ширине и скрытием там, где линии нет.
+function cvetFona(c) {
+  const m = String(c).match(/rgba?\(([^)]+)\)/);
+  if (!m) return c;
+  const [r, g, b, a = 1] = m[1].split(/[ ,/]+/).filter(Boolean).map(Number);
+  if (a >= 1) return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
+  const rgba = `rgba(${r},${g},${b},${a})`;
+  return `linear-gradient(0deg, ${rgba} 0%, ${rgba} 100%)`;
+}
+function dobavitLinii(code, ramki = {}) {
+  const kluchi = Object.keys(code).filter((k) => /^\d+$/.test(k)).map(Number);
+  let sled = kluchi.length ? Math.max(...kluchi) + 1 : 0;
+  let z = Math.max(2, ...elementy(code).map((e) => num(e.zindex)));
+  const baza = Date.now() % 1e9;
+  Object.values(ramki).forEach((poShirinam, i) => {
+    const iz = SCREENS.find((s) => poShirinam[s]);
+    if (!iz) return;
+    const el = {layer: 'Линия', elem_type: 'shape', elem_id: `${baza}${i + 1}`,
+      bgcolor: cvetFona(poShirinam[iz].c), rotate: '0', borderradius: '0px'};
+    for (const s of SCREENS) {
+      const r = poShirinam[s];
+      if (!r) { set(el, 'hidden', s, 'y'); continue; }
+      set(el, 'hidden', s, 'n');
+      set(el, 'top', s, Math.round(r.t)); set(el, 'left', s, Math.round(r.l));
+      set(el, 'width', s, Math.max(1, Math.round(r.w))); set(el, 'height', s, Math.max(1, Math.round(r.h)));
+    }
+    z += 1;
+    el.zindex = String(z);
+    code[String(sled)] = el;
+    sled += 1;
+  });
+}
+
 async function build(key, selector, opts = {}) {
   const html = await fetch(`${BAZA}${key}.html?v=${Date.now()}`).then((r) => {
     if (!r.ok) throw new Error(`${key}.html: HTTP ${r.status}`);
@@ -191,6 +227,7 @@ async function build(key, selector, opts = {}) {
   });
   const mod = await window.tp__fallbackImport(MODUL);
   window.__ziLines = {}; // сюда пишет замерщик строк из экрана
+  window.__ziRamki = {}; // а сюда — линии частичных границ
   const code = await mod.html__buildBackendData(html, selector, {
     viewportWidth: 1200, viewportHeight: 800, rootMode: 'artboard',
     bypassMaxDepth: true, breakpoints: SCREENS, materialOnly: true,
@@ -202,6 +239,7 @@ async function build(key, selector, opts = {}) {
   vertikalnyyTekst(code);
   zapasTeksta(code, window.__ziLines);
   podlozhkiPodTekst(code);
+  dobavitLinii(code, window.__ziRamki);
   kKrayuOkna(code, {vh: !!opts.vh});
   if (opts.pinBottom) kNizu(code, opts.pinBottom);
   if (opts.after) opts.after(code);
