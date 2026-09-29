@@ -17,7 +17,9 @@ const norm = (s) => s.replace(/\s+/g, ' ').trim();
 
 let A = null, B = null, shirina = 1280;
 
-export async function otkryt(w = 1280, h = 900) {
+// orig и chernovik — адреса страниц на домене проекта; по умолчанию главная
+// и черновик главной. Для 404: {orig: '/stranica-ne-naydena', chernovik: '/page273701609.html'}.
+export async function otkryt(w = 1280, h = 900, {orig = '/', chernovik = CHERNOVIK} = {}) {
   shirina = w;
   document.getElementById('zi-sverka')?.remove();
   const d = document.createElement('div');
@@ -30,8 +32,8 @@ export async function otkryt(w = 1280, h = 900) {
     d.appendChild(f);
     return f;
   };
-  A = mk('/', 0);
-  B = mk(CHERNOVIK, 1);
+  A = mk(orig, 0);
+  B = mk(chernovik, 1);
   document.body.appendChild(d);
   await Promise.all([A, B].map((f) => new Promise((r) => { f.onload = r; })));
   await pause(3500);
@@ -53,7 +55,7 @@ export async function otkryt(w = 1280, h = 900) {
 }
 
 // Экран, к которому относится текст: секция лендинга или блок Тильды.
-function ekranOrig(el) { return el.closest('section, footer, .site-header, .cookie'); }
+function ekranOrig(el) { return el.closest('section, footer, header, .site-header, .cookie'); }
 function ekranChern(el) { return el.closest('.r.t-rec'); }
 
 function listya(doc, ekran) {
