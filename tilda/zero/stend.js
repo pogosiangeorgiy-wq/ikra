@@ -132,6 +132,14 @@ export async function nazvat(recid, title) {
   return otvet;
 }
 
+// Блок с таким названием на открытой странице. У разных страниц названия
+// повторяются («Подвал страницы»), поэтому ищется по названию, а не по ключу.
+function najti(title) {
+  const r = [...document.querySelectorAll('.record')].find((x) => (x.getAttribute('data-title')
+    || x.querySelector('.t396__artboard')?.getAttribute('data-artboard-title') || '') === title);
+  return r ? +r.id.replace('record', '') : undefined;
+}
+
 const hod = {log: [], gotovo: true};
 export function fon(kluchi, {posle} = {}) {
   hod.log = []; hod.gotovo = false;
@@ -141,9 +149,10 @@ export function fon(kluchi, {posle} = {}) {
       try {
         const e = EKRANY[k];
         const code = e.prostavka ? ZI.prostavka(e.prostavka) : await ZI.build(k, e.sel || 'main > section', e.opts || {});
-        const b = bloki();
-        const est = b[k];
-        const id = est ? await ZI.replace(est, code) : await ZI.put(code, posle ?? b[e.posle] ?? Object.values(b).pop());
+        const est = najti(e.title);
+        const poslednij = [...document.querySelectorAll('.record')].pop();
+        const id = est ? await ZI.replace(est, code) : await ZI.put(code, posle
+          ?? (e.posle && najti(EKRANY[e.posle].title)) ?? (poslednij && +poslednij.id.replace('record', '')));
         await nazvat(id, e.title);
         if (e.anchor) await window.tp__fetch({url: '/page/submit/', body: {comm: 'saverecord',
           pageid: window.pageid, recordid: id, onlythisfield: 'rec_anchor', rec_anchor: e.anchor}});
