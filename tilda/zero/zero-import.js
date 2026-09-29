@@ -519,9 +519,13 @@ function shagi(D, {t, skryt = false, fiks = true}) {
     return Object.fromEntries(Object.entries(o).filter(([k, v]) => +v !== umolch[k])
       .map(([k, v]) => [k, String(+(+v).toFixed(4))]));
   };
+  // Первый шаг — точка отсчёта сдвигов, поэтому без сдвига; исходный сдвиг
+  // (строки акта ждут на 20 px ниже) ставит шаг нулевой длины сразу за ним.
   const nol = polno(t[0][1]);
-  const out = [{di: '0', ...nol}];
-  if (skryt) out.push({di: '0', ...nol, op: '0'}, {di: '0', ...nol});
+  const {mx, my, ...bezSdviga} = nol;
+  const out = [{di: '0', ...bezSdviga}];
+  if (skryt) out.push({di: '0', ...nol, op: '0'});
+  if (skryt || mx !== undefined || my !== undefined) out.push({di: '0', ...nol});
   let akk = 0;
   for (let i = 1; i < t.length; i += 1) {
     const kon = Math.round(t[i][0] * D);
