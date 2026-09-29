@@ -42,14 +42,23 @@ const skryt = (el, s) => eff(el, 'hidden', s) === 'y';
 // Фото и вуали, которые у лендинга уходят под край окна, конвертер кладёт
 // в сетку 1200 — на широком экране они обрывались бы на её краю.
 // Здесь они переводятся в «контейнер: окно» с шириной в процентах.
+// Исходная геометрия элемента на всех ширинах — снимается до любых правок:
+// правка значения на 1200 иначе «протекла» бы через наследование в 960 и ниже.
+function geometriya(code, el) {
+  return Object.fromEntries(SCREENS.map((s) => [s, {
+    L: num(eff(el, 'left', s)), w: num(eff(el, 'width', s)),
+    T: num(eff(el, 'top', s)), h: num(eff(el, 'height', s)),
+    H: abH(code, s), skryt: skryt(el, s),
+  }]));
+}
+
 function kKrayuOkna(code, {vh = false} = {}) {
   for (const el of elementy(code)) {
     if (el.elem_type !== 'image' && el.elem_type !== 'shape') continue;
+    const g = geometriya(code, el);
     for (const s of SCREENS) {
-      if (skryt(el, s)) continue;
-      const L = num(eff(el, 'left', s)), w = num(eff(el, 'width', s));
-      const T = num(eff(el, 'top', s)), h = num(eff(el, 'height', s));
-      const H = abH(code, s);
+      if (g[s].skryt) continue;
+      const {L, w, T, h, H} = g[s];
       const lev = L <= 1, prav = L + w >= s - 1;
       if (!lev && !prav) {
         // На этой ширине элемент внутри сетки — явно возвращаем сетку,
@@ -78,12 +87,12 @@ function kKrayuOkna(code, {vh = false} = {}) {
 function kNizu(code, re) {
   for (const el of elementy(code)) {
     if (!re.test(el.layer || '')) continue;
+    const g = geometriya(code, el);
     for (const s of SCREENS) {
-      const L = num(eff(el, 'left', s)), w = num(eff(el, 'width', s));
-      const T = num(eff(el, 'top', s)), h = num(eff(el, 'height', s));
+      const {L, w, T, h, H} = g[s];
       set(el, 'container', s, 'window');
       set(el, 'axisx', s, 'center'); set(el, 'left', s, Math.round(L - s / 2 + w / 2));
-      set(el, 'axisy', s, 'bottom'); set(el, 'top', s, Math.round(T + h - abH(code, s)));
+      set(el, 'axisy', s, 'bottom'); set(el, 'top', s, Math.round(T + h - H));
     }
   }
 }
