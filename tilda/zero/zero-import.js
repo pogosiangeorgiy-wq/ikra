@@ -243,6 +243,31 @@ function bystryeTaimery() {
   return () => { window.setTimeout = st; window.clearTimeout = ct; };
 }
 
+// Первый экран на телефоне. Высота «по окну» при автомасштабе берётся как
+// большее из (высота раскладки × масштаб) и высоты окна; замеренные 649 px
+// раскладки «320» на экране 375 дают 761 px — выше окна, и подписи внизу
+// уходят за край. Поэтому высота телефонной раскладки ужимается до
+// содержимого с полями, а содержимое сдвигается на полразницы: центровка
+// сохраняется. Фон на всю высоту и подписи, прижатые к низу, не трогаются.
+function telefonPoOknu(code, {vh = 92, pole = 48} = {}) {
+  const s = 320;
+  const H = abH(code, s);
+  const obychnye = elementy(code).filter((el) => {
+    if (skryt(el, s)) return false;
+    return !(eff(el, 'container', s) === 'window'
+      && (eff(el, 'axisy', s) === 'bottom' || eff(el, 'heightunits', s) === '%'));
+  });
+  if (!obychnye.length) return;
+  const g = obychnye.map((el) => geometriya(code, el)[s]);
+  const verh = Math.min(...g.map((x) => x.T)), niz = Math.max(...g.map((x) => x.T + x.h));
+  const nH = Math.round(niz - verh + 2 * pole);
+  if (nH >= H) return;
+  const sdvig = Math.round((H - nH) / 2);
+  obychnye.forEach((el, i) => set(el, 'top', s, Math.round(g[i].T - sdvig)));
+  code[`ab_height-res-${s}`] = String(nH);
+  code[`ab_height_vh-res-${s}`] = String(vh);
+}
+
 async function build(key, selector, opts = {}) {
   const html = await fetch(`${BAZA}${key}.html?v=${Date.now()}`).then((r) => {
     if (!r.ok) throw new Error(`${key}.html: HTTP ${r.status}`);
@@ -294,6 +319,7 @@ async function build(key, selector, opts = {}) {
   dobavitLinii(code, window.__ziRamki);
   kKrayuOkna(code, {vh: !!opts.vh});
   if (opts.pinBottom) kNizu(code, opts.pinBottom);
+  if (opts.vh && opts.mobileScale !== false) telefonPoOknu(code);
   if (opts.after) opts.after(code);
   return code;
 }
