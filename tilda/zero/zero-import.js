@@ -255,6 +255,10 @@ async function build(key, selector, opts = {}) {
     code.ab_height_vh = String(opts.vh);
     code.ab_valign = 'center';
   }
+  // Телефонная раскладка (экраны 320–479) масштабируется под ширину окна —
+  // штатный автомасштаб Zero. Без него на 375–430 раскладка «320» стоит
+  // посередине с пустыми полями по бокам и узкой колонкой текста.
+  if (opts.mobileScale !== false) code['ab_upscale-res-320'] = 'window';
   vertikalnyyTekst(code);
   zapasTeksta(code, window.__ziLines);
   podlozhkiPodTekst(code);
