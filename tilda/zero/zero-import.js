@@ -430,30 +430,26 @@ function podSetkuTildy(code) {
 
 // Политика и согласие: текст документа — блок «Статья», он стоит в сетке
 // Тильды (1200/960/640 с полями 20 px). Zero-блоки этих страниц (шапка с
-// заголовком, подвал) встают по тем же полям, чтобы края совпадали: что у
-// левого края контейнера — к левому полю, что у правого — к правому, линия во
-// всю ширину — между полями. Ширины текстов не меняются, переносы те же.
-function kPolyamTildy(code) {
+// заголовком, подвал) встают по тем же полям, чтобы края совпадали. Края
+// контейнера лендинга замерены на странице (роль kont). Что в левой
+// половине, сдвигается вместе к левому полю, что в правой — к правому
+// (так группы, например две ссылки в подвале, не разъезжаются), что во всю
+// ширину — растягивается между полями. Ширины текстов не меняются.
+function kPolyamTildy(code, roli = {}) {
   const els = elementy(code).filter((el) => eff(el, 'container', TOP) !== 'window');
   const g = new Map(els.map((el) => [el, geometriya(code, el)]));
   for (const s of SCREENS) {
     const vid = els.filter((el) => !g.get(el)[s].skryt);
-    if (!vid.length) continue;
-    // Края контейнера — по линиям и картинкам: рамки текстов шире строк на
-    // запас (zapasTeksta) и могут выходить за край.
-    const kraya = vid.filter((el) => el.elem_type !== 'text');
-    const osn = kraya.length ? kraya : vid;
-    const L0 = Math.min(...osn.map((el) => g.get(el)[s].L));
-    const R0 = Math.max(...osn.map((el) => g.get(el)[s].L + g.get(el)[s].w));
+    const kont = (roli[s] || []).find((r) => r.rol === 'kont');
+    if (!vid.length || !kont) continue;
+    const L0 = kont.l, R0 = kont.l + kont.w;
     const [L1, R1] = POLYA_TILDY[s];
     for (const el of vid) {
       const {L, w} = g.get(el)[s];
-      // У правого края — с допуском на запас ширины текста; текст, чья рамка
-      // вышла за край, тоже прижат к нему.
       const lev = Math.abs(L - L0) < 2, prav = L + w >= R0 - Math.max(2, 0.05 * w);
       if (lev && prav) { set(el, 'left', s, Math.round(L1)); set(el, 'width', s, Math.round(R1 - L1)); }
-      else if (prav) set(el, 'left', s, Math.round(R1 - w));
-      else set(el, 'left', s, Math.round(L1 + (L - L0)));
+      else if (L + w / 2 > (L0 + R0) / 2) set(el, 'left', s, Math.round(L + (R1 - R0)));
+      else set(el, 'left', s, Math.round(L + (L1 - L0)));
     }
   }
 }
@@ -745,7 +741,7 @@ function begushayaLenta(code, cfg) {
 // Сглаживание кадров (инерция) штатно не повторить: кадры идут точно за
 // прокруткой.
 const ROLI_TIP = {kadr: 'image', scrim: 'shape', bar: 'shape', fill: 'shape', dline: 'shape', dfoto: 'image'};
-const ROLI_RAMKI = ['dli', 'dfig']; // только рамка, элемента у роли нет
+const ROLI_RAMKI = ['dli', 'dfig', 'kont']; // только рамка, элемента у роли нет
 
 function naznachitRoli(code, roli = []) {
   const els = elementy(code).filter((el) => !skryt(el, TOP));
@@ -1021,7 +1017,7 @@ async function build(key, selector, opts = {}) {
   if (opts.geroy) telefonPoOknu(code);
   if (opts.nizProcentom) nizProcentom(code);
   if (opts.podSetkuTildy) podSetkuTildy(code);
-  if (opts.polyaTildy) kPolyamTildy(code);
+  if (opts.polyaTildy) kPolyamTildy(code, roli);
   if (opts.forma) podpravitFormu(code, opts.forma);
   // Движение. Рамки .reveal и роли сцены сняты на ширинах снятия — здесь
   // они пересчитываются в единицы раскладок.
