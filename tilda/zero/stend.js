@@ -27,7 +27,15 @@ export const EKRANY = {
   start: {title: 'Как начать', orig: 'h2:Как начать', posle: 'o-kompanii'},
   ekonomika: {title: 'Экономика и условия', orig: '#ekonomika', posle: 'start', anchor: 'ekonomika'},
   voprosy: {title: 'Вопросы', orig: 'h2:Вопросы', posle: 'ekonomika', anchor: 'voprosy', opts: {podSetkuTildy: true}},
-  kontakty: {title: 'Контакты', orig: '#kontakty', posle: 'ekonomika', anchor: 'kontakty'},
+  kontakty: {title: 'Контакты', orig: '#kontakty', posle: 'ekonomika', anchor: 'kontakty', opts: {forma: {
+    // Те же имена полей, что уходили в «Заявки» из версии на блоках кода.
+    imena: {name: 'Имя', company: 'Компания', phone: 'Телефон', email: 'Почта', product: 'Продукт',
+      volume: 'Объём партии', message: 'Задача', consent: 'Согласие'},
+    soglasie: 'Я даю согласие ООО «ГУРМАН-ГУРУ» на обработку моих персональных данных на условиях <a href="/soglasie">Согласия</a> и подтверждаю ознакомление с <a href="/politika">Политикой обработки персональных данных</a>.',
+    skrytye: [{imya: 'Версия согласия', znachenie: '2026-09-09'}, {imya: 'Форма', znachenie: 'lead-kontakty'}],
+    nazvanie: 'Заявка — контакты',
+    uspeh: 'Заявка принята. Свяжемся с вами по указанным контактам.',
+  }}},
   map: {title: 'Как добраться', orig: 'section.map', posle: 'kontakty'},
   footer: {title: 'Подвал', sel: 'footer', orig: 'footer.site-footer', posle: 'map'},
 };

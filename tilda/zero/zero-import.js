@@ -393,6 +393,31 @@ function podSetkuTildy(code) {
   }
 }
 
+// Форма заявки. Конвертер делает из <form> штатную форму Zero: поля, подписи,
+// варианты списка, кнопку. Имена полей он берёт из атрибута name — в вёрстке
+// они короткие латинские, а в «Заявках» Тильды и в письмах поля должны
+// называться по-русски, как было в версии на блоках кода. Здесь же — ссылки
+// в тексте согласия и служебное скрытое поле с версией текста согласия.
+function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie = '', uspeh = ''} = {}) {
+  for (const el of elementy(code)) {
+    if (el.elem_type !== 'form') continue;
+    const inputs = JSON.parse(el.inputs || '[]');
+    for (const it of inputs) {
+      if (imena[it.li_nm]) it.li_nm = imena[it.li_nm];
+      if (it.li_type === 'cb' && soglasie) it.li_title = soglasie;
+    }
+    let n = inputs.length;
+    for (const h of skrytye) {
+      inputs.push({lid: String(1790000002000 + n), ls: String((n + 1) * 10), loff: '', li_parent_id: '',
+        li_type: 'hd', li_nm: h.imya, li_title: h.imya, li_value: h.znachenie, li_ph: h.znachenie});
+      n += 1;
+    }
+    el.inputs = JSON.stringify(inputs);
+    if (nazvanie) el.formname = nazvanie;
+    if (uspeh) el.formmsgsuccess = uspeh;
+  }
+}
+
 async function build(key, selector, opts = {}) {
   const html = await fetch(`${BAZA}${key}.html?v=${Date.now()}`).then((r) => {
     if (!r.ok) throw new Error(`${key}.html: HTTP ${r.status}`);
@@ -452,6 +477,7 @@ async function build(key, selector, opts = {}) {
   if (opts.pinBottom) kNizu(code, opts.pinBottom, {telefon: S_MASSHTABOM, krome: opts.vh ? S_TELEFON : []});
   if (opts.vh) telefonPoOknu(code);
   if (opts.podSetkuTildy) podSetkuTildy(code);
+  if (opts.forma) podpravitFormu(code, opts.forma);
   if (opts.after) opts.after(code);
   return code;
 }

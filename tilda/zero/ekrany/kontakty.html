@@ -1714,7 +1714,50 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
         </dl>
       </div>
 
-      
+      <form class="reveal" id="leadForm" novalidate data-form-id="lead-kontakty" data-consent-version="2026-09-09">
+        <div class="form__row">
+          <div class="field">
+            <label for="f-name">Имя</label>
+            <input id="f-name" name="name" type="text" autocomplete="name" required placeholder="Как к вам обращаться">
+          </div>
+          <div class="field">
+            <label for="f-company">Компания</label>
+            <input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Название бренда">
+          </div>
+          <div class="field">
+            <label for="f-phone">Телефон</label>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required placeholder="+7 ___ ___-__-__">
+          </div>
+          <div class="field">
+            <label for="f-email">Почта</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" placeholder="name@company.ru">
+          </div>
+          <div class="field">
+            <label for="f-product">Продукт</label>
+            <select id="f-product" name="product">
+              <option>Красная икра</option>
+              <option>Чёрная икра</option>
+              <option>Красная и чёрная</option>
+              <option>Пока не определились</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-volume">Объём партии</label>
+            <input id="f-volume" name="volume" type="text" placeholder="например, 500 кг">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-msg">Задача</label>
+          <textarea id="f-msg" name="message" placeholder="Тара, граммовка, сроки, есть ли готовый макет этикетки"></textarea>
+        </div>
+        
+        <label class="form__consent">
+          <input type="checkbox" name="consent" id="f-consent" required>
+          <span>Я даю согласие ООО «ГУРМАН-ГУРУ» на обработку моих персональных данных на условиях <a href="soglasie.html">Согласия</a> и подтверждаю ознакомление с <a href="politika.html">Политикой обработки персональных данных</a>.</span>
+        </label>
+        <button class="btn btn--solid" type="submit" id="f-submit" disabled>Отправить заявку <span class="btn__arrow" aria-hidden="true">&#8594;</span></button>
+        <p class="form__status micro" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
     </div>
   </div>
 </section>
