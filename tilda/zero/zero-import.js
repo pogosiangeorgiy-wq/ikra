@@ -439,13 +439,18 @@ function kPolyamTildy(code) {
   for (const s of SCREENS) {
     const vid = els.filter((el) => !g.get(el)[s].skryt);
     if (!vid.length) continue;
-    const L0 = Math.min(...vid.map((el) => g.get(el)[s].L));
-    const R0 = Math.max(...vid.map((el) => g.get(el)[s].L + g.get(el)[s].w));
+    // Края контейнера — по линиям и картинкам: рамки текстов шире строк на
+    // запас (zapasTeksta) и могут выходить за край.
+    const kraya = vid.filter((el) => el.elem_type !== 'text');
+    const osn = kraya.length ? kraya : vid;
+    const L0 = Math.min(...osn.map((el) => g.get(el)[s].L));
+    const R0 = Math.max(...osn.map((el) => g.get(el)[s].L + g.get(el)[s].w));
     const [L1, R1] = POLYA_TILDY[s];
     for (const el of vid) {
       const {L, w} = g.get(el)[s];
-      // Допуск у правого края — с запасом ширины однострочного текста (3 %).
-      const lev = Math.abs(L - L0) < 2, prav = Math.abs(L + w - R0) <= Math.max(2, 0.05 * w);
+      // У правого края — с допуском на запас ширины текста; текст, чья рамка
+      // вышла за край, тоже прижат к нему.
+      const lev = Math.abs(L - L0) < 2, prav = L + w >= R0 - Math.max(2, 0.05 * w);
       if (lev && prav) { set(el, 'left', s, Math.round(L1)); set(el, 'width', s, Math.round(R1 - L1)); }
       else if (prav) set(el, 'left', s, Math.round(R1 - w));
       else set(el, 'left', s, Math.round(L1 + (L - L0)));
