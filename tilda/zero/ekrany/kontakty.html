@@ -1771,10 +1771,10 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
   var ramkiStore = P.__ziRamki = P.__ziRamki || {};
   var spisok = null;
-  function koren() { return document.querySelector('main > .zi-scena, main > section, footer'); }
+  function koren() { return document.querySelector('.zi-stranica, main > .zi-scena, main > section, footer'); }
   function ramki() {
     if (!spisok) {
-      spisok = Array.prototype.filter.call(document.querySelectorAll('main *, footer *'), function (el) {
+      spisok = Array.prototype.filter.call(koren().querySelectorAll('*'), function (el) {
         return el.tagName !== 'HR' && el.tagName !== 'IMG';
       });
     }
@@ -1818,7 +1818,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   }
   function measure() {
     var w = Math.round(window.innerWidth);
-    var all = document.querySelectorAll('main *, footer *');
+    var all = koren().querySelectorAll('*');
     for (var i = 0; i < all.length; i++) {
       var el = all[i];
       var own = false;
@@ -1862,7 +1862,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
       var r = el.getBoundingClientRect();
       return {l: r.left - kr.left, t: r.top - kr.top, w: r.width, h: r.height};
     }
-    Array.prototype.forEach.call(document.querySelectorAll('main .reveal, footer .reveal'), function (el) {
+    Array.prototype.forEach.call(koren().querySelectorAll('.reveal'), function (el) {
       var r = el.getBoundingClientRect();
       if (r.width < 1 || r.height < 1) return;
       var z = ramka(el);

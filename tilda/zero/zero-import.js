@@ -297,6 +297,23 @@ function bystryeTaimery() {
   return () => { window.setTimeout = st; window.clearTimeout = ct; };
 }
 
+// Фото и вуаль, которые начинаются чуть ниже верха экрана и тянутся до его
+// низа (у 404 блок ошибки заходит под шапку не целиком): привязка к низу и
+// высота — той же долей высоты экрана, что при снятии. Экран растёт с
+// окном, и фото растёт вместе с ним.
+function nizProcentom(code) {
+  for (const el of elementy(code)) {
+    if (el.elem_type !== 'image' && el.elem_type !== 'shape') continue;
+    const g = geometriya(code, el);
+    for (const s of SCREENS) {
+      const {T, h, H, skryt: sk} = g[s];
+      if (sk || T <= 1 || T + h < H - 1 || h < H / 2) continue;
+      set(el, 'axisy', s, 'bottom'); set(el, 'top', s, 0);
+      set(el, 'heightunits', s, '%'); set(el, 'height', s, +(h / H * 100).toFixed(2));
+    }
+  }
+}
+
 // Первый экран на телефоне (у лендинга ≤760). Там у строки подписей нет
 // margin-top:auto, и всё содержимое — от заголовка до подписей — центрируется
 // по вертикали внутри 92svh с отступами 120 сверху и 48 снизу. Конвертер
@@ -970,15 +987,16 @@ async function build(key, selector, opts = {}) {
   kKrayuOkna(code, {vh: !!opts.vh});
   // На телефонных раскладках подписи первого экрана остаются в сетке под
   // кнопкой — их ставит на место telefonPoOknu.
-  if (opts.pinBottom) kNizu(code, opts.pinBottom, {telefon: S_MASSHTABOM, krome: opts.vh ? S_TELEFON : []});
-  if (opts.vh) telefonPoOknu(code);
+  if (opts.pinBottom) kNizu(code, opts.pinBottom, {telefon: S_MASSHTABOM, krome: opts.geroy ? S_TELEFON : []});
+  if (opts.geroy) telefonPoOknu(code);
+  if (opts.nizProcentom) nizProcentom(code);
   if (opts.podSetkuTildy) podSetkuTildy(code);
   if (opts.forma) podpravitFormu(code, opts.forma);
   // Движение. Рамки .reveal и роли сцены сняты на ширинах снятия — здесь
   // они пересчитываются в единицы раскладок.
   const reveal = zameryVRazmetku(window.__ziReveal);
-  poyavlenie(code, reveal, {isklyuchit: (el) => el.layer === 'px' || (opts.vh && el.elem_type === 'image')});
-  if (opts.vh) geroyFoto(code);
+  poyavlenie(code, reveal, {isklyuchit: (el) => el.layer === 'px' || (opts.geroy && el.elem_type === 'image')});
+  if (opts.geroy) geroyFoto(code);
   else parallaks(code);
   if (opts.schetchiki) schetchiki(code, opts.schetchiki);
   if (opts.lenta) begushayaLenta(code, opts.lenta);

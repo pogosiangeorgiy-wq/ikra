@@ -13,7 +13,7 @@ const KOREN = 'https://pogosiangeorgiy-wq.github.io/ikra/';
 // параметры импорта и селектор той же секции на лендинге (для сверки).
 export const EKRANY = {
   hero: {title: 'Первый экран', sel: 'section.hero', orig: 'section.hero',
-    opts: {vh: 100, pinBottom: /^(Москва|ТУ 10|HACCP)/}},
+    opts: {vh: 100, geroy: true, pinBottom: /^(Москва|ТУ 10|HACCP)/}},
   uslugi: {title: 'Услуги', orig: '#uslugi'},
   band: {title: 'Качество начинается с сырья', orig: 'section.band'},
   syrye: {title: 'Сырьё', orig: '#syrye'},
@@ -51,6 +51,13 @@ export const EKRANY = {
   }}},
   map: {title: 'Как добраться', orig: 'section.map', posle: 'kontakty'},
   footer: {title: 'Подвал', sel: 'footer', orig: 'footer.site-footer', posle: 'map'},
+
+  // Вторичные страницы (свои черновики). 404: шапка и блок ошибки — один
+  // экран высотой в окно (у страницы 100svh − 88 px под шапкой, это ~93 %),
+  // строка разделов прижата к низу; подвал — отдельно.
+  '404': {title: 'Страница 404', sel: '.zi-stranica', opts: {vh: 93, nizProcentom: true,
+    pinBottom: /^(Услуги|Производство|Упаковка|Контакты)$/}},
+  '404-podval': {title: 'Подвал страницы', sel: '.zi-stranica', posle: '404'},
 };
 
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
