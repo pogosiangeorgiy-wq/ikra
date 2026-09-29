@@ -14,12 +14,26 @@
 // Подробности и причины каждой поправки — tilda/zero/КАК-РАБОТАЕТ.md.
 
 const BAZA = 'https://pogosiangeorgiy-wq.github.io/ikra/tilda/zero/ekrany/';
-// Ширины Zero Block. 1200 — основная, значения без суффикса.
-const SCREENS = [1200, 960, 640, 480, 320];
+// Раскладки Zero Block: s — с какой ширины окна раскладка действует
+// (брейкпоинт), c — на какой ширине она снимается с лендинга. Пороги — те
+// же, где перестраивается сам лендинг: его медиазапросы 560/640/760/900/1100
+// и контейнер, растущий до 1332 px. Шире 1440 лендинг не меняется, поэтому
+// верхняя раскладка 1440 показывается как есть, а все остальные — с
+// автомасштабом по ширине окна: внутри своего диапазона раскладка растёт
+// вместе с окном, как «резиновый» лендинг, с отклонением не больше ±8 %.
+const RAZMETKA = [
+  {s: 1440, c: 1440}, {s: 1280, c: 1360}, {s: 1101, c: 1180}, {s: 901, c: 1000},
+  {s: 761, c: 820}, {s: 641, c: 700}, {s: 561, c: 600}, {s: 480, c: 520}, {s: 320, c: 375},
+];
+const SCREENS = RAZMETKA.map((r) => r.s);       // по убыванию
+const TOP = SCREENS[0];                          // значения без суффикса
+const SNYATIE = RAZMETKA.map((r) => r.c);        // ширины снятия, по убыванию
+const S_MASSHTABOM = SCREENS.slice(1);           // раскладки с автомасштабом
+const S_TELEFON = RAZMETKA.filter((r) => r.c <= 760).map((r) => r.s); // у лендинга ≤760 первый экран 92svh
 const MODUL = './index-bbX7hnLP.min.js';
 
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
-const kluch = (field, s) => (s === 1200 ? field : `${field}-res-${s}`);
+const kluch = (field, s) => (s === TOP ? field : `${field}-res-${s}`);
 const elementy = (code) => Object.keys(code).filter((k) => /^\d+$/.test(k)).map((k) => code[k]);
 
 // Значение поля на ширине s с учётом наследования: меньшие ширины берут
@@ -40,10 +54,10 @@ const abH = (code, s) => num(eff(Object.fromEntries(
 const skryt = (el, s) => eff(el, 'hidden', s) === 'y';
 
 // Фото и вуали, которые у лендинга уходят под край окна, конвертер кладёт
-// в сетку 1200 — на широком экране они обрывались бы на её краю.
+// в сетку раскладки — на широком экране они обрывались бы на её краю.
 // Здесь они переводятся в «контейнер: окно» с шириной в процентах.
 // Исходная геометрия элемента на всех ширинах — снимается до любых правок:
-// правка значения на 1200 иначе «протекла» бы через наследование в 960 и ниже.
+// правка значения на верхней раскладке иначе «протекла» бы через наследование в нижние.
 function geometriya(code, el) {
   return Object.fromEntries(SCREENS.map((s) => [s, {
     L: num(eff(el, 'left', s)), w: num(eff(el, 'width', s)),
@@ -115,9 +129,9 @@ function vertikalnyyTekst(code) {
   for (const el of elementy(code)) {
     if (el.elem_type !== 'text') continue;
     const g = geometriya(code, el);
-    const {w, h} = g[1200];
+    const {w, h} = g[TOP];
     if (!(h > 3 * w && (el.text || '').length > 5)) continue;
-    set(el, 'rotate', 1200, num(el.rotate) === 180 ? 270 : 90);
+    set(el, 'rotate', TOP, num(el.rotate) === 180 ? 270 : 90);
     for (const s of SCREENS) {
       if (g[s].skryt) continue;
       const {L, T, w: ws, h: hs} = g[s];
@@ -175,7 +189,7 @@ function zapasTeksta(code, stroki = {}, dolya = 0.03) {
 // Фигура, накрывающая картинку, переезжает сразу за эту картинку.
 function podlozhkiPodTekst(code) {
   const els = elementy(code).sort((a, b) => num(a.zindex) - num(b.zindex));
-  const box = (el) => { const g = geometriya(code, el)[1200]; return [g.L, g.T, g.L + g.w, g.T + g.h]; };
+  const box = (el) => { const g = geometriya(code, el)[TOP]; return [g.L, g.T, g.L + g.w, g.T + g.h]; };
   // «Накрывает» — пересечение не меньше 80 % меньшей из рамок: фото в
   // рамке параллакса выше своей полосы, и строгое вложение не срабатывает.
   const ploshad = (r) => Math.max(0, r[2] - r[0]) * Math.max(0, r[3] - r[1]);
@@ -261,62 +275,73 @@ function bystryeTaimery() {
 // дальше её дотягивает до 92 % окна сама Тильда (как 92svh у лендинга), а
 // подписи прижаты к низу окна. Содержимое стоит сверху — так и в лендинге.
 function telefonPoOknu(code, {vh = 92, pole = 40} = {}) {
-  const s = 320;
-  const H = abH(code, s);
-  const obychnye = elementy(code).filter((el) => !skryt(el, s) && eff(el, 'container', s) !== 'window');
-  if (!obychnye.length) return;
-  const niz = Math.max(...obychnye.map((el) => { const g = geometriya(code, el)[s]; return g.T + g.h; }));
-  const nH = Math.round(niz + pole);
-  if (nH < H) code[`ab_height-res-${s}`] = String(nH);
-  code[`ab_height_vh-res-${s}`] = String(vh);
+  for (const s of S_TELEFON) {
+    const H = abH(code, s);
+    const obychnye = elementy(code).filter((el) => !skryt(el, s) && eff(el, 'container', s) !== 'window');
+    if (!obychnye.length) continue;
+    const niz = Math.max(...obychnye.map((el) => { const g = geometriya(code, el)[s]; return g.T + g.h; }));
+    const nH = Math.round(niz + pole);
+    if (nH < H) code[`ab_height-res-${s}`] = String(nH);
+    code[`ab_height_vh-res-${s}`] = String(vh);
+  }
 }
 
-// Телефонная раскладка снимается с лендинга на ширине 375 — самой частой у
-// телефонов — и пересчитывается в сетку 320 с коэффициентом 320/375. Zero
-// показывает её с автомасштабом по ширине окна, и на экране 375 она выходит
-// ровно в размер лендинга (360 → 0,96, 414 → 1,1). Если снимать сразу на 320,
-// на 375 всё выходит на 17 % крупнее и текст переносится чаще.
-const TELEFON = 375;
-const K_TEL = 320 / TELEFON;
-const SNYATIE = [1200, 960, 640, 480, TELEFON];
-function eff375(obj, f) {
+// Раскладки снимаются с лендинга на своих ширинах c и пересчитываются в
+// сетку своего брейкпоинта s с коэффициентом s/c: с автомасштабом Zero на
+// экране шириной c раскладка выходит ровно в размер лендинга. Пример —
+// телефон: снято на 375, лежит в сетке 320; на экране 375 — 1:1,
+// на 360 — 0,96, на 414 — 1,1.
+function effCap(obj, f, c) {
   let v = obj[f];
   for (const t of SNYATIE.slice(1)) {
+    if (t < c) break;
     const x = obj[`${f}-res-${t}`];
     if (x !== undefined && x !== '') v = x;
   }
   return v;
 }
 const MASSHTAB = ['top', 'left', 'width', 'height', 'fontsize', 'letterspacing', 'borderwidth'];
-function vSetku320(code, stroki, ramki) {
-  const r1 = (v) => String(Math.round(num(v) * K_TEL * 10) / 10);
+function vRazmetku(code, stroki, ramki) {
+  const r1 = (v, k) => String(Math.round(num(v) * k * 10) / 10);
+  const nizhnie = RAZMETKA.slice(1);
   for (const el of elementy(code)) {
-    const res = Object.keys(el).filter((k) => k.endsWith(`-res-${TELEFON}`));
-    const polya = new Set([...MASSHTAB, 'lineheight', 'borderradius', ...res.map((k) => k.slice(0, -`-res-${TELEFON}`.length))]);
     const nov = {};
-    for (const f of polya) {
-      const v = eff375(el, f);
-      if (v === undefined || v === '') continue;
-      // Линии и обводки в 1–2 px не пересчитываются: 0,9 px Zero не рисует.
-      if ((f === 'borderwidth' || f === 'height' || f === 'width') && num(v) > 0 && num(v) <= 2) nov[f] = String(num(v));
-      else if (MASSHTAB.includes(f)) nov[f] = r1(v);
-      else if (f === 'lineheight' && num(v) > 3) nov[f] = r1(v);
-      else if (f === 'borderradius' && /px$/.test(v)) nov[f] = `${r1(v)}px`;
-      else if (res.includes(`${f}-res-${TELEFON}`)) nov[f] = v;
+    for (const {s, c} of nizhnie) {
+      const k = s / c;
+      const suf = `-res-${c}`;
+      const res = Object.keys(el).filter((key) => key.endsWith(suf));
+      const polya = new Set([...MASSHTAB, 'lineheight', 'borderradius', ...res.map((key) => key.slice(0, -suf.length))]);
+      for (const f of polya) {
+        const v = effCap(el, f, c);
+        if (v === undefined || v === '') continue;
+        let out;
+        // Линии и обводки в 1–2 px не пересчитываются: 0,9 px Zero не рисует.
+        if ((f === 'borderwidth' || f === 'height' || f === 'width') && num(v) > 0 && num(v) <= 2) out = String(num(v));
+        else if (MASSHTAB.includes(f)) out = r1(v, k);
+        else if (f === 'lineheight' && num(v) > 3) out = r1(v, k);
+        else if (f === 'borderradius' && /px$/.test(v)) out = `${r1(v, k)}px`;
+        else if (res.includes(`${f}${suf}`)) out = v;
+        else continue;
+        nov[`${f}-res-${s}`] = out;
+      }
     }
-    res.forEach((k) => delete el[k]);
-    Object.entries(nov).forEach(([f, v]) => { el[`${f}-res-320`] = v; });
+    for (const {c} of nizhnie) Object.keys(el).filter((key) => key.endsWith(`-res-${c}`)).forEach((key) => delete el[key]);
+    Object.assign(el, nov);
   }
   const ab = Object.fromEntries(Object.entries(code).filter(([k]) => k.startsWith('ab_')).map(([k, v]) => [k.slice(3), v]));
-  const hAb = eff375(ab, 'height');
-  Object.keys(code).filter((k) => k.startsWith('ab_') && k.endsWith(`-res-${TELEFON}`)).forEach((k) => delete code[k]);
-  if (hAb) code['ab_height-res-320'] = r1(hAb);
-  code.ab_screens = String(code.ab_screens || '').replace(String(TELEFON), '320') || '320,480,640,960,1200';
-  Object.values(stroki).forEach((z) => { if (z[TELEFON]) z[320] = {l: z[TELEFON].l * K_TEL, fs: z[TELEFON].fs * K_TEL}; });
-  Object.values(ramki).forEach((z) => {
-    const r = z[TELEFON];
-    if (r) z[320] = {t: r.t * K_TEL, l: r.l * K_TEL, w: r.w * K_TEL, h: Math.max(1, r.h * K_TEL), c: r.c};
-  });
+  const abNov = {};
+  for (const {s, c} of nizhnie) { const h = effCap(ab, 'height', c); if (h) abNov[`ab_height-res-${s}`] = r1(h, s / c); }
+  for (const {c} of nizhnie) Object.keys(code).filter((k) => k.startsWith('ab_') && k.endsWith(`-res-${c}`)).forEach((k) => delete code[k]);
+  Object.assign(code, abNov);
+  code.ab_screens = [...SCREENS].sort((x, y) => x - y).join(',');
+  for (const {s, c} of nizhnie) {
+    const k = s / c;
+    Object.values(stroki).forEach((z) => { if (z[c]) z[s] = {l: z[c].l * k, fs: z[c].fs * k}; });
+    Object.values(ramki).forEach((z) => {
+      const r = z[c];
+      if (r) z[s] = {t: r.t * k, l: r.l * k, w: r.w * k, h: Math.max(1, r.h * k), c: r.c};
+    });
+  }
 }
 
 // Экран, над которым или под которым стоит стандартный блок Тильды (шапка
@@ -324,9 +349,19 @@ function vSetku320(code, stroki, ramki) {
 // лендинга: содержимое растягивается по горизонтали с [левый край, правый
 // край] на [20, ширина − 20] — так стоят колонки стандартных блоков. На
 // телефонной раскладке поля пересчитаны под автомасштаб (20 px на экране 375).
-const POLYA_TILDY = {1200: [20, 1180], 960: [20, 940], 640: [20, 620], 480: [20, 460], 320: [20 * 320 / 375, 355 * 320 / 375]};
+// Поля колонок Тильды на ширине окна c: контейнер 1200/960/640 или во всю
+// ширину, внутри — отступ 20 px. В координатах раскладки — с её коэффициентом.
+function polyaTildy(c) {
+  const W = c >= 1200 ? 1200 : c >= 960 ? 960 : c >= 640 ? 640 : c;
+  return [(c - W) / 2 + 20, (c + W) / 2 - 20];
+}
+const POLYA_TILDY = Object.fromEntries(RAZMETKA.map(({s, c}) => {
+  const [L, R] = polyaTildy(c);
+  const k = s === TOP ? 1 : s / c;
+  return [s, [L * k, R * k]];
+}));
 function podSetkuTildy(code) {
-  const els = elementy(code).filter((el) => eff(el, 'container', 1200) !== 'window');
+  const els = elementy(code).filter((el) => eff(el, 'container', TOP) !== 'window');
   const g = new Map(els.map((el) => [el, geometriya(code, el)]));
   for (const s of SCREENS) {
     const vid = els.filter((el) => !g.get(el)[s].skryt);
@@ -367,8 +402,8 @@ async function build(key, selector, opts = {}) {
   let code;
   try {
     code = await mod.html__buildBackendData(html, selector, {
-      viewportWidth: 1200, viewportHeight: 800, rootMode: 'artboard',
-      bypassMaxDepth: true, breakpoints: opts.mobileScale === false ? SCREENS : SNYATIE, materialOnly: true,
+      viewportWidth: TOP, viewportHeight: 800, rootMode: 'artboard',
+      bypassMaxDepth: true, breakpoints: SNYATIE, materialOnly: true,
       // По умолчанию конвертер уступает браузеру каждые 8 мс через таймер, а
       // в фоновой вкладке таймер тянется секунду и больше — экран собирался
       // минутами. Без пауз он проходит за один заход.
@@ -378,7 +413,7 @@ async function build(key, selector, opts = {}) {
     nablyudatel.disconnect();
     vernutTaimery();
   }
-  if (opts.mobileScale !== false) vSetku320(code, window.__ziLines, window.__ziRamki);
+  vRazmetku(code, window.__ziLines, window.__ziRamki);
   const neHvataet = SCREENS.filter((s) => !Object.values(window.__ziLines).some((z) => z[s]));
   if (neHvataet.length) console.warn('zero-zamer: нет замеров строк на ширинах', neHvataet);
   if (opts.vh) {
@@ -387,17 +422,16 @@ async function build(key, selector, opts = {}) {
     code.ab_height_vh = String(opts.vh);
     code.ab_valign = 'top';
   }
-  // Телефонная раскладка (экраны 320–479) масштабируется под ширину окна —
-  // штатный автомасштаб Zero. Без него на 375–430 раскладка «320» стоит
-  // посередине с пустыми полями по бокам и узкой колонкой текста.
-  if (opts.mobileScale !== false) code['ab_upscale-res-320'] = 'window';
+  // Все раскладки, кроме верхней, масштабируются под ширину окна — штатный
+  // автомасштаб Zero (см. RAZMETKA).
+  for (const s of S_MASSHTABOM) code[`ab_upscale-res-${s}`] = 'window';
   vertikalnyyTekst(code);
   zapasTeksta(code, window.__ziLines);
   podlozhkiPodTekst(code);
   dobavitLinii(code, window.__ziRamki);
   kKrayuOkna(code, {vh: !!opts.vh});
-  if (opts.pinBottom) kNizu(code, opts.pinBottom, {telefon: opts.mobileScale !== false ? [320] : []});
-  if (opts.vh && opts.mobileScale !== false) telefonPoOknu(code);
+  if (opts.pinBottom) kNizu(code, opts.pinBottom, {telefon: S_MASSHTABOM});
+  if (opts.vh) telefonPoOknu(code);
   if (opts.podSetkuTildy) podSetkuTildy(code);
   if (opts.after) opts.after(code);
   return code;
