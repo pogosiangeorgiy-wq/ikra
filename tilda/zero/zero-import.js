@@ -303,7 +303,9 @@ function vSetku320(code, stroki, ramki) {
     for (const f of polya) {
       const v = eff375(el, f);
       if (v === undefined || v === '') continue;
-      if (MASSHTAB.includes(f)) nov[f] = r1(v);
+      // Линии и обводки в 1–2 px не пересчитываются: 0,9 px Zero не рисует.
+      if ((f === 'borderwidth' || f === 'height' || f === 'width') && num(v) > 0 && num(v) <= 2) nov[f] = String(num(v));
+      else if (MASSHTAB.includes(f)) nov[f] = r1(v);
       else if (f === 'lineheight' && num(v) > 3) nov[f] = r1(v);
       else if (f === 'borderradius' && /px$/.test(v)) nov[f] = `${r1(v)}px`;
       else if (res.includes(`${f}-res-${TELEFON}`)) nov[f] = v;
