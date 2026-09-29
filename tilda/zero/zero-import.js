@@ -245,6 +245,10 @@ async function build(key, selector, opts = {}) {
     code = await mod.html__buildBackendData(html, selector, {
       viewportWidth: 1200, viewportHeight: 800, rootMode: 'artboard',
       bypassMaxDepth: true, breakpoints: SCREENS, materialOnly: true,
+      // По умолчанию конвертер уступает браузеру каждые 8 мс через таймер, а
+      // в фоновой вкладке таймер тянется секунду и больше — экран собирался
+      // минутами. Без пауз он проходит за один заход.
+      frameBudgetMs: 1e9,
     });
   } finally {
     nablyudatel.disconnect();
