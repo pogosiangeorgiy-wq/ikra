@@ -457,6 +457,13 @@ function poRazmetke(el, f, znach) {
   }
 }
 
+// Шаги пошаговой анимации — строкой с одинарными кавычками, как их хранит
+// сама Тильда. Значения раскладок сервер кладёт в HTML-атрибут без замены
+// кавычек, и двойная кавычка внутри обрывала атрибут на «[{» — на всех
+// раскладках, кроме верхней, анимация пропадала. Движок перед разбором
+// сам меняет одинарные кавычки на двойные.
+const sbsStroka = (shagiSpisok) => JSON.stringify(shagiSpisok).replace(/"/g, "'");
+
 // Замеры из экрана (по ширинам снятия) → по раскладкам, в их единицах.
 function zameryVRazmetku(zamery = {}) {
   const out = {};
@@ -534,7 +541,7 @@ function shagi(D, {t, skryt = false, fiks = true}) {
     out.push(shag);
     akk = kon;
   }
-  return JSON.stringify(out);
+  return sbsStroka(out);
 }
 
 // Параллакс. У лендинга кадр в рамке .px-frame выше рамки на 2 × --parallax
@@ -555,7 +562,7 @@ function parallaks(code) {
       set(el, 'top', s, verh);
       set(el, 'sbstrgofst', s, verh); // старт — когда верх рамки у низа окна
       const put = Math.round(vEdinicah(s, vhOkna(s)) + H);
-      set(el, 'sbsopts', s, JSON.stringify([{di: '0', my: '0'}, {di: String(put), my: String(-Math.round(d))}]));
+      set(el, 'sbsopts', s, sbsStroka([{di: '0', my: '0'}, {di: String(put), my: String(-Math.round(d))}]));
     }
   }
 }
@@ -647,7 +654,7 @@ function begushayaLenta(code, cfg) {
         set(el, 'hidden', s, 'n');
         set(el, 'left', s, Math.round(x)); set(el, 'top', s, top);
         set(el, 'width', s, Math.round(w[i])); set(el, 'height', s, Math.round(h));
-        set(el, 'sbsopts', s, JSON.stringify([{ti: '0', mx: '0'}, {ti: String(p.dur * 1000), mx: String(-Math.round(rowW)), ea: ''}]));
+        set(el, 'sbsopts', s, sbsStroka([{ti: '0', mx: '0'}, {ti: String(p.dur * 1000), mx: String(-Math.round(rowW)), ea: ''}]));
         x += w[i] + gap;
       });
     });
