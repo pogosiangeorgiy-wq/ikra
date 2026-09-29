@@ -47,7 +47,7 @@ export async function otkryt(w = 1280, h = 900) {
 }
 
 // Экран, к которому относится текст: секция лендинга или блок Тильды.
-function ekranOrig(el) { return el.closest('main > section, footer, .site-header, .cookie'); }
+function ekranOrig(el) { return el.closest('section, footer, .site-header, .cookie'); }
 function ekranChern(el) { return el.closest('.r.t-rec'); }
 
 function listya(doc, ekran) {
