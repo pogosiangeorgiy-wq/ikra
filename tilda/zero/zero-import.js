@@ -49,8 +49,12 @@ const vhOkna = (s) => VH_TIP[razm(s).c];
 // Пиксели окна → единицы раскладки (у раскладок с автомасштабом они мельче).
 const vEdinicah = (s, px) => px * s / razm(s).c;
 // Сцена: трек 360vh, кадр 100vh — ход прокрутки, пока кадр стоит, 260vh.
+// Ход один на все компьютерные раскладки (260 % от окна 800 px): и шаги
+// анимации, и высота «прокрутки» растут с автомасштабом одинаково, а шаги,
+// одинаковые на всех раскладках, хранятся один раз — у Тильды есть предел
+// объёма данных блока.
 const DLINA_SCENY = 2.6;
-const hodSceny = (s) => Math.round(vEdinicah(s, DLINA_SCENY * vhOkna(s)));
+const hodSceny = () => Math.round(DLINA_SCENY * VH_TIP[1440]);
 const S_KOMP = RAZMETKA.filter((r) => r.c > 760).map((r) => r.s); // у лендинга сцена только шире 760
 
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -498,7 +502,7 @@ function poyavlenie(code, reveal = {}, {isklyuchit = () => false} = {}) {
       const d0 = b.hero !== undefined ? 260 + b.hero * shag : b.mesto * shag;
       return +((d0 + (vid === 'stroka' ? 60 * (b.stroka + 1) : 0)) / 1000).toFixed(2);
     });
-    poRazmetke(el, 'animtriggeroffset', (s) => Math.round(0.12 * vhOkna(s)));
+    el.animtriggeroffset = String(Math.round(0.12 * VH_TIP[1440])); // 12 % окна
   }
 }
 
@@ -510,7 +514,10 @@ function shagi(D, {t, skryt = false, fiks = true}) {
   const polno = (st) => {
     const o = {op: 1, sx: 1, sy: 1, mx: 0, my: 0, ...st};
     if (st.s !== undefined) { o.sx = st.s; o.sy = st.s; delete o.s; }
-    return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, String(+(+v).toFixed(4))]));
+    // Значения по умолчанию (видим, масштаб 1, без сдвига) не пишутся.
+    const umolch = {op: 1, sx: 1, sy: 1, mx: 0, my: 0};
+    return Object.fromEntries(Object.entries(o).filter(([k, v]) => +v !== umolch[k])
+      .map(([k, v]) => [k, String(+(+v).toFixed(4))]));
   };
   const nol = polno(t[0][1]);
   const out = [{di: '0', ...nol}];
@@ -796,7 +803,7 @@ function scena(code, roli, rol) {
         // Старт у всех элементов — когда верх блока доходит до верха окна.
         set(el, 'sbstrgofst', s, Math.round(T - oY));
       }
-      set(el, 'sbsopts', s, shagi(hodSceny(s), liniya(r, w)));
+      set(el, 'sbsopts', s, shagi(hodSceny(), liniya(r, w)));
     }
   }
   // Всё прочее, что конвертер снял с кадра (фон секции и т. п.), на
@@ -872,7 +879,7 @@ function spisokChteniya(code, roli, rol) {
 function prostavka() {
   const code = {ab_screens: [...SCREENS].sort((x, y) => x - y).join(','), ab_bgcolor: ''};
   for (const {s, c} of RAZMETKA) {
-    code[kluch('ab_height', s)] = String(c > 760 ? hodSceny(s) : 0);
+    code[kluch('ab_height', s)] = String(c > 760 ? hodSceny() : 0);
     if (s !== TOP) code[`ab_upscale-res-${s}`] = S_MASSHTABOM.includes(s) ? 'window' : 'grid';
   }
   return code;
@@ -956,6 +963,30 @@ async function build(key, selector, opts = {}) {
   if (opts.spisokChteniya) spisokChteniya(code, roli, rol);
   navedenie(code);
   if (opts.after) opts.after(code);
+  szhat(code);
+  return code;
+}
+
+// Сжатие: значение раскладки, совпадающее с унаследованным от большей, не
+// хранится — Zero и так возьмёт его сверху. У Тильды предел на объём данных
+// блока (ZRO-SZC-003 «Too much data»).
+function szhat(code) {
+  const chistit = (obj, pref) => {
+    const polya = new Set(Object.keys(obj).filter((k) => k.startsWith(pref) && /-res-\d+$/.test(k))
+      .map((k) => k.replace(/-res-\d+$/, '')));
+    for (const f of polya) {
+      let prev = obj[f];
+      for (const s of SCREENS.slice(1)) {
+        const k = `${f}-res-${s}`;
+        if (!(k in obj)) continue;
+        const v = obj[k];
+        if (v === '' || v === undefined || String(v) === String(prev)) delete obj[k];
+        else prev = v;
+      }
+    }
+  };
+  for (const el of elementy(code)) chistit(el, '');
+  chistit(code, 'ab_');
   return code;
 }
 
