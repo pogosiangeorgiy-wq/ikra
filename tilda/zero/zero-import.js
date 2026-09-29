@@ -319,6 +319,30 @@ function vSetku320(code, stroki, ramki) {
   });
 }
 
+// Экран, над которым или под которым стоит стандартный блок Тильды (шапка
+// «Вопросов» над аккордеоном), выравнивается по полям сетки Тильды, а не
+// лендинга: содержимое растягивается по горизонтали с [левый край, правый
+// край] на [20, ширина − 20] — так стоят колонки стандартных блоков. На
+// телефонной раскладке поля пересчитаны под автомасштаб (20 px на экране 375).
+const POLYA_TILDY = {1200: [20, 1180], 960: [20, 940], 640: [20, 620], 480: [20, 460], 320: [20 * 320 / 375, 355 * 320 / 375]};
+function podSetkuTildy(code) {
+  const els = elementy(code).filter((el) => eff(el, 'container', 1200) !== 'window');
+  const g = new Map(els.map((el) => [el, geometriya(code, el)]));
+  for (const s of SCREENS) {
+    const vid = els.filter((el) => !g.get(el)[s].skryt);
+    if (!vid.length) continue;
+    const L0 = Math.min(...vid.map((el) => g.get(el)[s].L));
+    const R0 = Math.max(...vid.map((el) => g.get(el)[s].L + g.get(el)[s].w));
+    const [L1, R1] = POLYA_TILDY[s];
+    const k = (R1 - L1) / (R0 - L0);
+    for (const el of vid) {
+      const {L, w} = g.get(el)[s];
+      set(el, 'left', s, Math.round(L1 + (L - L0) * k));
+      set(el, 'width', s, Math.round(w * k));
+    }
+  }
+}
+
 async function build(key, selector, opts = {}) {
   const html = await fetch(`${BAZA}${key}.html?v=${Date.now()}`).then((r) => {
     if (!r.ok) throw new Error(`${key}.html: HTTP ${r.status}`);
@@ -374,6 +398,7 @@ async function build(key, selector, opts = {}) {
   kKrayuOkna(code, {vh: !!opts.vh});
   if (opts.pinBottom) kNizu(code, opts.pinBottom, {telefon: opts.mobileScale !== false ? [320] : []});
   if (opts.vh && opts.mobileScale !== false) telefonPoOknu(code);
+  if (opts.podSetkuTildy) podSetkuTildy(code);
   if (opts.after) opts.after(code);
   return code;
 }
