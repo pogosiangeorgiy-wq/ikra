@@ -26,8 +26,16 @@ const FORMA = {
   };
 
 export const EKRANY = {
+  // Рамка кнопки у лендинга — --c-line-dark, rgba(255,255,255,.2); конвертер
+  // теряет прозрачность и ставит белую. #474440 — тот же цвет на фоне #191510.
   hero: {title: 'Первый экран', sel: 'section.hero', orig: 'section.hero',
-    anchor: 'top', opts: {vh: 100, geroy: true, pinBottom: /^(Москва|ТУ 10|HACCP)/}},
+    anchor: 'top', opts: {vh: 100, geroy: true, pinBottom: /^(Москва|ТУ 10|HACCP)/,
+      after: (code) => {
+        for (const k of Object.keys(code)) {
+          const el = code[k];
+          if (/^\d+$/.test(k) && el.elem_type === 'button' && /^#fff(fff)?$/i.test(el.bordercolor || '')) el.bordercolor = '#474440';
+        }
+      }}},
   uslugi: {title: 'Услуги', orig: '#uslugi', anchor: 'uslugi'},
   band: {title: 'Качество начинается с сырья', orig: 'section.band'},
   syrye: {title: 'Сырьё', orig: '#syrye', anchor: 'syrye'},
@@ -79,7 +87,7 @@ export const EKRANY = {
         const karta = figury.sort((a, b) => (parseFloat(b.width) * parseFloat(b.height) || 0) - (parseFloat(a.width) * parseFloat(a.height) || 0))[0];
         if (karta) {
           for (const k of Object.keys(karta)) if (/^(top|height|heightunits|topunits|axisy)(-res-\d+)?$/.test(k)) delete karta[k];
-          Object.assign(karta, {top: '0', axisy: 'top', heightunits: '%', height: '100'});
+          Object.assign(karta, {top: '0', axisy: 'top', heightunits: '%', height: '100', bordercolor: '#474440'});
         }
       }}},
   map: {title: 'Как добраться', orig: 'section.map', posle: 'kontakty'},
