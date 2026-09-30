@@ -506,6 +506,10 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
     // Иначе каждое поле стояло на 7 px выше, чем линия под ним (линии —
     // отдельные фигуры, сняты с вёрстки), и расхождение копилось вниз.
     el.inputtitlemargbottom = '15';
+    // Шаг полей у лендинга ~125 px (подпись 23 + 8 + поле 47 + 48, с дробями
+    // clamp-кегля), у формы Zero получался ровно 126 — за семь полей линия
+    // отставала на 7 px. Отступ 47 даёт шаг 125.
+    el.inputmargbottom = '47';
     if (nazvanie) el.formname = nazvanie;
     if (uspeh) el.formmsgsuccess = uspeh;
     // Сообщения лендинга: не заполнены обязательные поля и сбой отправки.
