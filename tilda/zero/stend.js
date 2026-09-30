@@ -34,6 +34,11 @@ export const EKRANY = {
         for (const k of Object.keys(code)) {
           const el = code[k];
           if (/^\d+$/.test(k) && el.elem_type === 'button' && /^#fff(fff)?$/i.test(el.bordercolor || '')) el.bordercolor = '#474440';
+          // Затемнение над фото (::after) — на 1 % шире фото: ширины в
+          // процентах округляются по-разному, и край фото выглядывал швом в 1 px.
+          if (/^\d+$/.test(k) && el.elem_type === 'shape' && el.layer === 'tn-pseudo--after' && el.container === 'window') {
+            for (const f of Object.keys(el)) if (/^width(-res-\d+)?$/.test(f) && +el[f] < 100) el[f] = String(Math.min(100, +el[f] + 1));
+          }
         }
       }}},
   uslugi: {title: 'Услуги', orig: '#uslugi', anchor: 'uslugi'},
