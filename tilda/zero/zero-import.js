@@ -553,6 +553,10 @@ function poyavlenie(code, reveal = {}, {isklyuchit = () => false} = {}) {
     const g = geometriya(code, el);
     const s0 = SCREENS.find((s) => !g[s].skryt && reveal[s]?.length);
     if (!s0) continue;
+    // Фон секции (фото, вуаль, заливка во всю ширину и почти во всю высоту
+    // блока) у лендинга стоит сразу — ему появление не нужно, иначе текст
+    // проявляется раньше своего фона (тёмный текст на тёмном и т. п.).
+    if (el.elem_type !== 'text' && g[s0].w >= 0.95 * s0 && g[s0].h >= 0.8 * g[s0].H) continue;
     const vnutri = (s) => {
       const {L, w, T, h} = g[s];
       const cx = L + w / 2, cy = T + h / 2;
@@ -895,7 +899,7 @@ function naznachitRoli(code, roli = []) {
   return res;
 }
 
-function scena(code, roli, rol) {
+function scena(code, roli, rol, {fonTelefon = ''} = {}) {
   const akty = 1 + Math.max(-1, ...[...rol.keys()].filter((k) => /^akt-\d+-/.test(k)).map((k) => +k.split('-')[1]));
   if (akty < 2) throw new Error('сцена: не нашлись акты');
   const SEG = 1 / akty, FADE = 0.06, XFADE = 0.10, ZOOM = 1.06;
@@ -954,6 +958,9 @@ function scena(code, roli, rol) {
   if (TEL.length) { code[`ab_height_vh-res-${TEL[0]}`] = '0'; code[`ab_valign-res-${TEL[0]}`] = 'top'; }
   code.ab_ovrflw = 'visible';
   code.ab_bgcolor = '#191510';
+  // На телефоне вместо сцены — список актов на фоне своей секции («Этапы» —
+  // светлая, «Тара» — тёмная).
+  if (TEL.length && fonTelefon) code[`ab_bgcolor-res-${TEL[0]}`] = fonTelefon;
 
   // Высота кадра при снятии — окно конвертера (по замеру первого снимка).
   const kadrH = (s) => (roli[s] || []).find((r) => r.rol === 'kadr-0')?.h || vEdinicah(s, 800);
@@ -1161,7 +1168,7 @@ async function build(key, selector, opts = {}) {
   if (opts.geroy) geroyFoto(code);
   else parallaks(code);
   if (opts.lenta) begushayaLenta(code, opts.lenta);
-  if (opts.scena) scena(code, roli, rol);
+  if (opts.scena) scena(code, roli, rol, typeof opts.scena === 'object' ? opts.scena : {});
   if (opts.spisokChteniya) spisokChteniya(code, roli, rol);
   navedenie(code);
   izEkrana(code, html);

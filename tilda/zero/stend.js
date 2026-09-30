@@ -32,10 +32,10 @@ export const EKRANY = {
   // Липкие сцены: кадр высотой в окно (на телефоне — список актов) и за ним
   // «прокрутка» — прозрачный блок высотой в ход сцены (prostavka).
   etapy: {title: 'Этапы работы', sel: 'main > .zi-scena', orig: '#etapy', posle: 'uslugi', anchor: 'etapy',
-    opts: {scena: true}},
+    opts: {scena: {fonTelefon: '#e9e4de'}}},
   'etapy-prokrutka': {title: 'Этапы работы — прокрутка', prostavka: {fonTelefon: '#e9e4de'}, posle: 'etapy'},
   upakovka: {title: 'Тара и маркировка', sel: 'main > .zi-scena', orig: '#upakovka', posle: 'proizvodstvo',
-    anchor: 'upakovka', opts: {scena: true}},
+    anchor: 'upakovka', opts: {scena: {fonTelefon: '#191510'}}},
   'upakovka-prokrutka': {title: 'Тара и маркировка — прокрутка', prostavka: {fonTelefon: '#191510'}, posle: 'upakovka'},
   'upakovka-tablica': {title: 'Тара — форматы', orig: '#upakovka', posle: 'upakovka-prokrutka'},
   start: {title: 'Как начать', orig: 'h2:Как начать', posle: 'o-kompanii'},
