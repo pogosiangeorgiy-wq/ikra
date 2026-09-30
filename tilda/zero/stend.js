@@ -11,6 +11,20 @@ const KOREN = 'https://pogosiangeorgiy-wq.github.io/ikra/';
 
 // Ключ экрана → название блока в редакторе, корень для конвертера,
 // параметры импорта и селектор той же секции на лендинге (для сверки).
+// Форма заявки: «Контакты» и всплывающее окно.
+const FORMA = {
+    // Те же имена полей, что уходили в «Заявки» из версии на блоках кода.
+    imena: {name: 'Имя', company: 'Компания', phone: 'Телефон', email: 'Почта', product: 'Продукт',
+      volume: 'Объём партии', message: 'Задача', consent: 'Согласие'},
+    soglasie: 'Я даю согласие ООО «ГУРМАН-ГУРУ» на обработку моих персональных данных на условиях <a href="/soglasie">Согласия</a> и подтверждаю ознакомление с <a href="/politika">Политикой обработки персональных данных</a>.',
+    skrytye: [{imya: 'Версия согласия', znachenie: '2026-09-09'}, {imya: 'Форма', znachenie: 'lead-kontakty'}],
+    nazvanie: 'Заявка — контакты',
+    uspeh: 'Заявка принята. Свяжемся с вами по указанным контактам.',
+    // Сообщения лендинга (index.html, раздел формы).
+    oshibkaPustye: 'Заполните имя, телефон и отметьте согласие.',
+    oshibka: 'Не удалось отправить. Напишите нам на sale@gurman.guru или позвоните.',
+  };
+
 export const EKRANY = {
   hero: {title: 'Первый экран', sel: 'section.hero', orig: 'section.hero',
     anchor: 'top', opts: {vh: 100, geroy: true, pinBottom: /^(Москва|ТУ 10|HACCP)/}},
@@ -47,18 +61,27 @@ export const EKRANY = {
   // лендинга (320 ← 360), и на 480–760 идёт в одну колонку (как .form__row
   // лендинга) — выходит выше, кнопка уходила под низ блока. Прибавка даёт
   // под кнопкой ~100 px, как на 390.
-  kontakty: {title: 'Контакты', orig: '#kontakty', posle: 'ekonomika', anchor: 'kontakty', opts: {vysotaPlus: {320: 110, 480: 85, 561: 70, 641: 110}, forma: {
-    // Те же имена полей, что уходили в «Заявки» из версии на блоках кода.
-    imena: {name: 'Имя', company: 'Компания', phone: 'Телефон', email: 'Почта', product: 'Продукт',
-      volume: 'Объём партии', message: 'Задача', consent: 'Согласие'},
-    soglasie: 'Я даю согласие ООО «ГУРМАН-ГУРУ» на обработку моих персональных данных на условиях <a href="/soglasie">Согласия</a> и подтверждаю ознакомление с <a href="/politika">Политикой обработки персональных данных</a>.',
-    skrytye: [{imya: 'Версия согласия', znachenie: '2026-09-09'}, {imya: 'Форма', znachenie: 'lead-kontakty'}],
-    nazvanie: 'Заявка — контакты',
-    uspeh: 'Заявка принята. Свяжемся с вами по указанным контактам.',
-    // Сообщения лендинга (index.html, раздел формы).
-    oshibkaPustye: 'Заполните имя, телефон и отметьте согласие.',
-    oshibka: 'Не удалось отправить. Напишите нам на sale@gurman.guru или позвоните.',
-  }}},
+  kontakty: {title: 'Контакты', orig: '#kontakty', posle: 'ekonomika', anchor: 'kontakty', opts: {vysotaPlus: {320: 110, 480: 85, 561: 70, 641: 110}, forma: FORMA}},
+  // Всплывающая форма «Обсудить партию» (кнопка первого экрана, крючок
+  // #zayavka): блок показывает попап T1093. Та же форма, что в «Контактах»,
+  // в заявке — «Форма: lead-popup». Фон блока прозрачный; карточка — на всю
+  // высоту блока, чтобы расти вместе с формой (прибавки — как у «Контактов»).
+  popup: {title: 'Всплывающая форма', sel: 'main > section', orig: '#kontakty', posle: 'footer',
+    opts: {vysotaPlus: {320: 110, 480: 85, 561: 70, 641: 110},
+      forma: {...FORMA, skrytye: [{imya: 'Версия согласия', znachenie: '2026-09-09'}, {imya: 'Форма', znachenie: 'lead-popup'}],
+        nazvanie: 'Заявка — всплывающее окно'},
+      after: (code) => {
+        code.ab_bgcolor = '';
+        for (const k of Object.keys(code)) if (/^ab_bgcolor-res-/.test(k)) delete code[k];
+        // Карточка — самая большая фигура: во всю высоту блока на всех раскладках.
+        const figury = Object.keys(code).filter((k) => /^\d+$/.test(k)).map((k) => code[k])
+          .filter((el) => el.elem_type === 'shape');
+        const karta = figury.sort((a, b) => (parseFloat(b.width) * parseFloat(b.height) || 0) - (parseFloat(a.width) * parseFloat(a.height) || 0))[0];
+        if (karta) {
+          for (const k of Object.keys(karta)) if (/^(top|height|heightunits|topunits|axisy)(-res-\d+)?$/.test(k)) delete karta[k];
+          Object.assign(karta, {top: '0', axisy: 'top', heightunits: '%', height: '100'});
+        }
+      }}},
   map: {title: 'Как добраться', orig: 'section.map', posle: 'kontakty'},
   footer: {title: 'Подвал', sel: 'footer', orig: 'footer.site-footer', posle: 'map'},
 

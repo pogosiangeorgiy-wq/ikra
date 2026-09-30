@@ -1666,6 +1666,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 .px,.px-frame img{transform:none!important}
 .hero__media img,.bg-media>img,.bg-media--soft>img,.section__photo img{filter:none!important;transform:none!important}
 </style>
+<style id="zero-dop">.zi-popup{background:transparent!important;padding:0!important}.zi-popup__karta{width:min(680px,calc(100% - 40px));margin:0 auto;background:var(--c-abyss);padding:56px 56px 48px;border:1px solid var(--c-line-dark)}.zi-popup__karta .cta__lead{margin-bottom:var(--s-7)}@media (max-width:760px){.zi-popup__karta{width:100%;padding:72px 20px 40px;border:0}}</style>
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
@@ -1678,26 +1679,55 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   </filter>
 </svg>
 <main id="top">
-<section class="hero">
-  
-  <div class="hero__media px-frame">
-    <img class="px" src="https://static.tildacdn.com/tild6565-6562-4562-a631-393236646538/hero-fasovka-z.jpg" width="1160" height="1662"
-         alt="Стеклянная банка красной икры и жестяная банка чёрной икры на стальном столе, рядом рулон чистых этикеток" fetchpriority="high">
-  </div>
-  <div class="container hero__inner">
-    
-    <h1 class="reveal">Фасовка икры</h1>
-    <hr class="rule hero__rule reveal">
-    <p class="hero__lead reveal">От приёмки сырья до готовой маркированной продукции под вашим брендом.</p>
-    <div class="hero__cta reveal">
-      <a class="btn" href="#zayavka">Обсудить партию <span class="btn__arrow" aria-hidden="true">&#8594;</span></a>
-    </div>
-  </div>
-  <div class="container hero__meta micro reveal">
-    <span>Москва</span>
-    <span>ТУ 10.20.26-001-2023</span>
-    <span>HACCP / ISO 22000</span>
-  </div>
+<section class="section section--dark cta zi-popup" id="zayavka">
+<div class="zi-popup__karta">
+<h2>Обсудить<br>партию</h2>
+<p class="cta__lead">Напишите продукт, тару и объём — вернёмся с расчётом и сроком по вашей заявке.</p>
+<form class="" id="leadForm" novalidate data-form-id="lead-kontakty" data-consent-version="2026-09-09">
+        <div class="form__row">
+          <div class="field">
+            <label for="f-name">Имя</label>
+            <input id="f-name" name="name" type="text" autocomplete="name" required placeholder="Как к вам обращаться">
+          </div>
+          <div class="field">
+            <label for="f-company">Компания</label>
+            <input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Название бренда">
+          </div>
+          <div class="field">
+            <label for="f-phone">Телефон</label>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required placeholder="+7 ___ ___-__-__">
+          </div>
+          <div class="field">
+            <label for="f-email">Почта</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" placeholder="name@company.ru">
+          </div>
+          <div class="field">
+            <label for="f-product">Продукт</label>
+            <select id="f-product" name="product">
+              <option>Красная икра</option>
+              <option>Чёрная икра</option>
+              <option>Красная и чёрная</option>
+              <option>Пока не определились</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-volume">Объём партии</label>
+            <input id="f-volume" name="volume" type="text" placeholder="например, 500 кг">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-msg">Задача</label>
+          <textarea id="f-msg" name="message" placeholder="Тара, граммовка, сроки, есть ли готовый макет этикетки"></textarea>
+        </div>
+        
+        <label class="form__consent">
+          <input type="checkbox" name="consent" id="f-consent" required>
+          <span>Я даю согласие ООО «ГУРМАН-ГУРУ» на обработку моих персональных данных на условиях <a href="/soglasie">Согласия</a> и подтверждаю ознакомление с <a href="/politika">Политикой обработки персональных данных</a>.</span>
+        </label>
+        <button class="btn btn--solid" type="submit" id="f-submit" disabled>Отправить заявку <span class="btn__arrow" aria-hidden="true">&#8594;</span></button>
+        <p class="form__status micro" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
+</div>
 </section>
 </main>
 <script id="zero-zamer">
