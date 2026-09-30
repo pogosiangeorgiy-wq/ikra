@@ -33,6 +33,9 @@
      — форма заявки: текст в полях от края (как подпись и линия под полем),
        от «Задачи» до согласия 24 px, от согласия до кнопки — только поле
        кнопки (32 px), как у .form__consent лендинга;
+     — колонки формы как .form__row лендинга: зазор 44 px (от 1101), 32 px
+       (761–1100), одна колонка на 760 и уже (у Тильды зазор всегда 15 px,
+       одна колонка только до 479 px — поля расходились с линиями);
      — вопросы (блок T585, rec4335967401): во всю ширину сетки лендинга
        (1332 px, поля 54/32/20), вопрос clamp(17px,1.55vw,22px), поля 24 px,
        знак 14 px у правого края. Если блок вопросов заменить новым —
@@ -52,6 +55,10 @@
 #allrecords .t396 .t-form .t-select{padding-left:0!important}
 #allrecords .t396 .t-form .t-input-group_ta{margin-bottom:24px!important}
 #allrecords .t396 .t-form .t-input-group_cb{margin-bottom:0!important}
+#allrecords .t396 .t-form__inputsbox_inrow{column-gap:44px!important}
+#allrecords .t396 .t-form__inputsbox_inrow .t-input-group_inonerow{width:calc(50% - 22px)!important}
+@media (max-width:1100px){#allrecords .t396 .t-form__inputsbox_inrow{column-gap:32px!important}#allrecords .t396 .t-form__inputsbox_inrow .t-input-group_inonerow{width:calc(50% - 16px)!important}}
+@media (max-width:760px){#allrecords .t396 .t-form__inputsbox_inrow .t-input-group_inonerow{width:100%!important}}
 #rec4335967401 .t-container{max-width:1332px!important;width:calc(100% - 108px)!important;margin:0 auto!important;padding:0!important}
 #rec4335967401 .t-col{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;float:none!important;display:block!important}
 #rec4335967401 .t585__title{font-size:clamp(17px,1.55vw,22px)!important;letter-spacing:.02em!important}
