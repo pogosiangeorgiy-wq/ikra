@@ -13,13 +13,13 @@ const KOREN = 'https://pogosiangeorgiy-wq.github.io/ikra/';
 // параметры импорта и селектор той же секции на лендинге (для сверки).
 export const EKRANY = {
   hero: {title: 'Первый экран', sel: 'section.hero', orig: 'section.hero',
-    opts: {vh: 100, geroy: true, pinBottom: /^(Москва|ТУ 10|HACCP)/}},
-  uslugi: {title: 'Услуги', orig: '#uslugi'},
+    anchor: 'top', opts: {vh: 100, geroy: true, pinBottom: /^(Москва|ТУ 10|HACCP)/}},
+  uslugi: {title: 'Услуги', orig: '#uslugi', anchor: 'uslugi'},
   band: {title: 'Качество начинается с сырья', orig: 'section.band'},
-  syrye: {title: 'Сырьё', orig: '#syrye'},
-  proizvodstvo: {title: 'Производство', orig: '#proizvodstvo'},
+  syrye: {title: 'Сырьё', orig: '#syrye', anchor: 'syrye'},
+  proizvodstvo: {title: 'Производство', orig: '#proizvodstvo', anchor: 'proizvodstvo'},
   partiya: {title: 'Готовая партия', orig: 'h2:Готовая', opts: {spisokChteniya: true}},
-  'o-kompanii': {title: 'О компании', orig: '#o-kompanii'},
+  'o-kompanii': {title: 'О компании', orig: '#o-kompanii', anchor: 'o-kompanii'},
   // posle — после какого блока ставить экран, если его ещё нет на странице.
   // Лента: числа сняты с работающего лендинга на 1440 и 375 (высота
   // логотипа, промежуток, отступ ряда, верх ряда, высота секции, круг в с).

@@ -673,6 +673,43 @@ function geroyFoto(code) {
 // читает цифры из служебного атрибута элемента Zero — вместо отсчёта текст
 // на секунду ломается («0">до 300»). Цифры появляются как остальной блок.
 
+// Ссылки. Отдельные <a> экрана (роль link-N с адресом) конвертер переносит
+// без адреса — здесь адрес ставится в поле link элемента Zero: текста или
+// кнопки с тем же текстом рядом с рамкой ссылки, для ссылки-картинки
+// (логотип) — картинки внутри рамки. Ищется на самой широкой раскладке, где
+// ссылка есть. Если в тексте элемента ссылка уже стоит (<a …>), он не
+// трогается.
+function ssylki(code, roli) {
+  const els = elementy(code);
+  const zanyato = new Set();
+  const tekstEl = (el) => normTekst(el.text || el.caption || el.buttontitle || '');
+  let postavleno = 0;
+  const ids = new Set();
+  for (const s of SCREENS) for (const r of roli[s] || []) if (r.rol.startsWith('link-')) ids.add(r.rol);
+  for (const id of ids) {
+    const s = SCREENS.find((x) => (roli[x] || []).some((r) => r.rol === id));
+    const r = roli[s].find((x) => x.rol === id);
+    const cx = r.l + r.w / 2, cy = r.t + r.h / 2;
+    let best = null, bd = Infinity;
+    for (const el of els) {
+      if (zanyato.has(el) || skryt(el, s)) continue;
+      const g = geometriya(code, el)[s];
+      let ok;
+      if (r.img) ok = el.elem_type === 'image' && g.L >= r.l - 4 && g.L + g.w <= r.l + r.w + 4 && g.T >= r.t - 4 && g.T + g.h <= r.t + r.h + 4;
+      else ok = (el.elem_type === 'text' || el.elem_type === 'button') && tekstEl(el) === r.tekst;
+      if (!ok) continue;
+      const d = Math.abs(g.L + g.w / 2 - cx) + Math.abs(g.T + g.h / 2 - cy);
+      if (d < bd) { best = el; bd = d; }
+    }
+    if (!best || bd > 120) { console.warn('ssylki: не нашёл элемент для', id, r.tekst, r.href, bd); continue; }
+    zanyato.add(best);
+    if (/<a\s/i.test(best.text || '')) continue;
+    best.link = r.href;
+    postavleno += 1;
+  }
+  return postavleno;
+}
+
 // Логотип-ссылка при наведении бледнеет до 78 % за 220 мс (.logo:hover у
 // лендинга) — пошаговая анимация «при наведении», обратный ход — при уходе
 // курсора. Логотипы помечены в экранах (роль logo-N).
@@ -782,7 +819,7 @@ function begushayaLenta(code, cfg) {
 // Сглаживание кадров (инерция) штатно не повторить: кадры идут точно за
 // прокруткой.
 const ROLI_TIP = {kadr: 'image', scrim: 'shape', bar: 'shape', fill: 'shape', dline: 'shape', dfoto: 'image', logo: 'image'};
-const ROLI_RAMKI = ['dli', 'dfig', 'kont']; // только рамка, элемента у роли нет
+const ROLI_RAMKI = ['dli', 'dfig', 'kont', 'link']; // только рамка (ссылки — своя сверка, ssylki)
 
 function naznachitRoli(code, roli = []) {
   const els = elementy(code).filter((el) => !skryt(el, TOP));
@@ -1075,6 +1112,7 @@ async function build(key, selector, opts = {}) {
   if (opts.scena) scena(code, roli, rol);
   if (opts.spisokChteniya) spisokChteniya(code, roli, rol);
   navedenie(code);
+  ssylki(code, roli);
   logotipy(code, rol);
   if (opts.after) opts.after(code);
   szhat(code);

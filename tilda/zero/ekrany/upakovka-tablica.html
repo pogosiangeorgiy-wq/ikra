@@ -1864,6 +1864,23 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
       out.push({rol: el.getAttribute('data-zi'), l: r.left - kr.left, t: r.top - kr.top, w: r.width, h: r.height,
         tekst: el.tagName === 'IMG' || el.tagName === 'I' ? '' : norm(el.textContent)});
     });
+    // Ссылки. Конвертер переносит ссылку только внутри абзаца (в HTML текста),
+    // а отдельная <a> — кнопка, пункт подвала, логотип — становится текстом
+    // или кнопкой без адреса. Такие ссылки записываются ролью link-N с адресом;
+    // zero-import.js ставит адрес в поле link элемента.
+    Array.prototype.forEach.call(koren().querySelectorAll('a[href]'), function (a, i) {
+      if (a.closest('form')) return;
+      var r = a.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
+      var blok = a.parentElement;
+      while (blok && getComputedStyle(blok).display === 'inline') blok = blok.parentElement;
+      // Ссылка внутри абзаца с другим текстом — её сохранит сам конвертер.
+      var vnutri = blok && norm(blok.textContent) !== norm(a.textContent) && !a.querySelector('img')
+        && getComputedStyle(a).display === 'inline';
+      if (vnutri) return;
+      out.push({rol: 'link-' + i, l: r.left - kr.left, t: r.top - kr.top, w: r.width, h: r.height,
+        tekst: norm(a.textContent), href: a.getAttribute('href'), img: a.querySelector('img') ? 1 : 0});
+    });
     if (!out.length) return;
     var st = P.__ziRoli = P.__ziRoli || {};
     st[w] = out;
