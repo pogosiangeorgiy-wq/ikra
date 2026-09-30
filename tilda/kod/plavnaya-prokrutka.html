@@ -26,6 +26,17 @@
      проявлялись за 0,5 с. Флажок в настройках страницы для этого не годится
      — он снимает и все появления элементов; галочка блока до Zero не
      доходит. Появления элементов внутри блоков работают как прежде.
+  6. Вид, которого нет в настройках Тильды (сверка с вёрсткой на телефонах
+     и планшетах 30.09.2026):
+     — сглаживание шрифта как у лендинга: Тильда включает antialiased, а
+       лендинг его снял — на macOS оно утончает светлый текст на тёмном;
+     — форма заявки: текст в полях от края (как подпись и линия под полем),
+       от «Задачи» до согласия 24 px, от согласия до кнопки — только поле
+       кнопки (32 px), как у .form__consent лендинга;
+     — вопросы (блок T585, rec4335967401): во всю ширину сетки лендинга
+       (1332 px, поля 54/32/20), вопрос clamp(17px,1.55vw,22px), поля 24 px,
+       знак 14 px у правого края. Если блок вопросов заменить новым —
+       поправить номер записи ниже.
 -->
 <style>
 .gg-progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:9999;background:#b9b2a6;opacity:.85;
@@ -36,6 +47,19 @@
 }
 @media (prefers-reduced-motion: reduce){.gg-progress{display:none}}
 #allrecords .r_hidden{opacity:1!important}#allrecords .r_anim{transition:none!important}
+.t-records,.t-records .t396 .tn-atom{-webkit-font-smoothing:auto!important;-moz-osx-font-smoothing:auto!important}
+#allrecords .t396 .t-form .t-input,#allrecords .t396 .t-form textarea{padding-left:0!important;padding-right:0!important}
+#allrecords .t396 .t-form .t-select{padding-left:0!important}
+#allrecords .t396 .t-form .t-input-group_ta{margin-bottom:24px!important}
+#allrecords .t396 .t-form .t-input-group_cb{margin-bottom:0!important}
+#rec4335967401 .t-container{max-width:1332px!important;width:calc(100% - 108px)!important;margin:0 auto!important;padding:0!important}
+#rec4335967401 .t-col{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;float:none!important;display:block!important}
+#rec4335967401 .t585__title{font-size:clamp(17px,1.55vw,22px)!important;letter-spacing:.02em!important}
+#rec4335967401 .t585__trigger-button{padding-top:24px!important;padding-bottom:24px!important;padding-right:34px!important}
+#rec4335967401 .t585__icon{padding:0!important;right:0!important}
+#rec4335967401 .t585__lines,#rec4335967401 .t585__lines svg{width:14px!important;height:14px!important}
+@media (max-width:1100px){#rec4335967401 .t-container{width:calc(100% - 64px)!important}}
+@media (max-width:760px){#rec4335967401 .t-container{width:calc(100% - 40px)!important}}
 </style>
 <div class="gg-progress" aria-hidden="true"></div>
 <script>
