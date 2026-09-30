@@ -674,7 +674,7 @@ function geroyFoto(code) {
 function logotipy(code, rol) {
   for (const [r, el] of rol) {
     if (!r.startsWith('logo-')) continue;
-    el.sbsevent = 'hover'; el.sbsloop = '';
+    el.sbsevent = 'hover'; el.sbsloop = ''; el.animmobile = 'y'; // иначе уже 1200 px Тильда его гасит
     el.sbsopts = sbsStroka([{ti: '0'}, {ti: '220', op: '0.78', ea: 'easeOut'}]);
   }
 }
