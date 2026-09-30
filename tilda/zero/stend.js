@@ -49,6 +49,9 @@ export const EKRANY = {
     skrytye: [{imya: 'Версия согласия', znachenie: '2026-09-09'}, {imya: 'Форма', znachenie: 'lead-kontakty'}],
     nazvanie: 'Заявка — контакты',
     uspeh: 'Заявка принята. Свяжемся с вами по указанным контактам.',
+    // Сообщения лендинга (index.html, раздел формы).
+    oshibkaPustye: 'Заполните имя, телефон и отметьте согласие.',
+    oshibka: 'Не удалось отправить. Напишите нам на sale@gurman.guru или позвоните.',
   }}},
   map: {title: 'Как добраться', orig: 'section.map', posle: 'kontakty'},
   footer: {title: 'Подвал', sel: 'footer', orig: 'footer.site-footer', posle: 'map'},

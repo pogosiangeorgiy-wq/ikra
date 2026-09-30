@@ -459,7 +459,7 @@ function kPolyamTildy(code, roli = {}) {
 // они короткие латинские, а в «Заявках» Тильды и в письмах поля должны
 // называться по-русски, как было в версии на блоках кода. Здесь же — ссылки
 // в тексте согласия и служебное скрытое поле с версией текста согласия.
-function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie = '', uspeh = ''} = {}) {
+function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie = '', uspeh = '', oshibkaPustye = '', oshibka = ''} = {}) {
   for (const el of elementy(code)) {
     if (el.elem_type !== 'form') continue;
     const inputs = JSON.parse(el.inputs || '[]');
@@ -489,6 +489,9 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
     el.inputelsfontsize = '13';
     if (nazvanie) el.formname = nazvanie;
     if (uspeh) el.formmsgsuccess = uspeh;
+    // Сообщения лендинга: не заполнены обязательные поля и сбой отправки.
+    if (oshibkaPustye) el.formerrreq = oshibkaPustye;
+    if (oshibka) el.formerr = oshibka;
   }
 }
 
@@ -705,9 +708,56 @@ function ssylki(code, roli) {
     zanyato.add(best);
     if (/<a\s/i.test(best.text || '')) continue;
     best.link = r.href;
+    if (/^https?:/i.test(r.href)) best.linktarget = '_blank';
     postavleno += 1;
   }
   return postavleno;
+}
+
+// Из исходного экрана — то, что конвертер теряет:
+//   alt у картинок (описания снимков, названия клиентов в ленте, знаки);
+//   неразрывные пробелы (у лендинга их 19 — «10 %», адрес, «г. Москва»):
+//   конвертер делает из них обычные, и строка может переломиться не там.
+function izEkrana(code, html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const alty = new Map();
+  doc.querySelectorAll('img[src]').forEach((i) => { if (i.alt && !alty.has(i.getAttribute('src'))) alty.set(i.getAttribute('src'), i.alt); });
+  const PROB = /[ \t\n\r\f]+/g;
+  const sNbsp = new Map();
+  doc.body.querySelectorAll('*').forEach((e) => {
+    if (/^(SCRIPT|STYLE)$/.test(e.tagName)) return;
+    const t = e.textContent.replace(PROB, ' ').trim();
+    if (t.includes('\u00a0')) sNbsp.set(t.replace(/\u00a0/g, ' '), t);
+  });
+  let alt = 0, nbsp = 0;
+  for (const el of elementy(code)) {
+    if (el.elem_type === 'image' && !el.alt && alty.has(el.img)) { el.alt = alty.get(el.img); alt += 1; }
+    if (el.elem_type !== 'text' || !el.text) continue;
+    const d = document.createElement('div');
+    d.innerHTML = el.text;
+    const orig = sNbsp.get(d.textContent.replace(PROB, ' ').trim());
+    if (!orig) continue;
+    // Проход по текстовым узлам: пробел становится неразрывным там, где он
+    // неразрывный в исходнике. При любом расхождении — без изменений.
+    let j = 0, ok = true;
+    const w = document.createTreeWalker(d, NodeFilter.SHOW_TEXT);
+    const uzly = [];
+    for (let n = w.nextNode(); n; n = w.nextNode()) uzly.push(n);
+    const novye = uzly.map((n) => {
+      let out = '';
+      for (const ch of n.data) {
+        if (/[ \t\n\r\f]/.test(ch)) {
+          if (orig[j] === ' ' || orig[j] === '\u00a0') { out += orig[j]; j += 1; } else out += ch;
+        } else if (orig[j] === ch) { out += ch; j += 1; } else { ok = false; out += ch; }
+      }
+      return out;
+    });
+    if (!ok || j !== orig.length) continue;
+    uzly.forEach((n, i) => { n.data = novye[i]; });
+    el.text = d.innerHTML;
+    nbsp += 1;
+  }
+  return {alt, nbsp};
 }
 
 // Логотип-ссылка при наведении бледнеет до 78 % за 220 мс (.logo:hover у
@@ -1112,6 +1162,7 @@ async function build(key, selector, opts = {}) {
   if (opts.scena) scena(code, roli, rol);
   if (opts.spisokChteniya) spisokChteniya(code, roli, rol);
   navedenie(code);
+  izEkrana(code, html);
   ssylki(code, roli);
   logotipy(code, rol);
   if (opts.after) opts.after(code);
