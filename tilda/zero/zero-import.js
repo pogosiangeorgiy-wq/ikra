@@ -467,7 +467,18 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
       if (imena[it.li_nm]) it.li_nm = imena[it.li_nm];
       // Согласие: текст со ссылками на /soglasie и /politika — в подпись у
       // галочки (li_label); заголовок поля пустой, иначе текст выходил дважды.
-      if (it.li_type === 'cb' && soglasie) { it.li_label = soglasie; it.li_title = ''; }
+      // Ссылки — как .form__consent a лендинга (белые, подчёркнутые); у
+      // формы Zero им иначе достаётся цвет Тильды по умолчанию.
+      if (it.li_type === 'cb' && soglasie) {
+        it.li_label = soglasie.replace(/<a /g, '<a style="color:#ffffff;text-decoration:underline;'
+          + 'text-underline-offset:3px;text-decoration-thickness:1px" ');
+        it.li_title = '';
+      }
+      // «Задача» у лендинга — textarea в 84 px (min-height); у формы Zero
+      // высота задаётся строками: 3 × 25 + 10 = 85 px. Без этого поле было
+      // высотой в строку, и линия под ним (отдельная фигура по вёрстке)
+      // ложилась на текст согласия.
+      else if (it.li_type === 'ta') { it.li_rows = '3'; if (it.li_title) it.li_title = it.li_title.toUpperCase(); }
       // Подписи полей у лендинга заглавными (.field label, text-transform);
       // у подписей формы Zero регистра нет — заглавные в самом тексте.
       // В заявку уходит имя поля (li_nm), не подпись.
@@ -489,6 +500,12 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
     // --t-micro (13 px), у формы по умолчанию 16.
     if (el.buttontitle) el.buttontitle = el.buttontitle.toUpperCase();
     el.inputelsfontsize = '13';
+    // Подпись поля у лендинга — строка 23 px (13 px × 1,75) и зазор 8 px:
+    // поле начинается на 31 px от подписи. У формы Zero строка подписи ~16 px,
+    // и её интервал не настраивается — зазор 15 px возвращает поле на 31 px.
+    // Иначе каждое поле стояло на 7 px выше, чем линия под ним (линии —
+    // отдельные фигуры, сняты с вёрстки), и расхождение копилось вниз.
+    el.inputtitlemargbottom = '15';
     if (nazvanie) el.formname = nazvanie;
     if (uspeh) el.formmsgsuccess = uspeh;
     // Сообщения лендинга: не заполнены обязательные поля и сбой отправки.
