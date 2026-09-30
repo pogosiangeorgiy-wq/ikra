@@ -43,7 +43,9 @@ export const EKRANY = {
   // Заголовок — по сетке лендинга: список вопросов (T585) переведён на неё
   // же правилами в блоке «Плавная прокрутка» (30.09.2026).
   voprosy: {title: 'Вопросы', orig: 'h2:Вопросы', posle: 'ekonomika', anchor: 'voprosy'},
-  kontakty: {title: 'Контакты', orig: '#kontakty', posle: 'ekonomika', anchor: 'kontakty', opts: {forma: {
+  // vysotaPlus: форма Zero на раскладке 320 не масштабируется вместе со
+  // снятой с 360 раскладкой — выходит выше, и кнопка уходила под низ блока.
+  kontakty: {title: 'Контакты', orig: '#kontakty', posle: 'ekonomika', anchor: 'kontakty', opts: {vysotaPlus: {320: 110}, forma: {
     // Те же имена полей, что уходили в «Заявки» из версии на блоках кода.
     imena: {name: 'Имя', company: 'Компания', phone: 'Телефон', email: 'Почта', product: 'Продукт',
       volume: 'Объём партии', message: 'Задача', consent: 'Согласие'},

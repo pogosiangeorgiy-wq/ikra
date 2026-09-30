@@ -524,15 +524,23 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
   }
 }
 
-// Линии под полями формы — отдельные фигуры, снятые с вёрстки. На двух
-// колонках Тильда делит форму сама: колонка (Ш − отступ)/2, правая — с
-// (Ш + отступ)/2. У лендинга правая колонка шла на 6–9 px правее, и у
-// Тильды подпись висела левее своей линии. Линии ставятся по колонкам
-// Тильды: подпись, текст и линия — на одном краю.
+// Линии под полями формы — отдельные фигуры, снятые с вёрстки. Форма Zero
+// раскладывается по своим размерам, в пикселях раскладки и без масштаба:
+// строка подписи ~16 px + зазор, поле inputheight, отступ inputmargbottom,
+// «Задача» — li_rows × 25 + 10. Снятые с лендинга линии на раскладках с
+// автомасштабом пересчитаны в масштаб (320, 761, 1101) и от полей уходили;
+// на двух колонках Тильда делит форму сама: колонка (Ш − отступ)/2, правая —
+// с (Ш + отступ)/2, а у лендинга правая шла на 14–16 px правее. Поэтому
+// линии ставятся по расчёту формы Тильды: ряд за рядом, последний — «Задача».
 function liniiFormy(code) {
   const forma = elementy(code).find((el) => el.elem_type === 'form');
   if (!forma) return 0;
   const m = num(forma.inputmargright || 0);
+  const PODPIS = 16 + num(forma.inputtitlemargbottom || 0);
+  const POLE = num(forma.inputheight || 47);
+  const SHAG = PODPIS + POLE + num(forma.inputmargbottom || 0);
+  const ta = JSON.parse(forma.inputs || '[]').find((x) => x.li_type === 'ta');
+  const TA = ta && +ta.li_rows > 1 ? +ta.li_rows * 25 + 10 : POLE;
   const gf = geometriya(code, forma);
   const figury = elementy(code).filter((el) => el.elem_type === 'shape');
   let n = 0;
@@ -540,22 +548,27 @@ function liniiFormy(code) {
     if (gf[s].skryt) continue;
     const {L: fL, w: fW, T: fT, h: fH} = gf[s];
     const linii = figury.map((el) => ({el, g: geometriya(code, el)[s]}))
-      .filter(({g}) => !g.skryt && g.h <= 3 && g.T >= fT - 4 && g.T <= fT + fH + 12
-        && g.L >= fL - 12 && g.L + g.w <= fL + fW + 12)
+      .filter(({g}) => !g.skryt && g.h <= 3 && g.T >= fT - 4 && g.T <= fT + fH + 80
+        && g.L < fL + fW && g.L + g.w > fL)
       .sort((a, b) => a.g.T - b.g.T);
     const ryady = [];
     for (const x of linii) {
-      const r = ryady.find((q) => Math.abs(q[0].g.T - x.g.T) <= 3);
+      const r = ryady.find((q) => Math.abs(q[0].g.T - x.g.T) <= 6);
       if (r) r.push(x); else ryady.push([x]);
     }
     const kol = (fW - m) / 2;
-    for (const r of ryady) {
-      if (r.length !== 2) continue;
+    ryady.forEach((r, i) => {
+      const niz = i * SHAG + PODPIS + (i === ryady.length - 1 ? TA : POLE);
       r.sort((a, b) => a.g.L - b.g.L);
-      set(r[0].el, 'left', s, Math.round(fL)); set(r[0].el, 'width', s, Math.round(kol));
-      set(r[1].el, 'left', s, Math.round(fL + (fW + m) / 2)); set(r[1].el, 'width', s, Math.round(kol));
-      n += 2;
-    }
+      r.forEach((x, j) => {
+        set(x.el, 'top', s, Math.round(fT + niz - Math.max(1, x.g.h)));
+        if (r.length === 2) {
+          set(x.el, 'left', s, Math.round(j ? fL + (fW + m) / 2 : fL));
+          set(x.el, 'width', s, Math.round(kol));
+        }
+        n += 1;
+      });
+    });
   }
   return n;
 }
