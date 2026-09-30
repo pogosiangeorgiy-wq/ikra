@@ -510,9 +510,9 @@ body::after{
 .nav a:hover::after{transform:scaleX(1)}
 .nav-toggle{display:none; background:none; border:0; padding:var(--s-2); cursor:pointer}
 .nav-toggle span{display:block; width:22px; height:1px; background:var(--c-bone); margin:5px 0; transition:transform var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease)}
-.nav-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(6px) rotate(45deg)}
-.nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
-.nav-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.nav-toggle[aria-expanded="true"] span:nth-of-type(1){transform:translateY(6px) rotate(45deg)}
+.nav-toggle[aria-expanded="true"] span:nth-of-type(2){opacity:0}
+.nav-toggle[aria-expanded="true"] span:nth-of-type(3){transform:translateY(-6px) rotate(-45deg)}
 
 /* ===========================================================================
    1. ПЕРВЫЙ ЭКРАН. Фото справа, текст слева поверх чёрного — как на референсе.
@@ -691,7 +691,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   color:var(--c-stone);
 }
 .chain li{display:flex; align-items:center; gap:var(--s-4)}
-.chain li:not(:last-child)::after{content:""; width:26px; height:1px; background:var(--c-line-light)}
+.chain li:not(:last-of-type)::after{content:""; width:26px; height:1px; background:var(--c-line-light)}
 .chain b{font-weight:400; color:var(--c-graphite)}
 
 /* ===========================================================================
@@ -777,7 +777,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 /* Кадр, однажды проявившись, остаётся непрозрачным, а следующий проступает
    поверх него. Так стопка всегда закрыта целиком: в середине перехода фон
    сквозь два полупрозрачных снимка не просвечивает. */
-.scene.is-scene .scene__frame:first-child{opacity:1}
+.scene.is-scene .scene__frame:first-of-type{opacity:1}
 
 /* Затемнение. Текст стоит слева, поэтому основной градиент горизонтальный;
    вертикальный добавлен под шапку сверху и под шкалу этапов снизу.
@@ -907,7 +907,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:var(--s-5);
   padding-block:var(--s-5); border-bottom:var(--border-w) solid var(--c-line-light);
 }
-.origin__specs div:first-child{border-top:var(--border-w) solid var(--c-line-light)}
+.origin__specs div:first-of-type{border-top:var(--border-w) solid var(--c-line-light)}
 .origin__specs dt{color:var(--c-stone)}
 .origin__specs dd{margin:0; color:var(--c-graphite)}
 
@@ -1027,13 +1027,13 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 /* Крайние колонки без внешнего отступа: иначе первый столбец стоял на 16px
    правее заголовка секции и подписи к таблице, а последний — на 16px левее
    правого края контейнера. Линии строк при этом идут во всю ширину. */
-.tbl th:first-child,.tbl td:first-child{padding-left:0}
-.tbl th:last-child,.tbl td:last-child{padding-right:0}
+.tbl th:first-of-type,.tbl td:first-of-type{padding-left:0}
+.tbl th:last-of-type,.tbl td:last-of-type{padding-right:0}
 .tbl th{
   font-size:var(--t-micro); font-weight:500; letter-spacing:var(--ls-wide);
   text-transform:uppercase; color:var(--c-ash); border-bottom-color:var(--c-line-dark);
 }
-.tbl td:first-child{font-family:var(--f-display); font-size:var(--t-title-s); letter-spacing:.02em; text-transform:uppercase; color:var(--c-bone)}
+.tbl td:first-of-type{font-family:var(--f-display); font-size:var(--t-title-s); letter-spacing:.02em; text-transform:uppercase; color:var(--c-bone)}
 .tbl td{color:var(--c-ash)}
 .tbl tr{transition:background var(--dur-fast) var(--ease)}
 .tbl tbody tr:hover{background:var(--c-carbon)}
@@ -1045,11 +1045,11 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 .js-motion .tbl.reveal{transform:none; transition-duration:var(--dur-fast)}
 .js-motion .tbl tbody tr{opacity:0; transition:opacity var(--dur-med) var(--ease)}
 .js-motion .tbl.is-in tbody tr{opacity:1}
-.js-motion .tbl.is-in tbody tr:nth-child(1){transition-delay:60ms}
-.js-motion .tbl.is-in tbody tr:nth-child(2){transition-delay:120ms}
-.js-motion .tbl.is-in tbody tr:nth-child(3){transition-delay:180ms}
-.js-motion .tbl.is-in tbody tr:nth-child(4){transition-delay:240ms}
-.js-motion .tbl.is-in tbody tr:nth-child(5){transition-delay:300ms}
+.js-motion .tbl.is-in tbody tr:nth-of-type(1){transition-delay:60ms}
+.js-motion .tbl.is-in tbody tr:nth-of-type(2){transition-delay:120ms}
+.js-motion .tbl.is-in tbody tr:nth-of-type(3){transition-delay:180ms}
+.js-motion .tbl.is-in tbody tr:nth-of-type(4){transition-delay:240ms}
+.js-motion .tbl.is-in tbody tr:nth-of-type(5){transition-delay:300ms}
 
 /* ===========================================================================
    7. ГОТОВАЯ ПАРТИЯ. Светлая секция: упаковка, контроль, отгрузка, документы.
@@ -1059,7 +1059,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
    висеть посреди колонки. Верх фото должен совпадать с первой линейкой списка. */
 .docs__grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--s-9); align-items:start}
 .docs__list li{position:relative; display:grid; grid-template-columns:28px minmax(0,1fr); gap:var(--s-5); padding-block:var(--s-5); border-bottom:var(--border-w) solid var(--c-line-light)}
-.docs__list li:first-child{border-top:var(--border-w) solid var(--c-line-light)}
+.docs__list li:first-of-type{border-top:var(--border-w) solid var(--c-line-light)}
 .docs__idx{font-family:var(--f-display); color:var(--c-stone); transition:color var(--dur-med) var(--ease)}
 /* Пункт на линии чтения отмечается тем, что его нижняя линия темнеет и
    доезжает слева направо, а номер набирает цвет. Текст при этом не гаснет:
@@ -1191,7 +1191,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
   border-top:var(--border-w) solid var(--c-line-dark);
   padding-block:var(--s-5);
 }
-.econ__terms li:last-child{border-bottom:var(--border-w) solid var(--c-line-dark)}
+.econ__terms li:last-of-type{border-bottom:var(--border-w) solid var(--c-line-dark)}
 .econ__term{
   font-family:var(--f-display); font-weight:var(--fw-display);
   font-size:var(--t-title-s); letter-spacing:var(--ls-title);
@@ -1213,7 +1213,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
    9. ВОПРОСЫ. Аккордеон на нативном <details>, без JS.
    =========================================================================== */
 .faq__item{border-bottom:var(--border-w) solid var(--c-line-light)}
-.faq__item:first-child{border-top:var(--border-w) solid var(--c-line-light)}
+.faq__item:first-of-type{border-top:var(--border-w) solid var(--c-line-light)}
 .faq__q{
   display:flex; align-items:center; justify-content:space-between; gap:var(--s-5);
   padding-block:var(--s-5); cursor:pointer; list-style:none;
@@ -1462,7 +1462,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
      снимается. Три колонки при 768 дают 208px на пункт — самый длинный
      («Этикетирование», ~120px) входит вместе с тире и просветом. */
   .chain{margin-top:var(--s-7); display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:var(--s-5) var(--s-4)}
-  .chain li:nth-child(3n)::after{content:none}
+  .chain li:nth-of-type(3n)::after{content:none}
   .docs__grid,.cta__grid,.origin__grid,.about__grid{grid-template-columns:1fr; gap:var(--s-7)}
   /* «Контакты» на одной колонке. Секция вытягивается с 926 до 1422–1769px, и
      при object-fit:cover кадр 3:4 перестаёт обрезаться по высоте — начинает
@@ -1533,12 +1533,12 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
     transition:opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
   }
   .js-motion .nav.is-open a{opacity:1; transform:none}
-  .js-motion .nav.is-open a:nth-child(1){transition-delay:60ms}
-  .js-motion .nav.is-open a:nth-child(2){transition-delay:120ms}
-  .js-motion .nav.is-open a:nth-child(3){transition-delay:180ms}
-  .js-motion .nav.is-open a:nth-child(4){transition-delay:240ms}
-  .js-motion .nav.is-open a:nth-child(5){transition-delay:300ms}
-  .js-motion .nav.is-open a:nth-child(6){transition-delay:360ms}
+  .js-motion .nav.is-open a:nth-of-type(1){transition-delay:60ms}
+  .js-motion .nav.is-open a:nth-of-type(2){transition-delay:120ms}
+  .js-motion .nav.is-open a:nth-of-type(3){transition-delay:180ms}
+  .js-motion .nav.is-open a:nth-of-type(4){transition-delay:240ms}
+  .js-motion .nav.is-open a:nth-of-type(5){transition-delay:300ms}
+  .js-motion .nav.is-open a:nth-of-type(6){transition-delay:360ms}
   .site-header .logo{position:relative; z-index:2} /* логотип поверх раскрытого меню */
 }
 @media (max-width:760px){
@@ -1583,9 +1583,9 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
      целиком, третья колонка не влезала. Правило про 3n перекрывается —
      строку теперь заканчивает каждый чётный пункт. */
   .chain{grid-template-columns:repeat(2, minmax(0,1fr))}
-  .chain li:nth-child(3n)::after{content:""}
-  .chain li:nth-child(2n)::after{content:none}
-  .chain li:not(:last-child)::after{width:18px}
+  .chain li:nth-of-type(3n)::after{content:""}
+  .chain li:nth-of-type(2n)::after{content:none}
+  .chain li:not(:last-of-type)::after{width:18px}
   .process__grid,.start__grid,.facts,.equip,.form__row,.site-footer__grid{grid-template-columns:1fr}
   /* «Производство» на узком экране. В одну колонку секция вытягивается с
      819 до 1418px, и кадр 3:2 при object-fit:cover обрезается до вертикальной
@@ -1631,7 +1631,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
      таблица превращается в карточки только на ≤760, то есть провал был
      чисто мобильным. --c-ash даёт 7,78 : 1. */
   .tbl td::before{content:attr(data-label) " — "; color:var(--c-ash); font-size:var(--t-micro); letter-spacing:var(--ls-wide); text-transform:uppercase}
-  .tbl td:first-child::before{content:none}
+  .tbl td:first-of-type::before{content:none}
 }
 /* На узких экранах движение приглушается, но не выключается.
    Причина: на телефоне блок проходит экран за долю секунды, длинный выкат

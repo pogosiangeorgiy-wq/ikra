@@ -482,6 +482,11 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
     // галочка согласия — тоже сталь (accent-color).
     Object.assign(el, {buttonhoverbgcolor: '#b9b2a6', buttonhoverbordercolor: '#b9b2a6',
       buttonhovercolor: '#191510', buttonspeedhover: '0.22', inputelscolor: '#b9b2a6'});
+    // Надпись кнопки у лендинга заглавными (.btn, text-transform) — регистра у
+    // кнопки формы Zero нет, заглавные в самом тексте. Текст согласия — кегль
+    // --t-micro (13 px), у формы по умолчанию 16.
+    if (el.buttontitle) el.buttontitle = el.buttontitle.toUpperCase();
+    el.inputelsfontsize = '13';
     if (nazvanie) el.formname = nazvanie;
     if (uspeh) el.formmsgsuccess = uspeh;
   }
