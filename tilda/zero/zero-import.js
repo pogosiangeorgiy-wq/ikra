@@ -1154,6 +1154,9 @@ async function build(key, selector, opts = {}) {
   // прижимают элементы к низу окна и переводят их в проценты.
   const reveal = zameryVRazmetku(window.__ziReveal);
   poyavlenie(code, reveal, {isklyuchit: (el) => el.layer === 'px' || (opts.geroy && el.elem_type === 'image')});
+  // Ссылки — тоже по исходной геометрии (элементы, прижатые к низу окна,
+  // потом получают другие координаты).
+  ssylki(code, roli);
   kKrayuOkna(code, {vh: !!opts.vh});
   // На телефонных раскладках подписи первого экрана остаются в сетке под
   // кнопкой — их ставит на место telefonPoOknu.
@@ -1172,7 +1175,6 @@ async function build(key, selector, opts = {}) {
   if (opts.spisokChteniya) spisokChteniya(code, roli, rol);
   navedenie(code);
   izEkrana(code, html);
-  ssylki(code, roli);
   logotipy(code, rol);
   if (opts.after) opts.after(code);
   szhat(code);
