@@ -19,38 +19,58 @@ let A = null, B = null, shirina = 1280;
 
 // orig и chernovik — адреса страниц на домене проекта; по умолчанию главная
 // и черновик главной. Для 404: {orig: '/stranica-ne-naydena', chernovik: '/page273701609.html'}.
-export async function otkryt(w = 1280, h = 900, {orig = '/', chernovik = CHERNOVIK} = {}) {
+export async function otkryt(w = 1280, h = 900, {orig = '/', chernovik = CHERNOVIK, etalon = false, bystro = false} = {}) {
+  // etalon — вместо страницы-оригинала на домене взять саму вёрстку index.html
+  // с GitHub Pages: без скриптов, появления на месте, шапка и cookie скрыты
+  // (как её видел конвертер). Кладётся во фрейм srcdoc того же происхождения,
+  // поэтому её можно измерять. bystro — без прокрутки до конца (в фоновой
+  // вкладке таймеры редкие, а для раскладки прокрутка не нужна).
   shirina = w;
   document.getElementById('zi-sverka')?.remove();
   const d = document.createElement('div');
   d.id = 'zi-sverka';
   d.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#777;overflow:auto';
-  const mk = (src, i) => {
+  const mk = (src, i, srcdoc) => {
     const f = document.createElement('iframe');
-    f.src = `${src}${src.includes('?') ? '&' : '?'}zi=${Date.now()}`;
+    if (srcdoc) f.srcdoc = srcdoc;
+    else f.src = `${src}${src.includes('?') ? '&' : '?'}zi=${Date.now()}`;
     f.style.cssText = `position:absolute;top:0;left:${i * (w + 10)}px;width:${w}px;height:${h}px;border:0;background:#fff`;
     d.appendChild(f);
     return f;
   };
-  A = mk(orig, 0);
+  let srcdoc = null;
+  if (etalon) {
+    const KOREN = 'https://pogosiangeorgiy-wq.github.io/ikra/';
+    srcdoc = await fetch(`${KOREN}${orig === '/' ? 'index.html' : orig.replace(/^\//, '') + '.html'}?v=${Date.now()}`).then((r) => r.text());
+    srcdoc = srcdoc.replace(/<script[\s\S]*?<\/script>/g, '')
+      .replace('<head>', `<head><base href="${KOREN}">`)
+      .replace('</head>', '<style>.reveal,.reveal *,.line__i{opacity:1!important;transform:none!important;transition:none!important}.cookie{display:none!important}</style></head>');
+  }
+  A = mk(orig, 0, srcdoc);
   B = mk(chernovik, 1);
   document.body.appendChild(d);
   await Promise.all([A, B].map((f) => new Promise((r) => { f.onload = r; })));
-  await pause(3500);
+  await pause(bystro ? 2500 : 3500);
   // У лендинга блоки стоят в стартовом положении появления (сдвиг вниз,
   // прозрачность), пока их не «увидит» прокрутка, а в скрытом окне она не
-  // срабатывает. Для сверки — конечное положение, как после появления.
+  // срабатывает. Для сверки — конечное положение, как после появления. То же
+  // у Zero: элементы с «появлением» до срабатывания сдвинуты и прозрачны.
   const st = A.contentDocument.createElement('style');
   st.textContent = '.reveal,.reveal *,.line__i{transform:none!important;opacity:1!important;transition:none!important}';
   A.contentDocument.head.appendChild(st);
-  // Прокрутка до конца и обратно будит ленивую загрузку и появления.
-  for (const f of [A, B]) {
-    const win = f.contentWindow, doc = f.contentDocument;
-    const H = doc.documentElement.scrollHeight;
-    for (let y = 0; y < H; y += h) { win.scrollTo({top: y, behavior: 'instant'}); win.dispatchEvent(new Event('scroll')); await pause(120); }
-    win.scrollTo({top: 0, behavior: 'instant'});
+  const st2 = B.contentDocument.createElement('style');
+  st2.textContent = '.t396 .t-animate,.t396 .t-animate *{opacity:1!important;transform:none!important;transition:none!important}';
+  B.contentDocument.head.appendChild(st2);
+  if (!bystro) {
+    // Прокрутка до конца и обратно будит ленивую загрузку и появления.
+    for (const f of [A, B]) {
+      const win = f.contentWindow, doc = f.contentDocument;
+      const H = doc.documentElement.scrollHeight;
+      for (let y = 0; y < H; y += h) { win.scrollTo({top: y, behavior: 'instant'}); win.dispatchEvent(new Event('scroll')); await pause(120); }
+      win.scrollTo({top: 0, behavior: 'instant'});
+    }
+    await pause(1500);
   }
-  await pause(1500);
   return 'ok';
 }
 
