@@ -20,6 +20,12 @@
   3. Якоря меню: плавный переход с отступом под шапку (как в вёрстке).
   4. Полоса прогресса: transform: scaleX каждый кадр (штатная T602
      обновлялась 10 раз в секунду и двигала ширину — рывками).
+  5. Проявление целых разделов у Тильды выключено (решение заказчика
+     30.09.2026): на компьютере 16 разделов стояли прозрачными, пока не
+     заедут на 100 px, и показывали до 100–290 px пустоты на белом, затем
+     проявлялись за 0,5 с. Флажок в настройках страницы для этого не годится
+     — он снимает и все появления элементов; галочка блока до Zero не
+     доходит. Появления элементов внутри блоков работают как прежде.
 -->
 <style>
 .gg-progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:9999;background:#b9b2a6;opacity:.85;
@@ -29,6 +35,7 @@
   @keyframes gg-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 }
 @media (prefers-reduced-motion: reduce){.gg-progress{display:none}}
+#allrecords .r_hidden{opacity:1!important}#allrecords .r_anim{transition:none!important}
 </style>
 <div class="gg-progress" aria-hidden="true"></div>
 <script>
