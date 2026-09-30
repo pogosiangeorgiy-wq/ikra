@@ -465,7 +465,9 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
     const inputs = JSON.parse(el.inputs || '[]');
     for (const it of inputs) {
       if (imena[it.li_nm]) it.li_nm = imena[it.li_nm];
-      if (it.li_type === 'cb' && soglasie) it.li_title = soglasie;
+      // Согласие: текст со ссылками на /soglasie и /politika — в подпись у
+      // галочки (li_label); заголовок поля пустой, иначе текст выходил дважды.
+      if (it.li_type === 'cb' && soglasie) { it.li_label = soglasie; it.li_title = ''; }
       // Подписи полей у лендинга заглавными (.field label, text-transform);
       // у подписей формы Zero регистра нет — заглавные в самом тексте.
       // В заявку уходит имя поля (li_nm), не подпись.
