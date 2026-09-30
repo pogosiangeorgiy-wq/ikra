@@ -28,7 +28,7 @@ const BAZA = 'https://pogosiangeorgiy-wq.github.io/ikra/tilda/zero/ekrany/';
 // лендинга (560/640/760/900/1100). Шире 1440 лендинг не меняется.
 const RAZMETKA = [
   {s: 1440, c: 1440}, {s: 1366, c: 1366}, {s: 1280, c: 1280}, {s: 1101, c: 1190, m: 1},
-  {s: 1024, c: 1024}, {s: 901, c: 960, m: 1}, {s: 768, c: 800, m: 1}, {s: 641, c: 700, m: 1},
+  {s: 1024, c: 1024}, {s: 901, c: 960, m: 1}, {s: 761, c: 800, m: 1}, {s: 641, c: 700, m: 1},
   {s: 561, c: 600, m: 1}, {s: 480, c: 520, m: 1}, {s: 430, c: 430}, {s: 412, c: 412},
   {s: 390, c: 390}, {s: 375, c: 375}, {s: 320, c: 360, m: 1},
 ];
@@ -478,6 +478,10 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
       n += 1;
     }
     el.inputs = JSON.stringify(inputs);
+    // Кнопка отправки — .btn--solid лендинга: при наведении сталь, 0,22 с;
+    // галочка согласия — тоже сталь (accent-color).
+    Object.assign(el, {buttonhoverbgcolor: '#b9b2a6', buttonhoverbordercolor: '#b9b2a6',
+      buttonhovercolor: '#191510', buttonspeedhover: '0.22', inputelscolor: '#b9b2a6'});
     if (nazvanie) el.formname = nazvanie;
     if (uspeh) el.formmsgsuccess = uspeh;
   }
@@ -526,18 +530,29 @@ function zameryVRazmetku(zamery = {}) {
 // Появление: элемент получает анимацию того блока .reveal, внутри которого
 // лежит (самого маленького из накрывающих его центр), на самой широкой
 // раскладке, где элемент виден. Задержка — место в каскаде, как у лендинга.
-// Блок проявляется, когда заходит в окно на 12 % его высоты снизу.
+//
+// Точка срабатывания. У лендинга блок проявляется целиком, когда 8 % его
+// высоты зашло выше линии в 12 % от низа окна. В Zero каждый элемент
+// срабатывает сам по себе — по своему верху, — поэтому ему ставится своя
+// точка: минус его отступ от верха блока. Так все элементы блока трогаются
+// вместе (для нижних точка отрицательная — они срабатывают, ещё не зайдя в
+// окно). Первый экран у лендинга играет сразу при загрузке — точка 0.
 function poyavlenie(code, reveal = {}, {isklyuchit = () => false} = {}) {
   for (const el of elementy(code)) {
     if (isklyuchit(el)) continue;
     const g = geometriya(code, el);
     const s0 = SCREENS.find((s) => !g[s].skryt && reveal[s]?.length);
     if (!s0) continue;
-    const {L, w, T, h} = g[s0];
-    const cx = L + w / 2, cy = T + h / 2;
-    const bloki = reveal[s0].filter((r) => cx >= r.l && cx <= r.l + r.w && cy >= r.t && cy <= r.t + r.h);
-    if (!bloki.length) continue;
-    const b = bloki.sort((x, y) => x.w * x.h - y.w * y.h)[0];
+    const vnutri = (s) => {
+      const {L, w, T, h} = g[s];
+      const cx = L + w / 2, cy = T + h / 2;
+      return (reveal[s] || []).filter((r) => cx >= r.l - 1 && cx <= r.l + r.w + 1 && cy >= r.t - 1 && cy <= r.t + r.h + 1)
+        // Самый маленький блок; при равной площади — заголовок (у <h1 class="reveal">
+        // рамка заголовка совпадает с рамкой блока).
+        .sort((x, y) => (x.w * x.h - y.w * y.h) || ((y.zagolovok ? 1 : 0) - (x.zagolovok ? 1 : 0)))[0];
+    };
+    const b = vnutri(s0);
+    if (!b) continue;
     // Вид появления:
     //   обычный блок — снизу на 18 px за 620 мс;
     //   заголовок, который лендинг режет на строки, — строки выезжают снизу
@@ -556,7 +571,16 @@ function poyavlenie(code, reveal = {}, {isklyuchit = () => false} = {}) {
       const d0 = b.hero !== undefined ? 260 + b.hero * shag : b.mesto * shag;
       return +((d0 + (vid === 'stroka' ? 60 * (b.stroka + 1) : 0)) / 1000).toFixed(2);
     });
-    el.animtriggeroffset = String(Math.round(0.12 * VH_TIP[1440])); // 12 % окна
+    // Точка срабатывания в пикселях окна, с шагом 8 px — чтобы соседние
+    // раскладки чаще совпадали и не раздували данные блока.
+    poRazmetke(el, 'animtriggeroffset', (s, c) => {
+      if (b.hero !== undefined) return 0;
+      const bs = g[s].skryt ? b : (vnutri(s) || b);
+      const k = c / s; // единицы раскладки → пиксели окна
+      const bt = bs.bt ?? bs.t, bh = bs.bh ?? bs.h;
+      const px = 0.12 * vhOkna(s) + 0.08 * bh * k - (g[s].T - bt) * k;
+      return Math.round(px / 8) * 8;
+    });
   }
 }
 
@@ -623,7 +647,8 @@ function parallaks(code) {
 function geroyFoto(code) {
   for (const el of elementy(code)) {
     if (el.elem_type !== 'image') continue;
-    el.animstyle = 'zoomin'; el.animscale = '105'; el.animduration = '1.6'; el.animdelay = '0';
+    // Масштаб Тильда хранит долей (1.05 — в редакторе «105 %»), не процентом.
+    el.animstyle = 'zoomin'; el.animscale = '1.05'; el.animduration = '1.6'; el.animdelay = '0';
     el.animmobile = 'y';
     if (el.layer !== 'px') continue;
     el.animprx = 'scroll'; el.animprxs = '110';
@@ -638,12 +663,19 @@ function geroyFoto(code) {
   }
 }
 
-// Счётчики цифр: штатная анимация Тильды «число» — отсчёт до значения.
-function schetchiki(code, re) {
-  for (const el of elementy(code)) {
-    if (el.elem_type === 'text' && re.test(normTekst(el.text))) {
-      el.animstyle = 'animatednumber'; el.animduration = '1.2'; el.animmobile = 'y';
-    }
+// Счётчики цифр (у лендинга — отсчёт от нуля) штатно не переносятся:
+// анимация Тильды «число» работает только на экранах от 1200 px и там
+// читает цифры из служебного атрибута элемента Zero — вместо отсчёта текст
+// на секунду ломается («0">до 300»). Цифры появляются как остальной блок.
+
+// Логотип-ссылка при наведении бледнеет до 78 % за 220 мс (.logo:hover у
+// лендинга) — пошаговая анимация «при наведении», обратный ход — при уходе
+// курсора. Логотипы помечены в экранах (роль logo-N).
+function logotipy(code, rol) {
+  for (const [r, el] of rol) {
+    if (!r.startsWith('logo-')) continue;
+    el.sbsevent = 'hover'; el.sbsloop = '';
+    el.sbsopts = sbsStroka([{ti: '0'}, {ti: '220', op: '0.78', ea: 'easeOut'}]);
   }
 }
 
@@ -707,7 +739,7 @@ function begushayaLenta(code, cfg) {
     });
     code[`ab_height${s === TOP ? '' : `-res-${s}`}`] = String(Math.round(p.secH * k));
     // Растушёвка: у раскладок с автомасштабом сетка — во всю ширину окна.
-    const fw = cfg.fade * k;
+    const fw = (p.fade ?? cfg.fade) * k;
     for (const [storona, f] of [['L', fade.L], ['R', fade.R]]) {
       set(f, 'top', s, top); set(f, 'height', s, Math.round(h)); set(f, 'width', s, Math.round(fw));
       set(f, 'widthunits', s, 'px');
@@ -744,7 +776,7 @@ function begushayaLenta(code, cfg) {
 //   вместе с актом.
 // Сглаживание кадров (инерция) штатно не повторить: кадры идут точно за
 // прокруткой.
-const ROLI_TIP = {kadr: 'image', scrim: 'shape', bar: 'shape', fill: 'shape', dline: 'shape', dfoto: 'image'};
+const ROLI_TIP = {kadr: 'image', scrim: 'shape', bar: 'shape', fill: 'shape', dline: 'shape', dfoto: 'image', logo: 'image'};
 const ROLI_RAMKI = ['dli', 'dfig', 'kont']; // только рамка, элемента у роли нет
 
 function naznachitRoli(code, roli = []) {
@@ -840,6 +872,9 @@ function scena(code, roli, rol) {
     el.sbsevent = 'scroll';
     el.sbstrg = y === 'top' ? '0' : y === 'center' ? '0.5' : '1';
     el.animmobile = 'y';
+    // Тусклая подпись шкалы у лендинга — цвет ash с прозрачностью .45;
+    // прозрачность конвертер не переносит.
+    if (r.startsWith('lbl-')) el.opacity = '0.45';
     for (const s of S_KOMP) {
       const {L, w, T, h} = g[s];
       const H0 = kadrH(s);
@@ -1014,6 +1049,10 @@ async function build(key, selector, opts = {}) {
   zapasTeksta(code, window.__ziLines);
   podlozhkiPodTekst(code);
   dobavitLinii(code, window.__ziRamki);
+  // Появление назначается по исходной геометрии — до поправок, которые
+  // прижимают элементы к низу окна и переводят их в проценты.
+  const reveal = zameryVRazmetku(window.__ziReveal);
+  poyavlenie(code, reveal, {isklyuchit: (el) => el.layer === 'px' || (opts.geroy && el.elem_type === 'image')});
   kKrayuOkna(code, {vh: !!opts.vh});
   // На телефонных раскладках подписи первого экрана остаются в сетке под
   // кнопкой — их ставит на место telefonPoOknu.
@@ -1023,17 +1062,15 @@ async function build(key, selector, opts = {}) {
   if (opts.podSetkuTildy) podSetkuTildy(code);
   if (opts.polyaTildy) kPolyamTildy(code, roli);
   if (opts.forma) podpravitFormu(code, opts.forma);
-  // Движение. Рамки .reveal и роли сцены сняты на ширинах снятия — здесь
-  // они пересчитываются в единицы раскладок.
-  const reveal = zameryVRazmetku(window.__ziReveal);
-  poyavlenie(code, reveal, {isklyuchit: (el) => el.layer === 'px' || (opts.geroy && el.elem_type === 'image')});
+  // Движение, которому нужна итоговая геометрия: параллакс, лента, сцены,
+  // список документов, наведение.
   if (opts.geroy) geroyFoto(code);
   else parallaks(code);
-  if (opts.schetchiki) schetchiki(code, opts.schetchiki);
   if (opts.lenta) begushayaLenta(code, opts.lenta);
   if (opts.scena) scena(code, roli, rol);
   if (opts.spisokChteniya) spisokChteniya(code, roli, rol);
   navedenie(code);
+  logotipy(code, rol);
   if (opts.after) opts.after(code);
   szhat(code);
   return code;

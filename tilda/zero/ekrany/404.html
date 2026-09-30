@@ -175,7 +175,7 @@ body::after{
 <header class="doc-header">
   <div data-zi="kont" class="container doc-header__inner">
     <a class="logo" href="/" aria-label="Гурман-Гуру — на главную">
-      <img src="https://static.tildacdn.com/tild3132-6634-4137-a566-646133336131/logo-gurman-guru.png" width="880" height="320" alt="Гурман-Гуру">
+      <img data-zi="logo-0" src="https://static.tildacdn.com/tild3132-6634-4137-a566-646133336131/logo-gurman-guru.png" width="880" height="320" alt="Гурман-Гуру">
     </a>
     <a class="back" href="/">&#8592; На главную</a>
   </div>
@@ -323,11 +323,13 @@ body::after{
       if (zag.length) z.linii = 1;
       if (el.classList.contains('tbl')) z.tbl = 1;
       out.push(z);
+      // bt/bh — рамка блока, по которой срабатывает появление (заголовок и
+      // строки таблицы трогаются вместе со своим блоком).
       zag.forEach(function (h) {
-        var q = ramka(h); q.zagolovok = 1; q.hero = z.hero; q.mesto = z.mesto; out.push(q);
+        var q = ramka(h); q.zagolovok = 1; q.hero = z.hero; q.mesto = z.mesto; q.bt = z.t; q.bh = z.h; out.push(q);
       });
       if (z.tbl) Array.prototype.forEach.call(el.querySelectorAll('tbody tr'), function (tr, n) {
-        var q = ramka(tr); q.stroka = n; q.hero = z.hero; q.mesto = z.mesto; out.push(q);
+        var q = ramka(tr); q.stroka = n; q.hero = z.hero; q.mesto = z.mesto; q.bt = z.t; q.bh = z.h; out.push(q);
       });
     });
     var st = P.__ziReveal = P.__ziReveal || {};

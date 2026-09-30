@@ -17,15 +17,16 @@ export const EKRANY = {
   uslugi: {title: 'Услуги', orig: '#uslugi'},
   band: {title: 'Качество начинается с сырья', orig: 'section.band'},
   syrye: {title: 'Сырьё', orig: '#syrye'},
-  proizvodstvo: {title: 'Производство', orig: '#proizvodstvo', opts: {schetchiki: /^(до 300|4|−4 °C|2)$/}},
+  proizvodstvo: {title: 'Производство', orig: '#proizvodstvo'},
   partiya: {title: 'Готовая партия', orig: 'h2:Готовая', opts: {spisokChteniya: true}},
   'o-kompanii': {title: 'О компании', orig: '#o-kompanii'},
   // posle — после какого блока ставить экран, если его ещё нет на странице.
   // Лента: числа сняты с работающего лендинга на 1440 и 375 (высота
   // логотипа, промежуток, отступ ряда, верх ряда, высота секции, круг в с).
   trust: {title: 'Нам доверяют', orig: 'section.trust', posle: 'hero', opts: {lenta: {
-    desktop: {h: 104, gap: 96, pad: 96, top: 101, secH: 269, dur: 88},
-    mobile: {h: 76, gap: 56, pad: 56, top: 85, secH: 209, dur: 110},
+    // Растушёвка краёв — --trust-fade: 120 px, до 760 px — 48.
+    desktop: {h: 104, gap: 96, pad: 96, top: 101, secH: 269, dur: 88, fade: 120},
+    mobile: {h: 76, gap: 56, pad: 56, top: 85, secH: 209, dur: 110, fade: 48},
     fade: 120,
   }}},
   // Липкие сцены: кадр высотой в окно (на телефоне — список актов) и за ним

@@ -1824,11 +1824,13 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
       if (zag.length) z.linii = 1;
       if (el.classList.contains('tbl')) z.tbl = 1;
       out.push(z);
+      // bt/bh — рамка блока, по которой срабатывает появление (заголовок и
+      // строки таблицы трогаются вместе со своим блоком).
       zag.forEach(function (h) {
-        var q = ramka(h); q.zagolovok = 1; q.hero = z.hero; q.mesto = z.mesto; out.push(q);
+        var q = ramka(h); q.zagolovok = 1; q.hero = z.hero; q.mesto = z.mesto; q.bt = z.t; q.bh = z.h; out.push(q);
       });
       if (z.tbl) Array.prototype.forEach.call(el.querySelectorAll('tbody tr'), function (tr, n) {
-        var q = ramka(tr); q.stroka = n; q.hero = z.hero; q.mesto = z.mesto; out.push(q);
+        var q = ramka(tr); q.stroka = n; q.hero = z.hero; q.mesto = z.mesto; q.bt = z.t; q.bh = z.h; out.push(q);
       });
     });
     var st = P.__ziReveal = P.__ziReveal || {};
