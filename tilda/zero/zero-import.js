@@ -578,21 +578,31 @@ function poyavlenie(code, reveal = {}, {isklyuchit = () => false} = {}) {
     const vid = b.zagolovok ? 'zag' : b.stroka !== undefined ? 'stroka' : b.linii || b.tbl ? 'bystro' : 'obychno';
     el.animstyle = vid === 'zag' || vid === 'obychno' ? 'fadeinup' : 'fadein';
     el.animmobile = 'y';
-    poRazmetke(el, 'animduration', (s, c) => (vid === 'stroka' ? 0.42 : vid === 'bystro' ? 0.22 : c <= 640 ? 0.46 : 0.62));
+    // Кривая у Тильды одна на все появления — cubic-bezier(.19,1,.22,1),
+    // резче, чем --ease лендинга: за первые 100 мс проходит 68 % пути против
+    // 50 %. Длительности ×1,6 дают ту же кривую, что у лендинга, в первые
+    // 200 мс (620 → 1000 мс: 26/48/77 % против 26/50/78 %).
+    poRazmetke(el, 'animduration', (s, c) => (vid === 'stroka' ? 0.68 : vid === 'bystro' ? 0.35 : c <= 640 ? 0.74 : 1));
     if (el.animstyle === 'fadeinup') poRazmetke(el, 'animdistance', (s, c) => (c <= 640 ? 12 : 18));
+    // Задержку Тильда применяет дважды: ждёт её перед стартом
+    // (setTimeout(delay + 250 мс)) и ещё раз как transition-delay. Поэтому
+    // в поле — половина: каскад выходит тот же, что у лендинга.
     poRazmetke(el, 'animdelay', (s, c) => {
       const shag = c <= 640 ? 50 : 70;
       const d0 = b.hero !== undefined ? 260 + b.hero * shag : b.mesto * shag;
-      return +((d0 + (vid === 'stroka' ? 60 * (b.stroka + 1) : 0)) / 1000).toFixed(2);
+      return +((d0 + (vid === 'stroka' ? 60 * (b.stroka + 1) : 0)) / 2000).toFixed(3);
     });
     // Точка срабатывания в пикселях окна, с шагом 8 px — чтобы соседние
-    // раскладки чаще совпадали и не раздували данные блока.
+    // раскладки чаще совпадали и не раздували данные блока. Минус запас на
+    // 250 мс, которые Тильда ждёт перед каждым появлением: иначе блок
+    // проявлялся, уже доехав до середины экрана.
     poRazmetke(el, 'animtriggeroffset', (s, c) => {
       if (b.hero !== undefined) return 0;
       const bs = g[s].skryt ? b : (vnutri(s) || b);
       const k = c / s; // единицы раскладки → пиксели окна
       const bt = bs.bt ?? bs.t, bh = bs.bh ?? bs.h;
-      const px = 0.12 * vhOkna(s) + 0.08 * bh * k - (g[s].T - bt) * k;
+      const zapas = c <= 640 ? 128 : 96;
+      const px = 0.12 * vhOkna(s) + 0.08 * bh * k - (g[s].T - bt) * k - zapas;
       return Math.round(px / 8) * 8;
     });
   }
@@ -904,7 +914,10 @@ function scena(code, roli, rol, {fonTelefon = ''} = {}) {
   if (akty < 2) throw new Error('сцена: не нашлись акты');
   const SEG = 1 / akty, FADE = 0.06, XFADE = 0.10, ZOOM = 1.06;
   const ZHIVOY = 0.3 * FADE;   // акт «ожил» — виден на 30 %
-  const LBL = 0.005;           // подпись шкалы загорается за 220 мс ≈ 1 % хода
+  // Подпись шкалы у лендинга загорается за 220 мс по порогу; здесь — за
+  // прокрутку. 1 % хода (21 px) проскакивал за кадр, 5 % (≈ 100 px) — нет.
+  const LBL = 0.025;
+  const VHOD = 0.10;           // строки акта въезжают за 10 % хода (≈ 210 px), было 5 %
   const zum = (p) => 1 + (ZOOM - 1) * p;
   const STROKA = {num: 0, title: 1, text: 2};
 
@@ -922,7 +935,7 @@ function scena(code, roli, rol, {fonTelefon = ''} = {}) {
       if (i === 0) t.push([0, {}]);
       else {
         const st = s + ZHIVOY + STROKA[b] * 0.006; // каскад 70 мс
-        t.push([0, {op: 0, my: 20}], [st, {op: 0, my: 20}], [st + 0.05, {op: 1, my: 0}]);
+        t.push([0, {op: 0, my: 20}], [st, {op: 0, my: 20}], [st + VHOD, {op: 1, my: 0}]);
       }
       if (i < akty - 1) t.push([e - FADE, {op: 1}], [e, {op: 0}], [1, {op: 0}]);
       else t.push([1, {op: 1}]);
@@ -966,6 +979,14 @@ function scena(code, roli, rol, {fonTelefon = ''} = {}) {
   const kadrH = (s) => (roli[s] || []).find((r) => r.rol === 'kadr-0')?.h || vEdinicah(s, 800);
   const svoi = new Set(rol.values());
   for (const [r, el] of rol) {
+    // Нижняя полоса вертикальной вуали на компьютере не нужна: верхняя
+    // растянута на весь кадр с градиентом --scrim-y (ниже). С верхом 58 %
+    // полоса закреплялась на 0,58 высоты окна позже кадров и ползла по фото.
+    if (r === 'scrim-foot') {
+      for (const f of Object.keys(el)) if (/^(sbs|anim)/.test(f)) delete el[f];
+      for (const s of S_KOMP) set(el, 'hidden', s, 'y');
+      continue;
+    }
     const g = geometriya(code, el);
     const y = yakor(r);
     const okno = /^(kadr|scrim)/.test(r);
@@ -990,10 +1011,12 @@ function scena(code, roli, rol, {fonTelefon = ''} = {}) {
           set(el, 'container', s, 'window'); set(el, 'axisx', s, 'left'); set(el, 'left', s, 0);
           set(el, 'widthunits', s, '%'); set(el, 'width', s, 100);
         }
-        // По высоте — доли окна, как у лендинга (кадры и вуали — во весь кадр,
-        // полосы вертикальной вуали — верх 24 % и низ 42 %).
-        set(el, 'axisy', s, 'top'); set(el, 'topunits', s, '%'); set(el, 'top', s, +(T / H0 * 100).toFixed(2));
-        set(el, 'heightunits', s, '%'); set(el, 'height', s, +(h / H0 * 100).toFixed(2));
+        // По высоте — доли окна, как у лендинга. Всё, что закреплено «по
+        // окну», начинается с верха кадра: у SBS старт элемента — его верх,
+        // и слой с верхом ниже нуля закрепился бы позже остальных.
+        const vesKadr = r === 'scrim-top';
+        set(el, 'axisy', s, 'top'); set(el, 'topunits', s, '%'); set(el, 'top', s, vesKadr ? 0 : +(T / H0 * 100).toFixed(2));
+        set(el, 'heightunits', s, '%'); set(el, 'height', s, vesKadr ? 100 : +(h / H0 * 100).toFixed(2));
         set(el, 'sbstrgofst', s, 0);
       } else {
         const oY = y === 'top' ? 0 : y === 'center' ? H0 / 2 : H0;
@@ -1006,6 +1029,11 @@ function scena(code, roli, rol, {fonTelefon = ''} = {}) {
         set(el, 'sbstrgofst', s, Math.round(T - oY));
       }
       set(el, 'sbsopts', s, shagi(hodSceny(), liniya(r, w)));
+    }
+    // Вертикальная вуаль одним слоем во весь кадр — --scrim-y лендинга.
+    if (r === 'scrim-top') {
+      el.bgcolor = 'linear-gradient(180deg, rgba(25,21,16,0.62) 0%, rgba(25,21,16,0) 24%, '
+        + 'rgba(25,21,16,0) 58%, rgba(25,21,16,0.7) 100%)';
     }
   }
   // Всё прочее, что конвертер снял с кадра (фон секции и т. п.), на
@@ -1027,13 +1055,14 @@ function scena(code, roli, rol, {fonTelefon = ''} = {}) {
 // не подсвечен ни один. Здесь у каждого пункта своя пара элементов поверх
 // (линия и номер) с анимацией по прокрутке: пункт «загорается», когда
 // линия чтения проходит середину между ним и предыдущим, и гаснет на
-// середине до следующего. Смена — за 40 px прокрутки.
+// середине до следующего. Смена — за 120 px прокрутки (не больше 45 %
+// шага между пунктами): за 40 px она проскакивала за один-два кадра.
 // Фото справа «липнет» к верху окна под шапкой (85 + 48 px) и едет со
 // списком до конца его колонки — штатная фиксация Zero. На узких
 // раскладках колонка одна, фото стоит на месте.
 function spisokChteniya(code, roli, rol) {
   const linii = [...rol.keys()].filter((k) => k.startsWith('dline-'));
-  const PER = 40;
+  const PER = 120;
   for (const k of linii) {
     const i = +k.split('-')[1];
     const para = [[rol.get(k), 'liniya'], [rol.get(`didx-${i}`), 'nomer']].filter(([el]) => el);
@@ -1049,7 +1078,7 @@ function spisokChteniya(code, roli, rol) {
         const centr = punkty.map((r) => r.t + r.h / 2);
         const a = i === 0 ? punkty[0].t - 0.55 * vh : (centr[i - 1] + centr[i]) / 2;
         const b = i === punkty.length - 1 ? punkty[i].t + punkty[i].h + 0.45 * vh : (centr[i] + centr[i + 1]) / 2;
-        const per = vEdinicah(s, PER);
+        const per = Math.min(vEdinicah(s, PER), 0.45 * (b - a));
         const D = b - a + per;
         const {L, w, T} = g[s];
         if (vid === 'liniya') set(el, 'left', s, Math.round(L - w / 2));
