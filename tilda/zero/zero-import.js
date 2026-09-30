@@ -535,7 +535,9 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
 function liniiFormy(code) {
   const forma = elementy(code).find((el) => el.elem_type === 'form');
   if (!forma) return 0;
-  const m = num(forma.inputmargright || 0);
+  // Зазор колонок — как .form__row лендинга (--grid-gap): 44 px шире 1100,
+  // 32 px до 1100; блок «Плавная прокрутка» ставит форме Тильды тот же.
+  const zazor = (s) => (RAZMETKA.find((r) => r.s === s).c > 1100 ? 44 : 32);
   const PODPIS = 16 + num(forma.inputtitlemargbottom || 0);
   const POLE = num(forma.inputheight || 47);
   const SHAG = PODPIS + POLE + num(forma.inputmargbottom || 0);
@@ -556,6 +558,7 @@ function liniiFormy(code) {
       const r = ryady.find((q) => Math.abs(q[0].g.T - x.g.T) <= 6);
       if (r) r.push(x); else ryady.push([x]);
     }
+    const m = zazor(s);
     const kol = (fW - m) / 2;
     ryady.forEach((r, i) => {
       const niz = i * SHAG + PODPIS + (i === ryady.length - 1 ? TA : POLE);
