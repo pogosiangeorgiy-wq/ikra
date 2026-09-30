@@ -195,6 +195,17 @@ export function fon(kluchi, {posle} = {}) {
         const id = est ? await ZI.replace(est, code) : await ZI.put(code, posle
           ?? (e.posle && najti(EKRANY[e.posle].title)) ?? (poslednij && +poslednij.id.replace('record', '')));
         await nazvat(id, e.title);
+        // Окно «Обсудить партию» (T1093) показывает блок по номеру записи, а
+        // пересборка даёт блоку новый номер — перепривязываем окно.
+        if (k === 'popup') {
+          const okno = document.querySelector('.record[data-record-type="1093"]');
+          if (okno) {
+            const oid = okno.id.replace('record', '');
+            await window.tp__fetch({url: '/page/submit/', body: {comm: 'saverecord', pageid: window.pageid,
+              recordid: oid, onlythisfield: 'recids', recids: String(id)}});
+            window.tp__updateRecord(oid, '1093');
+          }
+        }
         if (e.anchor) await window.tp__fetch({url: '/page/submit/', body: {comm: 'saverecord',
           pageid: window.pageid, recordid: id, onlythisfield: 'rec_anchor', rec_anchor: e.anchor}});
         hod.log.push(`${k} ✓`);
