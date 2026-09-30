@@ -40,7 +40,9 @@ export const EKRANY = {
   'upakovka-tablica': {title: 'Тара — форматы', orig: '#upakovka', posle: 'upakovka-prokrutka'},
   start: {title: 'Как начать', orig: 'h2:Как начать', posle: 'o-kompanii'},
   ekonomika: {title: 'Экономика и условия', orig: '#ekonomika', posle: 'start', anchor: 'ekonomika'},
-  voprosy: {title: 'Вопросы', orig: 'h2:Вопросы', posle: 'ekonomika', anchor: 'voprosy', opts: {podSetkuTildy: true}},
+  // Заголовок — по сетке лендинга: список вопросов (T585) переведён на неё
+  // же правилами в блоке «Плавная прокрутка» (30.09.2026).
+  voprosy: {title: 'Вопросы', orig: 'h2:Вопросы', posle: 'ekonomika', anchor: 'voprosy'},
   kontakty: {title: 'Контакты', orig: '#kontakty', posle: 'ekonomika', anchor: 'kontakty', opts: {forma: {
     // Те же имена полей, что уходили в «Заявки» из версии на блоках кода.
     imena: {name: 'Имя', company: 'Компания', phone: 'Телефон', email: 'Почта', product: 'Продукт',

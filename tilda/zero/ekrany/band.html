@@ -1836,7 +1836,9 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
         && getComputedStyle(a).display === 'inline';
       if (vnutri) return;
       out.push({rol: 'link-' + i, l: r.left - kr.left, t: r.top - kr.top, w: r.width, h: r.height,
-        tekst: norm(a.textContent), href: a.getAttribute('href'), img: a.querySelector('img') ? 1 : 0});
+        tekst: norm(a.textContent), href: a.getAttribute('href'), img: a.querySelector('img') ? 1 : 0,
+        // Подчёркнутая ссылка (правовые в подвале): конвертер text-decoration не переносит.
+        podch: getComputedStyle(a).textDecorationLine.indexOf('underline') !== -1 ? 1 : 0});
     });
     if (!out.length) return;
     var st = P.__ziRoli = P.__ziRoli || {};

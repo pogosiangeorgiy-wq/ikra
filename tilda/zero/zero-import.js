@@ -111,12 +111,14 @@ function kKrayuOkna(code, {vh = false} = {}) {
       set(el, 'left', s, 0);
       set(el, 'widthunits', s, '%');
       set(el, 'width', s, lev && prav ? 100 : +(w / s * 100).toFixed(2));
-      if (vh) {
-        // Экран растягивается по высоте окна: фон на всю высоту — в процентах.
-        const verh = T <= 1, niz = T + h >= H - 1;
-        if (verh && niz) { set(el, 'top', s, 0); set(el, 'heightunits', s, '%'); set(el, 'height', s, 100); }
-        else if (niz) { set(el, 'axisy', s, 'bottom'); set(el, 'top', s, 0); }
-      }
+      // Фон во всю высоту блока — в процентах от блока. На раскладках с
+      // автомасштабом блок растёт вместе с окном, а элемент «по окну» в
+      // пикселях — нет: затемнение «Качества» не доставало до низа на 24 px
+      // (360) и 18 px (820), фото «Производства» — на 83 px (820).
+      const verh = T <= 1, niz = T + h >= H - 1;
+      // Слой параллакса выше блока нарочно (запас на ход) — его не трогаем.
+      if (verh && niz && (vh || el.layer !== 'px')) { set(el, 'top', s, 0); set(el, 'heightunits', s, '%'); set(el, 'height', s, 100); }
+      else if (vh && niz) { set(el, 'axisy', s, 'bottom'); set(el, 'top', s, 0); }
     }
   }
 }
@@ -142,7 +144,9 @@ function kNizu(code, re, {telefon = [], krome = []} = {}) {
       set(el, 'axisy', s, 'bottom'); set(el, 'top', s, Math.round(T + h - H));
       if (telefon.includes(s)) {
         set(el, 'axisx', s, 'left'); set(el, 'leftunits', s, '%');
-        set(el, 'left', s, +(L / s * 100).toFixed(2));
+        // Целым числом: Тильда берёт значение через parseInt и дробь
+        // отбрасывает (3,94 % превращалось в 3 %, подпись уезжала на 7 px).
+        set(el, 'left', s, Math.round(L / s * 100));
       } else {
         set(el, 'axisx', s, 'center'); set(el, 'leftunits', s, 'px');
         set(el, 'left', s, Math.round(L - s / 2 + w / 2));
@@ -470,8 +474,10 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
       // Ссылки — как .form__consent a лендинга (белые, подчёркнутые); у
       // формы Zero им иначе достаётся цвет Тильды по умолчанию.
       if (it.li_type === 'cb' && soglasie) {
-        it.li_label = soglasie.replace(/<a /g, '<a style="color:#ffffff;text-decoration:underline;'
-          + 'text-underline-offset:3px;text-decoration-thickness:1px" ');
+        // Интервал 1,7 — как .form__consent (у формы Zero ~1,2: строки
+        // слипались, подчёркивание ложилось на следующую строку).
+        it.li_label = '<span style="line-height:1.7">' + soglasie.replace(/<a /g, '<a style="color:#ffffff;text-decoration:underline;'
+          + 'text-underline-offset:3px;text-decoration-thickness:1px" ') + '</span>';
         it.li_title = '';
       }
       // «Задача» у лендинга — textarea в 84 px (min-height); у формы Zero
@@ -516,6 +522,42 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
     if (oshibkaPustye) el.formerrreq = oshibkaPustye;
     if (oshibka) el.formerr = oshibka;
   }
+}
+
+// Линии под полями формы — отдельные фигуры, снятые с вёрстки. На двух
+// колонках Тильда делит форму сама: колонка (Ш − отступ)/2, правая — с
+// (Ш + отступ)/2. У лендинга правая колонка шла на 6–9 px правее, и у
+// Тильды подпись висела левее своей линии. Линии ставятся по колонкам
+// Тильды: подпись, текст и линия — на одном краю.
+function liniiFormy(code) {
+  const forma = elementy(code).find((el) => el.elem_type === 'form');
+  if (!forma) return 0;
+  const m = num(forma.inputmargright || 0);
+  const gf = geometriya(code, forma);
+  const figury = elementy(code).filter((el) => el.elem_type === 'shape');
+  let n = 0;
+  for (const s of SCREENS) {
+    if (gf[s].skryt) continue;
+    const {L: fL, w: fW, T: fT, h: fH} = gf[s];
+    const linii = figury.map((el) => ({el, g: geometriya(code, el)[s]}))
+      .filter(({g}) => !g.skryt && g.h <= 3 && g.T >= fT - 4 && g.T <= fT + fH + 12
+        && g.L >= fL - 12 && g.L + g.w <= fL + fW + 12)
+      .sort((a, b) => a.g.T - b.g.T);
+    const ryady = [];
+    for (const x of linii) {
+      const r = ryady.find((q) => Math.abs(q[0].g.T - x.g.T) <= 3);
+      if (r) r.push(x); else ryady.push([x]);
+    }
+    const kol = (fW - m) / 2;
+    for (const r of ryady) {
+      if (r.length !== 2) continue;
+      r.sort((a, b) => a.g.L - b.g.L);
+      set(r[0].el, 'left', s, Math.round(fL)); set(r[0].el, 'width', s, Math.round(kol));
+      set(r[1].el, 'left', s, Math.round(fL + (fW + m) / 2)); set(r[1].el, 'width', s, Math.round(kol));
+      n += 2;
+    }
+  }
+  return n;
 }
 
 // ── Движение ─────────────────────────────────────────────────────────────
@@ -696,14 +738,14 @@ function geroyFoto(code) {
     el.animstyle = 'zoomin'; el.animscale = '1.05'; el.animduration = '1.6'; el.animdelay = '0';
     el.animmobile = 'y';
     if (el.layer !== 'px') continue;
-    el.animprx = 'scroll'; el.animprxs = '110';
-    for (const {s, c} of RAZMETKA) {
-      const vysota = (c <= 760 ? 0.92 : 1) * vhOkna(s);
-      const d = c <= 640 ? 28 : 64;
-      const verh = d, niz = Math.max(d, 56);
+    // Параллакс снят (30.09.2026). Обёртка параллакса Тильды наследует
+    // высоту в процентах и применяет её второй раз — фото выходило крупнее
+    // на 14–28 % и обрезалось; сам параллакс шёл целыми пикселями и крутил
+    // вечный цикл кадров. Фото — во весь экран, как у лендинга в покое.
+    delete el.animprx; delete el.animprxs;
+    for (const {s} of RAZMETKA) {
       set(el, 'axisy', s, 'top'); set(el, 'topunits', s, '%'); set(el, 'heightunits', s, '%');
-      set(el, 'top', s, -(verh / vysota * 100).toFixed(2));
-      set(el, 'height', s, (100 + (verh + niz) / vysota * 100).toFixed(2));
+      set(el, 'top', s, 0); set(el, 'height', s, 100);
     }
   }
 }
@@ -745,6 +787,11 @@ function ssylki(code, roli) {
     zanyato.add(best);
     if (/<a\s/i.test(best.text || '')) continue;
     best.link = r.href;
+    // Подчёркивание ссылки (у лендинга 1 px с отступом 3 px) — стилем в
+    // самом тексте: конвертер text-decoration теряет.
+    if (r.podch && best.elem_type === 'text' && !/text-decoration/.test(best.text || '')) {
+      best.text = `<span style="text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px">${best.text}</span>`;
+    }
     if (/^https?:/i.test(r.href)) best.linktarget = '_blank';
     postavleno += 1;
   }
@@ -1218,7 +1265,13 @@ async function build(key, selector, opts = {}) {
   if (opts.nizProcentom) nizProcentom(code);
   if (opts.podSetkuTildy) podSetkuTildy(code);
   if (opts.polyaTildy) kPolyamTildy(code, roli);
-  if (opts.forma) podpravitFormu(code, opts.forma);
+  if (opts.forma) { podpravitFormu(code, opts.forma); liniiFormy(code); }
+  // Прибавка высоты блока на отдельных раскладках (форма Zero выше формы
+  // лендинга — кнопка упиралась в низ блока на 320).
+  for (const [s, px] of Object.entries(opts.vysotaPlus || {})) {
+    const k = kluch('ab_height', +s);
+    code[k] = String(Math.round(num(code[k] ?? code.ab_height) + px));
+  }
   // Движение, которому нужна итоговая геометрия: параллакс, лента, сцены,
   // список документов, наведение.
   if (opts.geroy) geroyFoto(code);

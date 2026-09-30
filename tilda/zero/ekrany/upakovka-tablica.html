@@ -1666,7 +1666,7 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
 .px,.px-frame img{transform:none!important}
 .hero__media img,.bg-media>img,.bg-media--soft>img,.section__photo img{filter:none!important;transform:none!important}
 </style>
-<style id="zero-dop">@media (max-width:760px){.tbl td::before{content:attr(data-label);display:block;margin-bottom:4px}}@media (min-width:761px){#upakovka{padding-block:0}#upakovka .scene__after{margin-top:0;padding-block:var(--s-9)}}@media (max-width:760px){#upakovka{padding-top:0;display:flow-root}}</style>
+<style id="zero-dop">@media (max-width:760px){.tbl td::before{content:attr(data-label);display:block;margin-bottom:2px;line-height:1.3}.tbl td{padding:10px 0 0}.tbl td:first-child{padding-top:0}}@media (min-width:761px){#upakovka{padding-block:0}#upakovka .scene__after{margin-top:0;padding-block:var(--s-9)}}@media (max-width:760px){#upakovka{padding-top:0;display:flow-root}}</style>
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
@@ -1879,7 +1879,9 @@ html:not(.js-motion) .trust__row{flex-wrap:wrap; padding-left:0; margin-inline:v
         && getComputedStyle(a).display === 'inline';
       if (vnutri) return;
       out.push({rol: 'link-' + i, l: r.left - kr.left, t: r.top - kr.top, w: r.width, h: r.height,
-        tekst: norm(a.textContent), href: a.getAttribute('href'), img: a.querySelector('img') ? 1 : 0});
+        tekst: norm(a.textContent), href: a.getAttribute('href'), img: a.querySelector('img') ? 1 : 0,
+        // Подчёркнутая ссылка (правовые в подвале): конвертер text-decoration не переносит.
+        podch: getComputedStyle(a).textDecorationLine.indexOf('underline') !== -1 ? 1 : 0});
     });
     if (!out.length) return;
     var st = P.__ziRoli = P.__ziRoli || {};
