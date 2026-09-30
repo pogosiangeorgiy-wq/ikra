@@ -1,0 +1,177 @@
+<!--
+  Плавная прокрутка и полоса прогресса — блок «HTML-код» (T123) в конце главной.
+  Не трогать при правке текстов и фото. Отключить: скрыть блок и вернуть
+  штатную полосу T602.
+
+  Зачем. В исходной вёрстке колесо мыши не прыгало на 100 px за щелчок, а
+  доводило страницу плавно (инерция). В Тильде этого нет штатно, и вместе со
+  страницей скачком двигались все анимации, привязанные к прокрутке: сцены
+  «Этапы работы» и «Тара и маркировка», линии, подписи шкалы. Замер
+  30.09.2026 (Chrome, 1440×900, колесо): Тильда — 172 кадра движения на всю
+  страницу, исходная вёрстка — 1924.
+
+  Что делает:
+  1. Инерция колеса — перенос раздела 8 из index.html: та же формула
+     1 − exp(−dt·8.35), только мышь/трекпад, экран шире 1024, движение не
+     отключено в системе. Телефоны и планшеты не трогает.
+  2. Шаг прокрутки выполняется первым в каждом кадре, до движка анимаций
+     Тильды: иначе сцены получали бы новое положение кадром позже и
+     вздрагивали на краях закрепления.
+  3. Якоря меню: плавный переход с отступом под шапку (как в вёрстке).
+  4. Полоса прогресса: transform: scaleX каждый кадр (штатная T602
+     обновлялась 10 раз в секунду и двигала ширину — рывками).
+-->
+<style>
+.gg-progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:9999;background:#b9b2a6;opacity:.85;
+  transform:scaleX(0);transform-origin:0 50%;pointer-events:none}
+@supports (animation-timeline: scroll()){
+  .gg-progress{animation:gg-progress linear both;animation-timeline:scroll(root block)}
+  @keyframes gg-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+}
+@media (prefers-reduced-motion: reduce){.gg-progress{display:none}}
+</style>
+<div class="gg-progress" aria-hidden="true"></div>
+<script>
+(function () {
+  if (window.__ggPlavno) return;
+  window.__ggPlavno = true;
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+  var TAU = 8.35;
+  var root = document.documentElement, body = document.body;
+  var nativeRaf = window.requestAnimationFrame.bind(window);
+  var target = 0, current = 0, running = false, prevTs = 0, lastTs = -1;
+
+  function inertiaOn() { return !reduce.matches && fine.matches && window.innerWidth > 1024; }
+  function maxScroll() { return Math.max(0, root.scrollHeight - window.innerHeight); }
+
+  // Состояния Тильды, когда прокрутку ведёт она сама или страница заперта.
+  function tildaBusy() {
+    return root.classList.contains('t-body_scroll-locked') ||
+      body.classList.contains('t-body_scroll-locked') ||
+      body.classList.contains('t-body_popupshowed') ||
+      body.classList.contains('t1272__body_menushowed') ||
+      body.hasAttribute('data-scrollable');
+  }
+
+  // Один шаг выката. Все колбэки кадра получают одно время кадра, поэтому
+  // шаг выполняется ровно один раз — тем, кто вызван в кадре первым.
+  function step(ts) {
+    if (!running || ts === lastTs) return;
+    lastTs = ts;
+    var dt = prevTs ? Math.min(0.1, (ts - prevTs) / 1000) : 1 / 60;
+    prevTs = ts;
+    current += (target - current) * (1 - Math.exp(-dt * TAU));
+    if (Math.abs(target - current) < 0.4) {
+      current = target;
+      running = false;
+      prevTs = 0;
+    }
+    window.scrollTo(0, current);
+  }
+
+  // Движок анимаций Тильды читает положение страницы в своём колбэке кадра.
+  // Обёртка ставит шаг выката перед любым колбэком — положение и анимации
+  // сцены сходятся в одном кадре.
+  window.requestAnimationFrame = function (cb) {
+    return nativeRaf(function (ts) { step(ts); cb(ts); });
+  };
+  function loop(ts) { step(ts); if (running) nativeRaf(loop); }
+  function stop() { running = false; prevTs = 0; }
+
+  function glideTo(y) {
+    target = Math.max(0, Math.min(maxScroll(), y));
+    if (!running) {
+      current = window.pageYOffset;
+      running = true;
+      prevTs = 0;
+      nativeRaf(loop);
+    }
+  }
+
+  // Колесо над элементом со своей прокруткой (выпадающий список, окно) —
+  // отдаём браузеру.
+  function ownScroll(el, dy) {
+    for (; el && el !== body && el !== root; el = el.parentElement) {
+      if (el.scrollHeight <= el.clientHeight + 1) continue;
+      var oy = getComputedStyle(el).overflowY;
+      if (oy !== 'auto' && oy !== 'scroll' && oy !== 'overlay') continue;
+      if (dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0) return true;
+    }
+    return false;
+  }
+
+  window.addEventListener('wheel', function (e) {
+    if (!inertiaOn() || e.defaultPrevented) return;
+    if (e.ctrlKey || e.metaKey) return;                 // масштабирование страницы
+    if (e.deltaMode !== 0) return;                      // строки или экраны — браузеру
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    if (tildaBusy() || ownScroll(e.target, e.deltaY)) { stop(); return; }
+    if (!running) current = target = window.pageYOffset;
+    e.preventDefault();
+    glideTo(target + e.deltaY);
+  }, { passive: false });
+
+  // Клавиши, полоса прокрутки, касание — прокрутку ведёт человек, выкат гасим.
+  ['mousedown', 'keydown', 'touchstart'].forEach(function (t) {
+    window.addEventListener(t, stop, { passive: true });
+  });
+
+  // Высота шапки: нижний край закреплённых элементов у верхней кромки окна.
+  function headerBottom() {
+    var bottom = 0, seen = [];
+    var stack = document.elementsFromPoint ? document.elementsFromPoint(window.innerWidth / 2, 2) : [];
+    for (var i = 0; i < stack.length; i++) {
+      for (var el = stack[i]; el && el !== body && el !== root; el = el.parentElement) {
+        if (seen.indexOf(el) !== -1) break;
+        seen.push(el);
+        if (getComputedStyle(el).position === 'fixed') {
+          var r = el.getBoundingClientRect();
+          if (r.top <= 2 && r.height < 200) bottom = Math.max(bottom, r.bottom);
+        }
+      }
+    }
+    return bottom;
+  }
+
+  // Якоря: плавно и с отступом под шапку, как в вёрстке. Клик не глушим —
+  // меню Тильды на тот же клик закрывает бургер и подсвечивает пункт.
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!a) return;
+    var id = a.getAttribute('href').slice(1);
+    try { id = decodeURIComponent(id); } catch (err) {}
+    if (!id || id.indexOf(':') !== -1) return;          // служебные адреса Тильды (#popup:…)
+    var el = document.getElementById(id) || document.getElementsByName(id)[0];
+    if (!el) return;
+    e.preventDefault();
+    setTimeout(function () {                            // после того как Тильда закроет меню
+      var y = el.getBoundingClientRect().top + window.pageYOffset - headerBottom() - 24;
+      if (inertiaOn()) glideTo(y);
+      else window.scrollTo({ top: Math.max(0, y), behavior: reduce.matches ? 'auto' : 'smooth' });
+      if (history.replaceState) history.replaceState(null, '', '#' + id);
+    }, 0);
+  });
+
+  // Полоса прогресса: в конец body, чтобы её не прятало проявление блока.
+  var bar = document.querySelector('.gg-progress');
+  if (bar) {
+    body.appendChild(bar);
+    if (!(window.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()'))) {
+      var pending = false;
+      var upd = function () {
+        pending = false;
+        var m = maxScroll(), p = m > 0 ? window.pageYOffset / m : 0;
+        bar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, p)).toFixed(4) + ')';
+      };
+      window.addEventListener('scroll', function () {
+        if (!pending) { pending = true; nativeRaf(upd); }
+      }, { passive: true });
+      window.addEventListener('resize', upd, { passive: true });
+      upd();
+    }
+  }
+})();
+</script>
