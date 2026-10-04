@@ -36,6 +36,10 @@
      — колонки формы как .form__row лендинга: зазор 44 px (от 1101), 32 px
        (761–1100), одна колонка на 760 и уже (у Тильды зазор всегда 15 px,
        одна колонка только до 479 px — поля расходились с линиями);
+     — меню (T1272, rec4335695101): линия под пунктом при наведении как
+       .nav a::after лендинга — 1 px, на 4 px ниже текста, выезжает слева.
+       Штатная линия Тильды стоит на 20 % выше низа пункта и в пункте
+       высотой 16 px ложилась на буквы — выглядела зачёркиванием;
      — вопросы (блок T585, rec4335967401): во всю ширину сетки лендинга
        (1332 px, поля 54/32/20), вопрос clamp(17px,1.55vw,22px), поля 24 px,
        знак 14 px у правого края. Если блок вопросов заменить новым —
@@ -65,6 +69,8 @@
 #rec4335967401 .t585__trigger-button{padding-top:24px!important;padding-bottom:24px!important;padding-right:34px!important}
 #rec4335967401 .t585__icon{padding:0!important;right:0!important}
 #rec4335967401 .t585__lines,#rec4335967401 .t585__lines svg{width:14px!important;height:14px!important}
+#rec4335695101 .t-menu__link-item:not(.t-active)::after{bottom:-4px!important;height:auto!important;border-bottom-width:1px!important;opacity:1!important;transform:scaleX(0);transform-origin:left;transition:transform .22s cubic-bezier(.2,.6,.2,1)!important}
+#rec4335695101 .t-menu__link-item:not(.t-active):hover::after,#rec4335695101 .t-menu__link-item:not(.t-active):focus-visible::after{transform:scaleX(1)}
 @media (max-width:1100px){#rec4335967401 .t-container{width:calc(100% - 64px)!important}}
 @media (max-width:760px){#rec4335967401 .t-container{width:calc(100% - 40px)!important}}
 </style>
