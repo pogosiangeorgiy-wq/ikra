@@ -37,7 +37,27 @@ const TOP = SCREENS[0];                          // значения без су
 const SNYATIE = RAZMETKA.map((r) => r.c);        // ширины снятия, по убыванию
 const S_MASSHTABOM = RAZMETKA.filter((r) => r.m).map((r) => r.s); // раскладки с автомасштабом
 const S_TELEFON = RAZMETKA.filter((r) => r.c <= 760).map((r) => r.s); // у лендинга ≤760 первый экран 92svh
-const MODUL = './index-bbX7hnLP.min.js';
+// Модуль редактора с конвертером html__buildBackendData. Имя меняется при
+// каждом обновлении Тильды (было index-bbX7hnLP, с октября 2026 index-MbzxeoLd),
+// поэтому ищется по содержимому среди модулей, которые импортирует
+// t-page-all.min.js; запасной вариант — последнее известное имя.
+const MODUL_ZAPAS = './index-MbzxeoLd.min.js';
+async function najtiModul() {
+  const glavnyy = [...document.scripts].map((s) => s.src).find((s) => /page-editor\/t-page-all/.test(s));
+  if (!glavnyy) return MODUL_ZAPAS;
+  const ochered = [glavnyy], vid = new Set();
+  while (ochered.length && vid.size < 60) {
+    const u = ochered.shift();
+    if (vid.has(u)) continue;
+    vid.add(u);
+    try {
+      const t = await fetch(u).then((r) => r.text());
+      if (u !== glavnyy && t.includes('html__buildBackendData')) return './' + u.split('/').pop().split('?')[0];
+      for (const m of t.matchAll(/["'`]\.\/([\w-]+\.min\.js)["'`]/g)) ochered.push(new URL('./' + m[1], u).href);
+    } catch (e) { /* следующий */ }
+  }
+  return MODUL_ZAPAS;
+}
 
 // Типичная высота окна браузера (px) на ширине снятия раскладки: ноутбуки,
 // планшеты, телефоны. Нужна там, где лендинг меряет движение высотой окна
@@ -1212,7 +1232,7 @@ async function build(key, selector, opts = {}) {
     if (!r.ok) throw new Error(`${key}.html: HTTP ${r.status}`);
     return r.text();
   });
-  const mod = await window.tp__fallbackImport(MODUL);
+  const mod = await window.tp__fallbackImport(await najtiModul());
   window.__ziLines = {}; // сюда пишет замерщик строк из экрана
   window.__ziRamki = {}; // а сюда — линии частичных границ
   window.__ziReveal = {}; // рамки блоков появления — по ширинам
