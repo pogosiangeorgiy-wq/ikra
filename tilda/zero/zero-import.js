@@ -849,12 +849,23 @@ function izEkrana(code, html) {
     const t = e.textContent.replace(PROB, ' ').trim();
     if (t.includes('\u00a0')) sNbsp.set(t.replace(/\u00a0/g, ' '), t);
   });
-  let alt = 0, nbsp = 0;
+  // Теги заголовков: конвертер делает из <h1>–<h3> обычный div, и у сайта
+  // не оставалось ни одного H1. Элементу с тем же текстом возвращается тег
+  // исходника (поле tag Zero); H1 — только первому совпадению.
+  const zag = new Map();
+  doc.body.querySelectorAll('h1, h2, h3').forEach((h) => {
+    const t = h.textContent.replace(/[\s\u00a0]+/g, '');
+    if (t && !zag.has(t)) zag.set(t, h.tagName.toLowerCase());
+  });
+  let alt = 0, nbsp = 0, estH1 = false;
   for (const el of elementy(code)) {
     if (el.elem_type === 'image' && !el.alt && alty.has(el.img)) { el.alt = alty.get(el.img); alt += 1; }
     if (el.elem_type !== 'text' || !el.text) continue;
     const d = document.createElement('div');
     d.innerHTML = el.text;
+    // Сравнение без пробелов: при переносах по <br> пробелы между словами пропадают.
+    const teg = zag.get(d.textContent.replace(/[\s\u00a0]+/g, ''));
+    if (teg && (teg !== 'h1' || !estH1)) { el.tag = teg; if (teg === 'h1') estH1 = true; }
     const orig = sNbsp.get(d.textContent.replace(PROB, ' ').trim());
     if (!orig) continue;
     // Проход по текстовым узлам: пробел становится неразрывным там, где он
