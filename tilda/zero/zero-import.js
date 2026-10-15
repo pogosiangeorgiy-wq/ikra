@@ -483,7 +483,7 @@ function kPolyamTildy(code, roli = {}) {
 // они короткие латинские, а в «Заявках» Тильды и в письмах поля должны
 // называться по-русски, как было в версии на блоках кода. Здесь же — ссылки
 // в тексте согласия и служебное скрытое поле с версией текста согласия.
-function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie = '', uspeh = '', oshibkaPustye = '', oshibka = ''} = {}) {
+function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie = '', uspeh = '', oshibkaPustye = '', oshibka = '', poluchateli = null} = {}) {
   for (const el of elementy(code)) {
     if (el.elem_type !== 'form') continue;
     const inputs = JSON.parse(el.inputs || '[]');
@@ -537,6 +537,9 @@ function podpravitFormu(code, {imena = {}, soglasie = '', skrytye = [], nazvanie
     // отставала на 7 px. Отступ 47 даёт шаг 125.
     el.inputmargbottom = '47';
     if (nazvanie) el.formname = nazvanie;
+    // Получатели заявок: конвертер их не переносит, без них заявка остаётся
+    // только в «Заявках» Тильды и на почту не уходит.
+    if (poluchateli) { el.receivers = poluchateli.id; el.receivers_names = poluchateli.imya; }
     if (uspeh) el.formmsgsuccess = uspeh;
     // Сообщения лендинга: не заполнены обязательные поля и сбой отправки.
     if (oshibkaPustye) el.formerrreq = oshibkaPustye;
